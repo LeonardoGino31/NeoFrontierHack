@@ -990,64 +990,38 @@ canvas {
   transition: opacity 0.2s;
 }
 
-/* ===== Panel de NASA Trek (vista real del sitio objetivo) ===== */
-/* Tarjeta horizontal abajo a la derecha: así no tapa el centro del cuerpo análogo,
-   que es justo donde queda el sitio seleccionado */
-.trek-panel {
-  right: 16px;
-  bottom: 64px;
-  width: min(520px, calc(100vw - 32px));
-  max-height: calc(100vh - 150px);
+/* ===== Panel inferior Tierra | análogo (NASA GIBS + NASA Trek) ===== */
+/* Centrado y dividido en dos, alineado con las mitades de la pantalla; deja libres los
+   botones de la izquierda y el interruptor PSR de la derecha */
+.compare-panel {
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(1040px, calc(100vw - 460px));
+  max-height: 42vh;
   overflow-y: auto;
+  padding-bottom: 0;
   user-select: text;
 }
 
-.trek-panel .hud-header {
+.compare-panel .hud-header {
+  gap: 12px;
   cursor: default;
 }
 
-.trek-panel.collapsed .trek-body {
+.compare-panel.collapsed .cmp-body {
   display: none;
 }
 
-.trek-body {
-  display: grid;
-  grid-template-columns: 170px 1fr;
-  grid-template-areas:
-    'figure title'
-    'figure text'
-    'tabs   text';
-  gap: 0 12px;
-  padding: 10px 12px 0;
-  font: 12.5px/1.4 system-ui, sans-serif;
-}
-
-.trek-title { grid-area: title; }
-.trek-figure { grid-area: figure; }
-.trek-tabs { grid-area: tabs; }
-.trek-text { grid-area: text; }
-
-.trek-title strong {
-  display: block;
-  font: 700 18px/1.2 'Rajdhani', sans-serif;
-  letter-spacing: 0.04em;
-}
-
-.trek-title span {
-  font-size: 12px;
-  color: rgba(var(--hud-cyan), 0.85);
-}
-
-.trek-tabs {
+.cmp-tabs {
   display: flex;
   gap: 6px;
-  margin: 6px 0 0;
+  margin-left: auto;
 }
 
-.trek-tabs button {
-  flex: 1;
-  padding: 4px 0;
-  font: 600 13px 'Rajdhani', sans-serif;
+.cmp-tabs button {
+  padding: 2px 12px;
+  font: 600 12px 'Rajdhani', sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #e6f7ff;
@@ -1056,16 +1030,33 @@ canvas {
   cursor: pointer;
 }
 
-.trek-tabs button.active {
+.cmp-tabs button.active {
   background: rgba(var(--hud-cyan), 0.22);
   border-color: rgba(var(--hud-cyan), 0.9);
 }
 
-.trek-figure {
+.cmp-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.cmp-side {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding: 10px 12px;
+  font: 12.5px/1.4 system-ui, sans-serif;
+}
+
+.cmp-side + .cmp-side {
+  border-left: 1px solid rgba(var(--hud-cyan), 0.35);
+}
+
+.cmp-side figure {
   margin: 0;
 }
 
-.trek-figure img {
+.cmp-side img {
   display: block;
   width: 100%;
   aspect-ratio: 1;
@@ -1074,31 +1065,95 @@ canvas {
   border: 1px solid rgba(var(--hud-cyan), 0.35);
 }
 
-.trek-figure figcaption {
+.cmp-side figcaption {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 10.5px;
   color: #94a3b8;
 }
 
-.trek-why,
-.trek-analogs {
-  margin: 8px 0 0;
+.cmp-text strong {
+  display: block;
+  font: 700 17px/1.2 'Rajdhani', sans-serif;
+  letter-spacing: 0.04em;
 }
 
-.trek-analogs b {
-  color: rgba(var(--hud-cyan), 1);
+.cmp-sub {
+  font-size: 11.5px;
+  color: rgba(var(--hud-cyan), 0.85);
+}
+
+.cmp-text p {
+  margin: 6px 0 0;
+}
+
+.cmp-limits b {
+  color: #fca5a5;
   font-weight: 600;
 }
 
-.trek-link {
+.cmp-link {
   display: inline-block;
-  margin: 10px 0 2px;
+  margin-top: 6px;
   color: #facc15;
   text-decoration: none;
 }
 
-.trek-link:hover {
+.cmp-link:hover {
   text-decoration: underline;
+}
+
+/* Selector Marte | Luna sobre la mitad derecha */
+#label-right.body-switch {
+  display: flex;
+  gap: 8px;
+  letter-spacing: normal;
+}
+
+.body-switch button {
+  padding: 4px 16px;
+  font: 600 13px system-ui, sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: rgba(5, 8, 22, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.body-switch button.active {
+  color: #0b1020;
+  background: #facc15;
+  border-color: #facc15;
+}
+
+/* Flechas ‹ › del HUD: recorren los puntos del cuerpo seleccionado */
+.hud-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-nav button {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 1;
+  color: #e6f7ff;
+  background: transparent;
+  border: 1px solid rgba(var(--hud-cyan), 0.5);
+  cursor: pointer;
+}
+
+.hud-nav button:hover {
+  background: rgba(var(--hud-cyan), 0.2);
+}
+
+.hud-nav-count {
+  min-width: 34px;
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: 0.05em;
 }
 
 /* Interruptor de la capa de sombra permanente de la Luna */
@@ -1136,16 +1191,24 @@ canvas {
   border: 1px solid #38bdf8;
 }
 
+@media (max-width: 1100px) {
+  .compare-panel {
+    width: calc(100vw - 16px);
+    bottom: 70px;
+  }
+}
+
 @media (max-width: 720px) {
-  .trek-panel {
-    left: 8px;
-    right: 8px;
-    bottom: 64px;
-    width: auto;
-    max-height: 45vh;
+  .cmp-body {
+    grid-template-columns: 1fr;
   }
 
-  .trek-body {
-    grid-template-columns: 110px 1fr;
+  .cmp-side {
+    grid-template-columns: 100px 1fr;
+  }
+
+  .cmp-side + .cmp-side {
+    border-left: 0;
+    border-top: 1px solid rgba(var(--hud-cyan), 0.35);
   }
 }

@@ -6,7 +6,8 @@ import { createSimilarityPanel } from './similarityPanel.js';
 import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
 import { TREK_SITES } from './trekSites.js';
-import { createTrekPanel } from './trekPanel.js';
+import { EARTH_SITES } from './earthSites.js';
+import { createComparePanel } from './comparePanel.js';
 
 // 1. Crear la escena
 const scene = new THREE.Scene();
@@ -297,7 +298,7 @@ const atmosphere = new THREE.Mesh(
 atmosphere.scale.setScalar(1.1);
 meshes.earth.add(atmosphere);
 
-// 5b. Puntos en la Tierra y sus análogos (por ahora aleatorios)
+// 5b. Puntos en la Tierra y sus análogos (sitios reales; la similitud aún es de demo)
 
 // Convierte latitud/longitud (grados) a una posición 3D sobre la esfera.
 // Usa la misma convención que SphereGeometry, así el punto coincide con la textura.
@@ -311,17 +312,10 @@ function latLonToVector3(lat, lon, radius = 1) {
   );
 }
 
-// Lat/lon aleatoria uniforme sobre la esfera (sin amontonarse en los polos)
-function randomLatLon() {
-  const lat = THREE.MathUtils.radToDeg(Math.asin(2 * Math.random() - 1));
-  const lon = Math.random() * 360 - 180;
-  return { lat, lon };
-}
-
-const MARKER_COLOR = 0x38bdf8;        // celeste
+// Color de cada punto de la Tierra según el cuerpo de su análogo
+const MARKER_COLORS = { mars: 0xf97316, moon: 0xcbd5e1 }; // naranja / gris claro
 const MARKER_ACTIVE_COLOR = 0xfacc15; // amarillo
 const ANALOG_TARGETS = ['mars', 'moon'];
-const NUM_EARTH_POINTS = 15;
 
 // Marcadores de la Tierra: hijos del mesh, así giran y escalan con el planeta
 const markerGeometry = new THREE.SphereGeometry(0.02, 12, 12);
@@ -329,22 +323,24 @@ const earthMarkers = new THREE.Group();
 earthMarkers.visible = false;
 meshes.earth.add(earthMarkers);
 
-for (let i = 0; i < NUM_EARTH_POINTS; i++) {
-  const earthPoint = randomLatLon();
-  // El análogo ya es un sitio real con imágenes de Trek; el punto en la Tierra y la
-  // similitud siguen siendo de demo hasta que exista el cálculo con datos reales.
-  const site = TREK_SITES[i % TREK_SITES.length];
-  const analog = { body: site.body, lat: site.lat, lon: site.lon, site };
+const sitesById = Object.fromEntries(TREK_SITES.map((site) => [site.id, site]));
+
+EARTH_SITES.forEach((earthPoint, i) => {
+  const site = sitesById[earthPoint.analogId];
+  const analog = { body: site.body, lat: site.lat, lon: site.lon, name: site.name, site };
 
   // MeshBasicMaterial no depende de la luz: el punto se ve aunque esté en la cara oscura
   const marker = new THREE.Mesh(
     markerGeometry,
-    new THREE.MeshBasicMaterial({ color: MARKER_COLOR })
+    new THREE.MeshBasicMaterial({ color: MARKER_COLORS[site.body] })
   );
   marker.position.copy(latLonToVector3(earthPoint.lat, earthPoint.lon, 1.02)); // encima de las nubes
-  marker.userData = { id: i + 1, earthPoint, analog, similarity: generateDemoParams(analog.body) };
+  marker.userData = { id: i + 1, earthPoint, analog, similarity: generateDemoParams(site.body) };
   earthMarkers.add(marker);
-}
+});
+
+/** Marcadores de la Tierra cuyo análogo está en `body`, en el orden de EARTH_SITES. */
+const markersFor = (body) => earthMarkers.children.filter((m) => m.userData.analog.body === body);
 
 // Un marcador de análogo por cuerpo objetivo (se reutiliza, solo se mueve)
 const analogMarkers = {};
@@ -422,7 +418,7 @@ function updatePsrVisibility() {
 
 let selectedMarker = null;
 const infoPanel = document.getElementById('info');
-const trekPanel = createTrekPanel({ formatLatLon });
+const comparePanel = createComparePanel({ formatLatLon });
 const compareLabels = document.getElementById('compare-labels');
 const terrainLab = createTerrainLab();
 const paramGuide = createParamGuide({
@@ -433,7 +429,8 @@ const paramGuide = createParamGuide({
 });
 const similarityPanel = createSimilarityPanel({
   onClose: () => clearSelection(),
-  onHelp: (key) => paramGuide.open(key) // abre la guía en ese parámetro
+  onHelp: (key) => paramGuide.open(key), // abre la guía en ese parámetro
+  onNav: (dir) => stepEarthPoint(dir)
 });
 
 // Salir de la comparación con el botón ✕ o con Esc
@@ -442,6 +439,10 @@ infoPanel.addEventListener('click', (event) => {
 });
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') clearSelection();
+  // Las flechas recorren los puntos, salvo si se está escribiendo o hay otra ventana abierta
+  if (event.target.closest('input, textarea, select') || terrainLab.isOpen()) return;
+  if (event.key === 'ArrowLeft') stepEarthPoint(-1);
+  if (event.key === 'ArrowRight') stepEarthPoint(1);
 });
 
 function formatLatLon({ lat, lon }) {
@@ -461,7 +462,7 @@ function shortestAngleTarget(current, desired) {
 
 function clearSelection() {
   if (selectedMarker) {
-    selectedMarker.material.color.set(MARKER_COLOR);
+    selectedMarker.material.color.set(MARKER_COLORS[selectedMarker.userData.analog.body]);
     selectedMarker.scale.setScalar(1);
     selectedMarker = null;
   }
@@ -473,7 +474,8 @@ function clearSelection() {
   infoPanel.hidden = true;
   compareLabels.hidden = true;
   similarityPanel.hide();
-  trekPanel.hide();
+  comparePanel.hide();
+  controls.enableRotate = true;
   paramGuide.setContext(null);
 
   // Salir del modo comparación
@@ -498,7 +500,7 @@ function selectEarthPoint(marker) {
   marker.material.color.set(MARKER_ACTIVE_COLOR);
   marker.scale.setScalar(1.8);
 
-  const { id, earthPoint, analog } = marker.userData;
+  const { earthPoint, analog } = marker.userData;
 
   // Encender el punto en el cuerpo análogo
   const localPos = latLonToVector3(analog.lat, analog.lon, 1);
@@ -506,43 +508,73 @@ function selectEarthPoint(marker) {
   group.position.copy(localPos);
   group.visible = true;
 
-  // Modo comparación: Tierra a la izquierda, análogo a la derecha
+  // Modo comparación: Tierra a la izquierda, análogo a la derecha.
+  // OrbitControls movería la cámara (y ambos cuerpos a la vez): aquí se arrastra cada cuerpo.
   compareBody = analog.body;
+  controls.enableRotate = false;
   applyLayout();
   cameraGoal = CAMERA_HOME.clone();
   controls.target.set(0, 0, 0);
 
-  // Girar ambos cuerpos para que sus puntos queden de frente
+  // Girar ambos cuerpos para que sus puntos queden de frente, e inclinarlos hacia su latitud:
+  // sin la inclinación, sitios polares como Shackleton o McMurdo quedarían en el borde del disco
   const { x } = getCompareLayout();
   faceTowardCamera(meshes.earth, marker.position, -x);
   faceTowardCamera(meshes[analog.body], localPos, x);
-  // Inclinar el análogo hacia su latitud: sin esto, un sitio polar como Shackleton
-  // quedaría en el borde del disco y no se vería
+  meshes.earth.userData.targetRotationX = THREE.MathUtils.degToRad(earthPoint.lat);
   meshes[analog.body].userData.targetRotationX = THREE.MathUtils.degToRad(analog.lat);
 
-  document.getElementById('label-right').textContent = BODIES[analog.body].name;
+  updateBodySwitch(analog.body);
   compareLabels.hidden = false;
 
-  infoPanel.innerHTML = `
-    <strong>Punto ${id}</strong> · Tierra ${formatLatLon(earthPoint)}<br>
-    Análogo en <strong>${BODIES[analog.body].name}</strong>: ${analog.site.name} ${formatLatLon(analog)}
-    <span class="demo-tag">similitud de demo</span>
-    <button class="close-compare" title="Salir de la comparación (Esc)">✕</button>`;
-  // El HUD de similitud reemplaza al panel de texto de abajo
+  const siblings = markersFor(analog.body);
   similarityPanel.show({
-    id,
     earthPoint,
     analogPoint: analog,
     analogName: BODIES[analog.body].name,
     formatLatLon,
-    data: marker.userData.similarity
+    data: marker.userData.similarity,
+    nav: { index: siblings.indexOf(marker), total: siblings.length }
   });
 
-  trekPanel.show(analog.site);
+  comparePanel.show(earthPoint, analog.site);
   updatePsrVisibility();
 
   // La guía también muestra los valores de este punto
   paramGuide.setContext({ analogName: BODIES[analog.body].name, data: marker.userData.similarity });
+}
+
+/** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */
+function stepEarthPoint(dir) {
+  if (!selectedMarker) return;
+  const list = markersFor(selectedMarker.userData.analog.body);
+  const i = list.indexOf(selectedMarker);
+  selectEarthPoint(list[(i + dir + list.length) % list.length]);
+}
+
+/** Cambia el análogo a otro cuerpo, saltando al primer punto de la Tierra emparejado con él. */
+function switchAnalogBody(body) {
+  if (!selectedMarker || selectedMarker.userData.analog.body === body) return;
+  const [first] = markersFor(body);
+  if (first) selectEarthPoint(first);
+}
+
+// Selector Marte | Luna sobre la mitad derecha (reemplaza a la etiqueta fija)
+const bodySwitch = document.getElementById('label-right');
+bodySwitch.classList.add('body-switch');
+bodySwitch.innerHTML = ANALOG_TARGETS
+  .map((key) => `<button data-body="${key}">${BODIES[key].name}</button>`)
+  .join('');
+bodySwitch.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-body]');
+  if (btn) switchAnalogBody(btn.dataset.body);
+});
+
+/** Resalta en el selector el cuerpo análogo activo. */
+function updateBodySwitch(body) {
+  for (const btn of bodySwitch.querySelectorAll('[data-body]')) {
+    btn.classList.toggle('active', btn.dataset.body === body);
+  }
 }
 
 // Los puntos solo existen cuando la Tierra está en el centro
@@ -595,8 +627,36 @@ function getHoveredBody() {
   return hits.length > 0 ? hits[0].object.userData.bodyKey : null;
 }
 
+// En el modo comparación cada cuerpo se gira por separado arrastrándolo
+const DRAG_SPEED = 0.008; // radianes por píxel
+const MAX_TILT = THREE.MathUtils.degToRad(85);
+let dragBody = null;
+const dragLast = new THREE.Vector2();
+
 renderer.domElement.addEventListener('pointerdown', (event) => {
   pointerDown.set(event.clientX, event.clientY);
+  if (!compareBody) return;
+  updatePointer(event);
+  const bodyKey = getHoveredBody();
+  if (bodyKey === 'earth' || bodyKey === compareBody) {
+    dragBody = bodyKey;
+    dragLast.set(event.clientX, event.clientY);
+    renderer.domElement.setPointerCapture(event.pointerId);
+  }
+});
+
+// Se acumula sobre el objetivo de rotación: el bucle de animación ya lo sigue con suavizado
+function dragRotate(event) {
+  const data = meshes[dragBody].userData;
+  const dx = event.clientX - dragLast.x;
+  const dy = event.clientY - dragLast.y;
+  dragLast.set(event.clientX, event.clientY);
+  data.targetRotationY = (data.targetRotationY ?? meshes[dragBody].rotation.y) + dx * DRAG_SPEED;
+  data.targetRotationX = THREE.MathUtils.clamp((data.targetRotationX ?? 0) + dy * DRAG_SPEED, -MAX_TILT, MAX_TILT);
+}
+
+window.addEventListener('pointerup', () => {
+  dragBody = null;
 });
 
 renderer.domElement.addEventListener('pointerup', (event) => {
@@ -612,17 +672,25 @@ renderer.domElement.addEventListener('pointerup', (event) => {
     return;
   }
 
+  // En el modo comparación un clic en un cuerpo no lo cambia: ahí se usa para arrastrar
   const bodyKey = getHoveredBody();
-  if (bodyKey) setBody(bodyKey);
+  if (bodyKey && !compareBody) setBody(bodyKey);
 });
 
 // Cursor de "mano" al pasar sobre un cuerpo que no está en el centro
 renderer.domElement.addEventListener('pointermove', (event) => {
+  if (dragBody) {
+    dragRotate(event);
+    renderer.domElement.style.cursor = 'grabbing';
+    return;
+  }
   updatePointer(event);
   const overMarker = getHoveredMarker() !== null;
   const bodyKey = getHoveredBody();
-  const overSideBody = bodyKey && bodyKey !== currentBody;
-  renderer.domElement.style.cursor = overMarker || overSideBody ? 'pointer' : 'default';
+  const overSideBody = bodyKey && bodyKey !== currentBody && !compareBody;
+  const overDraggable = compareBody && (bodyKey === 'earth' || bodyKey === compareBody);
+  renderer.domElement.style.cursor =
+    overMarker || overSideBody ? 'pointer' : overDraggable ? 'grab' : 'default';
 });
 
 // La app arranca en la Tierra, que es donde están los puntos
