@@ -989,3 +989,163 @@ canvas {
 .lab-readout {
   transition: opacity 0.2s;
 }
+
+/* ===== Panel de NASA Trek (vista real del sitio objetivo) ===== */
+/* Tarjeta horizontal abajo a la derecha: así no tapa el centro del cuerpo análogo,
+   que es justo donde queda el sitio seleccionado */
+.trek-panel {
+  right: 16px;
+  bottom: 64px;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  user-select: text;
+}
+
+.trek-panel .hud-header {
+  cursor: default;
+}
+
+.trek-panel.collapsed .trek-body {
+  display: none;
+}
+
+.trek-body {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  grid-template-areas:
+    'figure title'
+    'figure text'
+    'tabs   text';
+  gap: 0 12px;
+  padding: 10px 12px 0;
+  font: 12.5px/1.4 system-ui, sans-serif;
+}
+
+.trek-title { grid-area: title; }
+.trek-figure { grid-area: figure; }
+.trek-tabs { grid-area: tabs; }
+.trek-text { grid-area: text; }
+
+.trek-title strong {
+  display: block;
+  font: 700 18px/1.2 'Rajdhani', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.trek-title span {
+  font-size: 12px;
+  color: rgba(var(--hud-cyan), 0.85);
+}
+
+.trek-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.trek-tabs button {
+  flex: 1;
+  padding: 4px 0;
+  font: 600 13px 'Rajdhani', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e6f7ff;
+  background: transparent;
+  border: 1px solid rgba(var(--hud-cyan), 0.4);
+  cursor: pointer;
+}
+
+.trek-tabs button.active {
+  background: rgba(var(--hud-cyan), 0.22);
+  border-color: rgba(var(--hud-cyan), 0.9);
+}
+
+.trek-figure {
+  margin: 0;
+}
+
+.trek-figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #000;
+  border: 1px solid rgba(var(--hud-cyan), 0.35);
+}
+
+.trek-figure figcaption {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.trek-why,
+.trek-analogs {
+  margin: 8px 0 0;
+}
+
+.trek-analogs b {
+  color: rgba(var(--hud-cyan), 1);
+  font-weight: 600;
+}
+
+.trek-link {
+  display: inline-block;
+  margin: 10px 0 2px;
+  color: #facc15;
+  text-decoration: none;
+}
+
+.trek-link:hover {
+  text-decoration: underline;
+}
+
+/* Interruptor de la capa de sombra permanente de la Luna */
+#psr-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font: 600 13px 'Rajdhani', sans-serif;
+  letter-spacing: 0.06em;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.82);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 999px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#psr-toggle[hidden] {
+  display: none;
+}
+
+#psr-toggle .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+#psr-toggle[aria-pressed='false'] .swatch {
+  background: transparent;
+  border: 1px solid #38bdf8;
+}
+
+@media (max-width: 720px) {
+  .trek-panel {
+    left: 8px;
+    right: 8px;
+    bottom: 64px;
+    width: auto;
+    max-height: 45vh;
+  }
+
+  .trek-body {
+    grid-template-columns: 110px 1fr;
+  }
+}

@@ -5,6 +5,8 @@ import { generateDemoParams } from './similarity.js';
 import { createSimilarityPanel } from './similarityPanel.js';
 import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
+import { TREK_SITES } from './trekSites.js';
+import { createTrekPanel } from './trekPanel.js';
 
 // 1. Crear la escena
 const scene = new THREE.Scene();
@@ -92,9 +94,11 @@ textureLoader.load(
 
 // 5. Cuerpos planetarios
 // En la escena se dibujan con radio 1; radiusKm es el radio real para cálculos futuros.
+// Marte y la Luna usan mosaicos de NASA Trek (scripts/fetch-trek.sh); si faltan, se usa la
+// textura anterior para que la app siga funcionando sin haber ejecutado el script.
 const BODIES = {
-  mars:  { name: 'Marte',  texture: '/textures/mars.jpg',  radiusKm: 3389.5 },
-  moon:  { name: 'Luna',   texture: '/textures/moon.jpg',  radiusKm: 1737.4 },
+  mars:  { name: 'Marte',  texture: '/textures/trek/mars_viking_mdim.jpg', fallback: '/textures/mars.jpg', radiusKm: 3389.5 },
+  moon:  { name: 'Luna',   texture: '/textures/trek/moon_lro_wac.jpg',     fallback: '/textures/moon.jpg', radiusKm: 1737.4 },
   earth: { name: 'Tierra', texture: '/textures/earth.jpg', radiusKm: 6371.0 },
 };
 
@@ -149,17 +153,26 @@ const geometry = new THREE.SphereGeometry(1, 64, 64);
 const meshes = {}; // bodyKey -> mesh
 
 for (const [key, body] of Object.entries(BODIES)) {
+  // Cada cuerpo tiene su propio material; la geometría sí se comparte
+  const material = new THREE.MeshStandardMaterial({ roughness: 0.95 });
+  const mesh = new THREE.Mesh(geometry, material);
+
   const texture = textureLoader.load(
     body.texture,
     () => console.log(`Textura de ${body.name} cargada correctamente`),
     undefined,
-    (error) => console.error(`Error cargando la textura de ${body.name}:`, error)
+    (error) => {
+      if (!body.fallback) return console.error(`Error cargando la textura de ${body.name}:`, error);
+      console.info(`Sin textura de Trek para ${body.name}; se usa ${body.fallback}`);
+      const fallback = textureLoader.load(body.fallback);
+      fallback.colorSpace = THREE.SRGBColorSpace;
+      fallback.anisotropy = texture.anisotropy;
+      material.map = fallback;
+      material.needsUpdate = true;
+    }
   );
   texture.colorSpace = THREE.SRGBColorSpace;
-
-  // Cada cuerpo tiene su propio material; la geometría sí se comparte
-  const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95 });
-  const mesh = new THREE.Mesh(geometry, material);
+  material.map = texture;
   mesh.userData.bodyKey = key; // para saber qué cuerpo se clicó
 
   // Destino al que se mueve suavemente en cada frame
@@ -318,10 +331,10 @@ meshes.earth.add(earthMarkers);
 
 for (let i = 0; i < NUM_EARTH_POINTS; i++) {
   const earthPoint = randomLatLon();
-  const analog = {
-    body: ANALOG_TARGETS[Math.floor(Math.random() * ANALOG_TARGETS.length)],
-    ...randomLatLon()
-  };
+  // El análogo ya es un sitio real con imágenes de Trek; el punto en la Tierra y la
+  // similitud siguen siendo de demo hasta que exista el cálculo con datos reales.
+  const site = TREK_SITES[i % TREK_SITES.length];
+  const analog = { body: site.body, lat: site.lat, lon: site.lon, site };
 
   // MeshBasicMaterial no depende de la luz: el punto se ve aunque esté en la cara oscura
   const marker = new THREE.Mesh(
@@ -358,8 +371,58 @@ for (const key of ANALOG_TARGETS) {
   analogMarkers[key] = group;
 }
 
+// 5c. Sombra permanente (PSR) del polo sur lunar, de LRO LOLA vía Moon Trek.
+// La máscara solo cubre −78.75°…−90°, así que va sobre un casquete esférico de esas latitudes
+// (el UV de un SphereGeometry parcial recorre exactamente esa banda).
+const PSR_TOP_LAT = -78.75;
+const psrOverlay = new THREE.Mesh(
+  new THREE.SphereGeometry(
+    1.003, 256, 24,
+    0, Math.PI * 2,
+    THREE.MathUtils.degToRad(90 - PSR_TOP_LAT), THREE.MathUtils.degToRad(90 + PSR_TOP_LAT)
+  ),
+  new THREE.MeshBasicMaterial({ color: 0x5ee7ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
+);
+psrOverlay.visible = false;
+meshes.moon.add(psrOverlay);
+
+const psrToggle = document.createElement('button');
+psrToggle.id = 'psr-toggle';
+psrToggle.hidden = true;
+psrToggle.setAttribute('aria-pressed', 'true');
+psrToggle.title = 'LRO LOLA · regiones en sombra permanente del polo sur (Moon Trek)';
+psrToggle.innerHTML = '<span class="swatch"></span>Sombra permanente (hielo)';
+document.body.appendChild(psrToggle);
+
+let psrEnabled = true;
+let psrLoaded = false;
+
+loadOptionalTexture('/textures/trek/moon_psr_south_mask.png', (tex) => {
+  // Sin mipmaps: los PSR miden pocos píxeles y al promediarse con el resto desaparecerían
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
+  psrOverlay.material.alphaMap = tex; // blanco = región en sombra permanente
+  psrOverlay.material.needsUpdate = true;
+  psrLoaded = true;
+  updatePsrVisibility();
+});
+
+psrToggle.addEventListener('click', () => {
+  psrEnabled = !psrEnabled;
+  psrToggle.setAttribute('aria-pressed', String(psrEnabled));
+  updatePsrVisibility();
+});
+
+/** Muestra la capa PSR (y su interruptor) solo cuando la Luna está en primer plano. */
+function updatePsrVisibility() {
+  const moonInFocus = compareBody ? compareBody === 'moon' : currentBody === 'moon';
+  psrToggle.hidden = !(psrLoaded && moonInFocus);
+  psrOverlay.visible = psrLoaded && psrEnabled && moonInFocus;
+}
+
 let selectedMarker = null;
 const infoPanel = document.getElementById('info');
+const trekPanel = createTrekPanel({ formatLatLon });
 const compareLabels = document.getElementById('compare-labels');
 const terrainLab = createTerrainLab();
 const paramGuide = createParamGuide({
@@ -403,10 +466,14 @@ function clearSelection() {
     selectedMarker = null;
   }
   for (const group of Object.values(analogMarkers)) group.visible = false;
-  for (const mesh of Object.values(meshes)) mesh.userData.targetRotationY = null;
+  for (const mesh of Object.values(meshes)) {
+    mesh.userData.targetRotationY = null;
+    mesh.userData.targetRotationX = 0;
+  }
   infoPanel.hidden = true;
   compareLabels.hidden = true;
   similarityPanel.hide();
+  trekPanel.hide();
   paramGuide.setContext(null);
 
   // Salir del modo comparación
@@ -414,6 +481,7 @@ function clearSelection() {
     compareBody = null;
     applyLayout();
   }
+  updatePsrVisibility();
 }
 
 // Gira un cuerpo para que un punto (en coordenadas locales) mire hacia la cámara.
@@ -448,14 +516,17 @@ function selectEarthPoint(marker) {
   const { x } = getCompareLayout();
   faceTowardCamera(meshes.earth, marker.position, -x);
   faceTowardCamera(meshes[analog.body], localPos, x);
+  // Inclinar el análogo hacia su latitud: sin esto, un sitio polar como Shackleton
+  // quedaría en el borde del disco y no se vería
+  meshes[analog.body].userData.targetRotationX = THREE.MathUtils.degToRad(analog.lat);
 
   document.getElementById('label-right').textContent = BODIES[analog.body].name;
   compareLabels.hidden = false;
 
   infoPanel.innerHTML = `
     <strong>Punto ${id}</strong> · Tierra ${formatLatLon(earthPoint)}<br>
-    Análogo en <strong>${BODIES[analog.body].name}</strong> ${formatLatLon(analog)}
-    <span class="demo-tag">datos aleatorios</span>
+    Análogo en <strong>${BODIES[analog.body].name}</strong>: ${analog.site.name} ${formatLatLon(analog)}
+    <span class="demo-tag">similitud de demo</span>
     <button class="close-compare" title="Salir de la comparación (Esc)">✕</button>`;
   // El HUD de similitud reemplaza al panel de texto de abajo
   similarityPanel.show({
@@ -467,6 +538,9 @@ function selectEarthPoint(marker) {
     data: marker.userData.similarity
   });
 
+  trekPanel.show(analog.site);
+  updatePsrVisibility();
+
   // La guía también muestra los valores de este punto
   paramGuide.setContext({ analogName: BODIES[analog.body].name, data: marker.userData.similarity });
 }
@@ -475,6 +549,7 @@ function selectEarthPoint(marker) {
 function onBodyChanged() {
   earthMarkers.visible = currentBody === 'earth';
   if (currentBody !== 'earth') clearSelection();
+  updatePsrVisibility();
 }
 
 // Pulso del halo de los análogos
@@ -581,6 +656,7 @@ function animate() {
     } else {
       mesh.rotation.y += 0.06 * delta;
     }
+    mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, mesh.userData.targetRotationX ?? 0, t);
   }
 
   updateHighlightPulse(clock.elapsedTime);
