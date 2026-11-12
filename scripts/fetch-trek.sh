@@ -51,6 +51,7 @@ aristarchus|moon|23.70|-47.40|128
 tranquillitatis|moon|8.34|33.22|128
 earth_salda|earth|37.55|29.68|250
 earth_hanksville|earth|38.41|-110.79|250
+earth_lajoya|earth|-16.73|-71.87|250
 earth_riotinto|earth|37.72|-6.55|250
 earth_lavabeds|earth|41.71|-121.51|250
 earth_devon|earth|75.38|-89.68|250

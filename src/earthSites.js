@@ -25,6 +25,12 @@ export const EARTH_SITES = [
     limits: 'Las capas de Gale se depositaron en un lago dentro de un cráter; la presión y la radiación no se parecen en nada.',
   },
   {
+    id: 'lajoya', analogId: 'gale', name: 'Pampas de La Joya', region: 'Arequipa, Perú', lat: -16.73, lon: -71.87,
+    kind: 'Desierto hiperárido',
+    why: 'Uno de los lugares más secos del planeta: sus suelos tienen oxidantes y casi nada de materia orgánica. Investigadores de NASA Ames lo estudian como análogo del suelo marciano.',
+    limits: 'La atmósfera terrestre filtra la radiación UV que en Marte llega directa al suelo, y allí la temperatura media ronda −60 °C.',
+  },
+  {
     id: 'riotinto', analogId: 'meridiani', name: 'Río Tinto', region: 'Huelva, España', lat: 37.72, lon: -6.55,
     kind: 'Aguas ácidas con hierro',
     why: 'Agua con pH cercano a 2 que forma jarosita y hematita, los mismos minerales que encontró Opportunity. Tiene microbios extremófilos.',

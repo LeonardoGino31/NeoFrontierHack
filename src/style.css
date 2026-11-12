@@ -272,20 +272,6 @@ canvas {
   gap: 6px;
 }
 
-.hud-help {
-  width: 24px;
-  height: 24px;
-  font: 700 14px 'Rajdhani', sans-serif;
-  color: #e6f7ff;
-  background: rgba(var(--hud-cyan), 0.15);
-  border: 1px solid rgba(var(--hud-cyan), 0.5);
-  cursor: pointer;
-}
-
-.hud-help:hover {
-  background: rgba(var(--hud-cyan), 0.35);
-}
-
 .hud-row,
 .hud-score {
   cursor: pointer;

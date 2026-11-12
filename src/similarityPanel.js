@@ -26,7 +26,6 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
         <button class="hud-next" title="Punto siguiente (→)">›</button>
       </div>
       <div class="hud-actions">
-        <button class="hud-help" title="¿Qué significa cada parámetro?">?</button>
         <button class="hud-close" title="Cerrar (Esc)">✕</button>
       </div>
     </div>
@@ -39,7 +38,6 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   const header = panel.querySelector('.hud-header');
   panel.querySelector('.hud-close').addEventListener('click', onClose);
-  panel.querySelector('.hud-help').addEventListener('click', () => onHelp('overall'));
   panel.querySelector('.hud-prev').addEventListener('click', () => onNav(-1));
   panel.querySelector('.hud-next').addEventListener('click', () => onNav(1));
 
