@@ -23,8 +23,8 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 ## Cómo ejecutarlo
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ### Datos de NASA Trek

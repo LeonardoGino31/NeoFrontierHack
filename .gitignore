@@ -35,3 +35,6 @@ public/textures/raw/
 
 # Notas locales del asistente
 CLAUDE.md
+
+# pnpm solo se usa en local; el lockfile oficial del repo es package-lock.json
+pnpm-lock.yaml
