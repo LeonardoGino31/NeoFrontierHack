@@ -37,9 +37,9 @@ GLOBAL_Z=3   # 4096 × 2048 px en Trek: límite seguro para GPUs integradas
 # Radios en km, para pasar del ancho del recorte en km a grados
 declare -A RADIUS_KM=([earth]=6371 [mars]=3389.5 [moon]=1737.4)
 
-# Recortes: id|cuerpo|lat|lon (°E, −180..180)|ancho km.
-# Cada sitio de Marte/Luna tiene su par en la Tierra con el MISMO ancho, para comparar a escala.
-# Mantener sincronizado con src/trekSites.js y src/earthSites.js (textos y coordenadas).
+# Recortes para la vista de imágenes: id|cuerpo|lat|lon (°E, −180..180)|ancho km.
+# La aplicación lee las ubicaciones desde planetary_candidates.csv; añade entradas aquí solo
+# cuando quieras generar también las imágenes locales de un sitio nuevo para el panel NASA.
 SITES=$(cat <<'EOF'
 jezero|mars|18.38|77.58|250
 gale|mars|-5.40|137.80|250

@@ -62,7 +62,7 @@ npm run dev
 
 ### Datos de NASA Trek
 
-Las imágenes ya están en `public/`. Para regenerarlas (o tras añadir un sitio en `src/trekSites.js` / `src/earthSites.js` y en la lista del script):
+Las imágenes ya están en `public/`. La lista de recortes de `scripts/fetch-trek.sh` solo se usa para crear esas imágenes. Al añadir una pareja al CSV no hace falta tocarla para que funcionen el marcador y la similitud; actualízala después solo si quieres generar también imágenes locales para el panel NASA.
 
 ```bash
 ./scripts/fetch-trek.sh          # descarga solo lo que falta
@@ -73,10 +73,14 @@ Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (so
 
 ### Datos de ubicaciones y similitud
 
-- `public/data/planetary_candidates.csv` es la fuente de ubicaciones objetivo de Marte/Luna y de los valores usados para calcular la similitud. Tiene una fila por pareja Tierra–análogo, con el identificador del sitio terrestre para enlazarla con `src/earthSites.js`.
-- `src/planetaryData.js` carga el CSV, crea los sitios extraterrestres para los marcadores y entrega los valores fijos al cálculo de similitud.
+- `public/data/planetary_candidates.csv` es la fuente de ambas ubicaciones y de los valores usados para calcular la similitud. Cada fila representa una pareja completa Tierra–análogo.
+- Para agregar una pareja, añade una fila con un `pair_id` único; los datos del sitio terrestre (`earth_site_*`) y del candidato (`candidate_id`, `body`, `analog_*`); y los valores de cada parámetro en columnas `*_earth` y `*_analog`. Las columnas de EDL pueden quedar vacías para la Luna. `body` debe ser `mars` o `moon`.
+- `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra. `analog_latitude` / `analog_longitude` posicionan su contraparte en Marte o la Luna. Al seleccionar el punto, el índice y los porcentajes se calculan con los valores de esa fila.
+- Usa un `earth_site_id` único por punto seleccionable de la Tierra y un `pair_id` único por fila. Un `candidate_id` sí puede repetirse para emparejar el mismo análogo con distintos puntos terrestres; sus datos deben coincidir en todas esas filas.
+- `src/planetaryData.js` carga y valida el CSV, crea las parejas para los marcadores y entrega los valores al cálculo de similitud.
 - Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos generados dentro de los rangos anteriores, no mediciones ni resultados científicos. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
-- La lista y las coordenadas terrestres continúan en `src/earthSites.js`. Los rangos de parámetros en `src/similarity.js` se conservan para el simulador de la guía.
+- Los rangos y pesos de parámetros en `src/similarity.js` se conservan para el cálculo y el simulador de la guía. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
+- Las imágenes recortadas del panel NASA siguen siendo recursos aparte; agregarlas no es necesario para que aparezcan los marcadores ni para calcular similitudes.
 
 Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
 
@@ -91,15 +95,15 @@ src/
 ├── paramInfo.js        # Textos explicativos de cada parámetro
 ├── paramGuide.js       # Guía de parámetros y simulador
 ├── terrainLab.js       # Laboratorio de terreno 3D
-├── trekSites.js        # Sitios objetivo en Marte y la Luna (textos y coordenadas)
-├── earthSites.js       # Puntos de la Tierra emparejados con cada sitio (y dónde falla la analogía)
+├── trekSites.js        # Capas, imágenes y enlaces a NASA Trek
+├── earthSites.js       # Capas y rutas de imágenes terrestres del panel
 ├── comparePanel.js     # Panel inferior Tierra | análogo con imágenes reales
 ├── icons.js            # Íconos SVG compartidos
 └── style.css
 public/textures/        # Texturas de la Tierra y estrellas (+ respaldo de Marte y la Luna)
 public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA Trek
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
-public/data/            # Candidatos extraterrestres y valores fijos para similitud (CSV)
+public/data/            # Parejas Tierra–análogo y valores fijos para similitud (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
 ```
 

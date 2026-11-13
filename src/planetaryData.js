@@ -1,4 +1,4 @@
-// Carga desde CSV las ubicaciones extraterrestres y los datos fijos de comparación.
+// Cada fila del CSV representa una pareja completa Tierra–análogo.
 
 import { PARAMS, paramSimilarity, overallSimilarity } from './similarity.js';
 
@@ -46,14 +46,39 @@ function parseCsv(text) {
   ));
 }
 
-const numberFrom = (row, key, description) => {
-  if (row[key] === undefined || row[key] === '') {
-    throw new Error(`Falta el dato ${key} (${description}).`);
-  }
-  const value = Number(row[key]);
-  if (!Number.isFinite(value)) throw new Error(`Valor inválido en ${key} (${description}).`);
+const textFrom = (row, key, recordId) => {
+  const value = row[key]?.trim();
+  if (!value) throw new Error(`Falta el dato ${key} (${recordId}).`);
   return value;
 };
+
+const numberFrom = (row, key, recordId) => {
+  if (row[key] === undefined || row[key] === '') {
+    throw new Error(`Falta el dato ${key} (${recordId}).`);
+  }
+  const value = Number(row[key]);
+  if (!Number.isFinite(value)) throw new Error(`Valor inválido en ${key} (${recordId}).`);
+  return value;
+};
+
+function coordinateFrom(row, key, min, max, recordId) {
+  const value = numberFrom(row, key, recordId);
+  if (value < min || value > max) {
+    throw new Error(`Coordenada fuera de rango en ${key} (${recordId}).`);
+  }
+  return value;
+}
+
+function booleanFrom(row, key, recordId) {
+  if (row[key] === 'true') return true;
+  if (row[key] === 'false') return false;
+  throw new Error(`El dato ${key} debe ser true o false (${recordId}).`);
+}
+
+function sameAnalogSite(first, second) {
+  return ['body', 'name', 'lat', 'lon', 'footprintKm', 'kind', 'why', 'polar']
+    .every((key) => first[key] === second[key]);
+}
 
 export async function loadPlanetaryData() {
   const response = await fetch('/data/planetary_candidates.csv');
@@ -62,33 +87,64 @@ export async function loadPlanetaryData() {
   }
 
   const rows = parseCsv(await response.text());
+  const pairs = [];
+  const pairIds = new Set();
   const sitesById = new Map();
-  const comparisonsByEarthSite = {};
+  const earthSiteIds = new Set();
 
   for (const row of rows) {
-    const site = {
-      id: row.candidate_id,
-      body: row.body,
-      name: row.site_name,
-      lat: numberFrom(row, 'latitude', row.candidate_id),
-      lon: numberFrom(row, 'longitude', row.candidate_id),
-      footprintKm: numberFrom(row, 'footprint_km', row.candidate_id),
-      kind: row.kind,
-      why: row.description,
-      polar: row.polar === 'true',
-    };
+    const pairId = textFrom(row, 'pair_id', 'registro');
+    const earthId = textFrom(row, 'earth_site_id', pairId);
+    const candidateId = textFrom(row, 'candidate_id', pairId);
+    const body = textFrom(row, 'body', pairId);
 
-    if (!site.id || !['mars', 'moon'].includes(site.body)) {
-      throw new Error(`Registro de sitio inválido en el CSV: ${row.candidate_id || '(sin id)'}.`);
+    if (pairIds.has(pairId)) throw new Error(`El CSV repite el pair_id ${pairId}.`);
+    pairIds.add(pairId);
+    if (!['mars', 'moon'].includes(body)) {
+      throw new Error(`Cuerpo inválido en el registro ${pairId}: ${body}.`);
     }
-    if (!sitesById.has(site.id)) sitesById.set(site.id, site);
-    if (comparisonsByEarthSite[row.earth_site_id]) {
-      throw new Error(`El CSV repite el sitio terrestre ${row.earth_site_id}.`);
+
+    const earthPoint = {
+      id: earthId,
+      name: textFrom(row, 'earth_site_name', pairId),
+      region: textFrom(row, 'earth_region', pairId),
+      lat: coordinateFrom(row, 'earth_latitude', -90, 90, pairId),
+      lon: coordinateFrom(row, 'earth_longitude', -180, 180, pairId),
+      kind: textFrom(row, 'earth_kind', pairId),
+      why: textFrom(row, 'earth_description', pairId),
+      limits: textFrom(row, 'earth_limits', pairId),
+    };
+    if (earthSiteIds.has(earthId)) {
+      throw new Error(`El CSV repite el earth_site_id ${earthId}; usa un ID por punto seleccionable de la Tierra.`);
     }
-    comparisonsByEarthSite[row.earth_site_id] = row;
+    earthSiteIds.add(earthId);
+
+    const site = {
+      id: candidateId,
+      body,
+      name: textFrom(row, 'analog_site_name', pairId),
+      lat: coordinateFrom(row, 'analog_latitude', -90, 90, pairId),
+      lon: coordinateFrom(row, 'analog_longitude', -180, 180, pairId),
+      footprintKm: numberFrom(row, 'footprint_km', pairId),
+      kind: textFrom(row, 'analog_kind', pairId),
+      why: textFrom(row, 'analog_description', pairId),
+      polar: booleanFrom(row, 'analog_polar', pairId),
+    };
+    const previousSite = sitesById.get(candidateId);
+    if (previousSite && !sameAnalogSite(previousSite, site)) {
+      throw new Error(`Los datos del candidato ${candidateId} no coinciden entre sus parejas.`);
+    }
+    if (!previousSite) sitesById.set(candidateId, site);
+
+    pairs.push({
+      id: pairId,
+      earthPoint,
+      analog: { body, lat: site.lat, lon: site.lon, name: site.name, site },
+      comparison: row,
+    });
   }
 
-  return { sites: [...sitesById.values()], comparisonsByEarthSite };
+  return { pairs };
 }
 
 export function similarityDataFromCsv(row, analogBody) {
