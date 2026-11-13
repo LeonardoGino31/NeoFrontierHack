@@ -74,9 +74,17 @@ Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (so
 ### Datos de ubicaciones y similitud
 
 - `public/data/planetary_candidates.csv` es la fuente de ambas ubicaciones y de los valores usados para calcular la similitud. Cada fila representa una pareja completa Tierra–análogo.
-- Para agregar una pareja, añade una fila con un `pair_id` único; los datos del sitio terrestre (`earth_site_*`) y del candidato (`candidate_id`, `body`, `analog_*`); y los valores de cada parámetro en columnas `*_earth` y `*_analog`. Las columnas de EDL pueden quedar vacías para la Luna. `body` debe ser `mars` o `moon`.
+- El encabezado del CSV sigue este orden de bloques:
+
+  1. **Identificadores:** `pair_id`, `earth_site_id`, `candidate_id`, `body`.
+  2. **Sitio terrestre:** `earth_site_name`, `earth_region`, `earth_latitude`, `earth_longitude`, `earth_kind`, `earth_description`, `earth_limits`.
+  3. **Análogo lunar o marciano:** `analog_site_name`, `analog_latitude`, `analog_longitude`, `footprint_km`, `analog_kind`, `analog_description`, `analog_polar`.
+  4. **Estado del registro:** `data_status`.
+  5. **Valores comparados**, en este orden: `elevation_earth`, `elevation_analog`; `slope_earth`, `slope_analog`; `temperature_earth`, `temperature_analog`; `roughness_earth`, `roughness_analog`; `albedo_earth`, `albedo_analog`; `iron_earth`, `iron_analog`; `ice_earth`, `ice_analog`; `ice_confidence_earth`, `ice_confidence_analog`; `landing_area_earth`, `landing_area_analog`; `soil_stability_earth`, `soil_stability_analog`; `edl_conditions_earth`, `edl_conditions_analog`; `traverse_access_earth`, `traverse_access_analog`; `solar_energy_earth`, `solar_energy_analog`. La confianza del hielo se muestra aparte y no se incluye en el índice. Las columnas EDL se dejan vacías para la Luna.
+- Para agregar una pareja, añade una fila de datos debajo del encabezado, respetando ese orden y con un `pair_id` y un `earth_site_id` únicos. `body` debe ser `mars` o `moon`; incluye las coordenadas de ambos puntos y valores numéricos para los parámetros aplicables.
 - `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra. `analog_latitude` / `analog_longitude` posicionan su contraparte en Marte o la Luna. Al seleccionar el punto, el índice y los porcentajes se calculan con los valores de esa fila.
 - Usa un `earth_site_id` único por punto seleccionable de la Tierra y un `pair_id` único por fila. Un `candidate_id` sí puede repetirse para emparejar el mismo análogo con distintos puntos terrestres; sus datos deben coincidir en todas esas filas.
+- No agregues filas de notas ni encabezados intermedios al CSV: el cargador interpreta cada fila posterior al encabezado como un registro.
 - `src/planetaryData.js` carga y valida el CSV, crea las parejas para los marcadores y entrega los valores al cálculo de similitud.
 - Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos generados dentro de los rangos anteriores, no mediciones ni resultados científicos. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
 - Los rangos y pesos de parámetros en `src/similarity.js` se conservan para el cálculo y el simulador de la guía. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
