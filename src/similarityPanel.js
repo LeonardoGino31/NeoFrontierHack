@@ -93,13 +93,13 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
       </div>`;
 
     panel.querySelector('.hud-rows').innerHTML = data.results
-      .map(({ param, earth, analog, similarity }) => `
+      .map(({ param, earth, analog, confidence, similarity }) => `
         <div class="hud-row" data-key="${param.key}" title="Ver explicación">
           <div class="hud-icon">${icon(param.icon)}</div>
           <div class="hud-bar hud-${level(similarity)}">
             <div class="hud-fill" data-width="${similarity * 100}"></div>
             <span class="hud-label">${param.label}</span>
-            <span class="hud-values">${fmt(earth, param.decimals)} / ${fmt(analog, param.decimals)} ${param.unit}</span>
+            <span class="hud-values">${fmt(earth, param.decimals)} / ${fmt(analog, param.decimals)} ${param.unit}${confidence ? `<small class="hud-confidence">Confianza demo: ${Math.round(confidence.earth)}% / ${Math.round(confidence.analog)}%</small>` : ''}</span>
           </div>
           <div class="hud-pct hud-${level(similarity)}">${Math.round(similarity * 100)}%</div>
         </div>`)

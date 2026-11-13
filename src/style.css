@@ -229,6 +229,14 @@ canvas {
   color: rgba(230, 247, 255, 0.85);
 }
 
+.hud-confidence {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
 .hud-big {
   font-size: 22px;
   font-weight: 700;

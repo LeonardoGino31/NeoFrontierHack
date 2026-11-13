@@ -6,7 +6,7 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 
 - **Globo 3D** de la Tierra, Marte y la Luna con texturas reales, atmósfera, nubes y luces nocturnas.
 - **Puntos de análisis** sobre la Tierra: al seleccionar uno, se muestra lado a lado con su análogo en Marte o la Luna.
-- **HUD de similitud** con 7 parámetros (elevación, pendiente, temperatura, rugosidad, albedo, óxidos de hierro y humedad) y un índice global ponderado.
+- **HUD de similitud** con 7 parámetros (elevación, pendiente, temperatura, rugosidad, albedo, óxidos de hierro y potencial de hielo) y un índice global ponderado.
 - **Guía de parámetros**: explica qué mide cada parámetro, por qué importa, qué datasets se usarán y cómo se calcula, con un simulador interactivo.
 - **Imágenes reales de NASA Trek**: Marte y la Luna usan mosaicos de [Mars Trek](https://trek.nasa.gov/mars/) y [Moon Trek](https://trek.nasa.gov/moon/) (Viking MDIM 2.1, LRO WAC). Los análogos son 9 sitios objetivo reales (Jezero, Gale, Meridiani, Arsia Mons, Utopia, Colinas de Marius, Aristarco, pozo de Tranquilidad y el polo sur con Shackleton) con recorte de imagen y relieve (MOLA / LOLA).
 - **Comparación Tierra | análogo**: cada punto de la Tierra es un análogo conocido (Lago Salda, Pampas de La Joya en Perú, Río Tinto, Lanzarote, McMurdo…) emparejado con su sitio. El panel inferior muestra ambos con imagen y relieve reales al **mismo ancho en km** (Tierra: Blue Marble NG y ASTER GDEM de [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api)), y explica dónde falla la analogía.
@@ -14,7 +14,7 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 - **Sombra permanente del polo sur lunar**: capa de LRO LOLA con las regiones donde nunca da el sol (posible hielo), activable al ver la Luna.
 - **Laboratorio 3D**: terreno procedural de 20 × 20 km donde cada parámetro se visualiza sobre el relieve y se puede modificar en vivo.
 
-> ⚠️ Estado actual: los sitios, sus pares en la Tierra y las imágenes son reales; los valores de similitud y los entornos del laboratorio siguen siendo **de demostración**. Las fórmulas de similitud son las definitivas; los datos reales se integrarán desde el backend.
+> ⚠️ Estado actual: los sitios, sus pares en la Tierra y las imágenes son reales; los valores de similitud, la confianza del potencial de hielo y los entornos del laboratorio siguen siendo **de demostración**. La humedad relativa ya no forma parte del conjunto de parámetros. Las fórmulas de similitud son las definitivas; los datos reales se integrarán desde el backend.
 
 ## Tecnologías
 

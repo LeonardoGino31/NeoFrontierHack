@@ -62,14 +62,14 @@ export const PARAM_INFO = {
       moon: 'GRS (Lunar Prospector) / Clementine',
     },
   },
-  humidity: {
-    what: 'Humedad relativa media del aire cerca de la superficie.',
-    why: 'La sequedad extrema es clave en los análogos de Marte: limita la vida, conserva compuestos orgánicos y cambia cómo se degradan los materiales. La Luna no tiene atmósfera, así que su valor es prácticamente cero.',
-    example: 'Desierto de Atacama: uno de los lugares más secos de la Tierra, donde la NASA prueba instrumentos para buscar vida.',
+  ice: {
+    what: 'Índice ilustrativo del potencial de encontrar hielo aprovechable en una región. No representa una concentración medida ni confirma un depósito. La confianza expresa por separado cuán sólida es la evidencia disponible.',
+    why: 'El agua podría apoyar operaciones humanas y científicas. Para estimar su disponibilidad hay que combinar indicios de hielo, temperatura y sombra; una región en sombra permanente no confirma por sí sola que contenga hielo.',
+    example: 'Permafrost y glaciares terrestres pueden servir como análogos para estudiar hielo y operaciones en frío, aunque no equivalen a depósitos lunares.',
     sources: {
-      earth: 'ERA5 (ECMWF)',
-      mars: 'REMS (Curiosity) / Mars Climate Database',
-      moon: 'No aplica (sin atmósfera)',
+      earth: 'Inventarios de glaciares y permafrost',
+      mars: 'MRO SHARAD / Mars Odyssey',
+      moon: 'LRO Diviner, LEND, LAMP y LOLA',
     },
   },
 };

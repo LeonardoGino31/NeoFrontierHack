@@ -4,7 +4,7 @@
 
 // span: diferencia a partir de la cual la similitud de ese parámetro es 0 %
 // weight: importancia del parámetro en el índice global
-// earth / mars / moon: rango de valores de demo para cada cuerpo
+// earth / mars / moon: rangos ilustrativos, todavía de demo
 export const PARAMS = [
   { key: 'elevation',   label: 'Elevación',         unit: 'm',  decimals: 0, span: 4000, weight: 1,   icon: 'mountain',
     earth: [0, 4500],    mars: [-4000, 6000], moon: [-3000, 5000] },
@@ -18,8 +18,10 @@ export const PARAMS = [
     earth: [0.1, 0.45],  mars: [0.1, 0.35],   moon: [0.07, 0.2] },
   { key: 'iron',        label: 'Óxidos de hierro',  unit: '%',  decimals: 1, span: 20,   weight: 1,   icon: 'rock',
     earth: [0, 15],      mars: [10, 20],      moon: [3, 14] },
-  { key: 'humidity',    label: 'Humedad relativa',  unit: '%',  decimals: 0, span: 100,  weight: 0.8, icon: 'drop',
-    earth: [1, 60],      mars: [0, 5],        moon: [0, 0] },
+  { key: 'ice',         label: 'Potencial de hielo', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'ice',
+    earth: [0, 100],     mars: [0, 100],      moon: [0, 100],
+    // Confianza de la estimación, informativa y separada del valor comparado.
+    confidence: { earth: [20, 85], mars: [20, 75], moon: [20, 75] } },
 ];
 
 const randomIn = ([min, max]) => min + Math.random() * (max - min);
@@ -41,7 +43,10 @@ export function generateDemoParams(analogBody) {
   const results = PARAMS.map((param) => {
     const earth = randomIn(param.earth);
     const analog = randomIn(param[analogBody]);
-    return { param, earth, analog, similarity: paramSimilarity(earth, analog, param.span) };
+    const confidence = param.confidence
+      ? { earth: randomIn(param.confidence.earth), analog: randomIn(param.confidence[analogBody]) }
+      : null;
+    return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
   });
   return { results, overall: overallSimilarity(results) };
 }

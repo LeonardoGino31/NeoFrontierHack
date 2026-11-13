@@ -143,6 +143,7 @@ export function createParamGuide({ onOpenLab } = {}) {
              <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}</div>
              <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
            </div>
+           ${result.confidence ? `<p class="guide-note">Confianza de la estimación (demo): Tierra ${Math.round(result.confidence.earth)}% · ${context.analogName} ${Math.round(result.confidence.analog)}%. No forma parte del índice de similitud.</p>` : ''}
          </div>`
       : '';
 
@@ -166,6 +167,7 @@ export function createParamGuide({ onOpenLab } = {}) {
         <h3>Cómo se compara</h3>
         <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
         <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
+        ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tendría la estimación. Los valores actuales son de demostración.</p>' : ''}
         <div class="simulator">
           <svg class="sim-plot" viewBox="0 0 300 130"></svg>
           <div class="sim-controls">
