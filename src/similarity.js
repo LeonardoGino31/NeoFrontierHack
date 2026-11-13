@@ -22,6 +22,16 @@ export const PARAMS = [
     earth: [0, 100],     mars: [0, 100],      moon: [0, 100],
     // Confianza de la estimación, informativa y separada del valor comparado.
     confidence: { earth: [20, 85], mars: [20, 75], moon: [20, 75] } },
+  { key: 'landingArea', label: 'Área libre de obstáculos', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'target',
+    earth: [0, 100], mars: [0, 100], moon: [0, 100] },
+  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'grid',
+    earth: [0, 100], mars: [0, 100], moon: [0, 100] },
+  { key: 'edlConditions', label: 'Condiciones de descenso', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'thermo', bodies: ['mars'],
+    earth: [0, 100], mars: [0, 100] },
+  { key: 'traverseAccess', label: 'Acceso a objetivos científicos', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'mountain',
+    earth: [0, 100], mars: [0, 100], moon: [0, 100] },
+  { key: 'solarEnergy', label: 'Disponibilidad de energía solar', unit: 'pts', decimals: 0, span: 100, weight: 1, icon: 'sun',
+    earth: [0, 100], mars: [0, 100], moon: [0, 100] },
 ];
 
 const randomIn = ([min, max]) => min + Math.random() * (max - min);
@@ -40,13 +50,15 @@ export function overallSimilarity(results) {
 
 // Genera un conjunto de parámetros de demo para un par Tierra–análogo
 export function generateDemoParams(analogBody) {
-  const results = PARAMS.map((param) => {
+  const results = PARAMS
+    .filter((param) => !param.bodies || param.bodies.includes(analogBody))
+    .map((param) => {
     const earth = randomIn(param.earth);
     const analog = randomIn(param[analogBody]);
     const confidence = param.confidence
       ? { earth: randomIn(param.confidence.earth), analog: randomIn(param.confidence[analogBody]) }
       : null;
     return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
-  });
+    });
   return { results, overall: overallSimilarity(results) };
 }

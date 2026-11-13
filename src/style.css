@@ -111,6 +111,11 @@ canvas {
   display: none;
 }
 
+#sim-panel {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
 .hud-header {
   display: flex;
   justify-content: space-between;
@@ -770,6 +775,13 @@ canvas {
   flex-direction: column;
   gap: 6px;
   width: 190px !important;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.lab-modes button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .lab-modes button {

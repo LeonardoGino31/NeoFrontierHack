@@ -541,7 +541,7 @@ function selectEarthPoint(marker) {
   updatePsrVisibility();
 
   // La guía también muestra los valores de este punto
-  paramGuide.setContext({ analogName: BODIES[analog.body].name, data: marker.userData.similarity });
+  paramGuide.setContext({ analogName: BODIES[analog.body].name, analogBody: analog.body, data: marker.userData.similarity });
 }
 
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */

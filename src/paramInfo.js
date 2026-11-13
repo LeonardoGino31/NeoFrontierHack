@@ -63,13 +63,62 @@ export const PARAM_INFO = {
     },
   },
   ice: {
-    what: 'Índice ilustrativo del potencial de encontrar hielo aprovechable en una región. No representa una concentración medida ni confirma un depósito. La confianza expresa por separado cuán sólida es la evidencia disponible.',
-    why: 'El agua podría apoyar operaciones humanas y científicas. Para estimar su disponibilidad hay que combinar indicios de hielo, temperatura y sombra; una región en sombra permanente no confirma por sí sola que contenga hielo.',
-    example: 'Permafrost y glaciares terrestres pueden servir como análogos para estudiar hielo y operaciones en frío, aunque no equivalen a depósitos lunares.',
+    what: 'Índice ilustrativo del potencial de encontrar hielo en una región. No representa una concentración medida ni confirma un depósito. La confianza expresa por separado cuán sólida es la evidencia disponible.',
+    why: 'El hielo puede ser un objetivo científico y, en misiones futuras, un recurso. Para estimarlo hay que combinar indicios geológicos, térmicos y orbitales; una región en sombra no confirma por sí sola que contenga hielo.',
+    example: 'Permafrost y glaciares terrestres pueden servir como análogos para estudiar hielo y operaciones en frío, aunque no equivalen a depósitos extraterrestres.',
     sources: {
       earth: 'Inventarios de glaciares y permafrost',
       mars: 'MRO SHARAD / Mars Odyssey',
       moon: 'LRO Diviner, LEND, LAMP y LOLA',
+    },
+  },
+  landingArea: {
+    what: 'Índice ilustrativo de la superficie disponible sin rocas grandes, cráteres, dunas u otros obstáculos dentro de una zona de aterrizaje.',
+    why: 'El aterrizador necesita espacio seguro para tocar suelo; los obstáculos también pueden dañar el rover o limitar su primer desplazamiento.',
+    example: 'Una planicie amplia y con pocos obstáculos ofrece más opciones de aterrizaje que un campo de rocas o una zona de cráteres.',
+    sources: {
+      earth: 'DEM e imágenes de alta resolución',
+      mars: 'MOLA, CTX y HiRISE (NASA)',
+      moon: 'LOLA y LROC NAC (NASA)',
+    },
+  },
+  soilStability: {
+    what: 'Índice ilustrativo de firmeza y transitabilidad del suelo, incluyendo polvo, arena suelta y capacidad portante.',
+    why: 'El terreno suelto puede hacer que el rover pierda tracción o quede atascado; la capacidad portante también importa durante el aterrizaje.',
+    example: 'Suelos compactos y firmes facilitan el desplazamiento frente a dunas de arena fina o polvo profundo.',
+    sources: {
+      earth: 'DEM, imágenes y mediciones geotécnicas locales',
+      mars: 'THEMIS, HiRISE y datos de rover (NASA)',
+      moon: 'LOLA, LROC y datos de superficie (NASA)',
+    },
+  },
+  edlConditions: {
+    what: 'Índice ilustrativo de las condiciones atmosféricas para la entrada, descenso y aterrizaje (EDL), incluyendo presión/densidad, vientos y polvo atmosférico.',
+    why: 'La atmósfera marciana frena el vehículo y el viento o el polvo pueden cambiar las condiciones del descenso. El efecto depende de la temporada y del diseño de la misión.',
+    example: 'Una llegada con densidad atmosférica y vientos dentro del margen del sistema EDL reduce la incertidumbre del aterrizaje.',
+    sources: {
+      earth: 'ERA5 (ECMWF)',
+      mars: 'Mars Climate Database / MCS (Mars Reconnaissance Orbiter)',
+    },
+  },
+  traverseAccess: {
+    what: 'Índice ilustrativo de facilidad para llegar desde la zona de aterrizaje hasta los objetivos científicos, considerando rutas, pendientes, obstáculos y distancia.',
+    why: 'El valor científico de una región depende de que el rover pueda recorrerla con seguridad y dentro de su autonomía.',
+    example: 'Un afloramiento interesante a corta distancia y conectado por terreno transitable es más accesible para el rover.',
+    sources: {
+      earth: 'DEM e imágenes de alta resolución',
+      mars: 'MOLA, CTX, HiRISE y mapas de planificación de rover',
+      moon: 'LOLA, LROC y mapas de planificación de rover',
+    },
+  },
+  solarEnergy: {
+    what: 'Índice ilustrativo de energía solar disponible a lo largo del día y de las estaciones, considerando sombras y latitud.',
+    why: 'Es relevante para dimensionar operaciones de un rover que use paneles solares. Su importancia depende de la fuente de energía de la misión.',
+    example: 'Un lugar con iluminación frecuente y menos sombras puede ofrecer más oportunidades de recarga a un rover solar.',
+    sources: {
+      earth: 'NASA POWER / modelos de iluminación',
+      mars: 'Modelos de iluminación y Mars Climate Database',
+      moon: 'LRO/LOLA y modelos de iluminación',
     },
   },
 };

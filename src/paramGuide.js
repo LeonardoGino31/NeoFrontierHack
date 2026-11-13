@@ -6,7 +6,6 @@ import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
 import { icon } from './icons.js';
 
 const BODY_NAMES = { earth: 'Tierra', mars: 'Marte', moon: 'Luna' };
-const TOTAL_WEIGHT = PARAMS.reduce((sum, p) => sum + p.weight, 0);
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
 
 export function createParamGuide({ onOpenLab } = {}) {
@@ -36,15 +35,23 @@ export function createParamGuide({ onOpenLab } = {}) {
 
   const nav = overlay.querySelector('.guide-nav');
   const detail = overlay.querySelector('.guide-detail');
-  const keys = ['overall', ...PARAMS.map((p) => p.key)];
-
-  nav.innerHTML = [
-    `<button data-key="overall">${icon('target')}<span>Índice global</span></button>`,
-    ...PARAMS.map((p) => `<button data-key="${p.key}">${icon(p.icon)}<span>${p.label}</span></button>`),
-  ].join('');
-
   let currentKey = null;
   let context = null; // datos del punto seleccionado (si hay)
+  let activeParams = PARAMS;
+  let keys = [];
+
+  function refreshNavigation() {
+    activeParams = context?.analogBody
+      ? PARAMS.filter((p) => !p.bodies || p.bodies.includes(context.analogBody))
+      : PARAMS;
+    keys = ['overall', ...activeParams.map((p) => p.key)];
+    nav.innerHTML = [
+      `<button data-key="overall">${icon('target')}<span>Índice global</span></button>`,
+      ...activeParams.map((p) => `<button data-key="${p.key}">${icon(p.icon)}<span>${p.label}</span></button>`),
+    ].join('');
+    if (currentKey && !keys.includes(currentKey)) currentKey = 'overall';
+  }
+  refreshNavigation();
 
   // --- Eventos ---
   overlay.querySelector('.hud-close').addEventListener('click', close);
@@ -80,6 +87,7 @@ export function createParamGuide({ onOpenLab } = {}) {
 
   // --- Render ---
   function show(key) {
+    if (!keys.includes(key)) key = 'overall';
     currentKey = key;
     nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
     detail.innerHTML = key === 'overall' ? renderOverall() : renderParam(key);
@@ -88,8 +96,9 @@ export function createParamGuide({ onOpenLab } = {}) {
   }
 
   function renderOverall() {
-    const rows = PARAMS.map((p) => {
-      const share = (p.weight / TOTAL_WEIGHT) * 100;
+    const totalWeight = activeParams.reduce((sum, p) => sum + p.weight, 0);
+    const rows = activeParams.map((p) => {
+      const share = (p.weight / totalWeight) * 100;
       return `
         <div class="weight-row">
           <span class="weight-icon">${icon(p.icon)}</span>
@@ -125,13 +134,14 @@ export function createParamGuide({ onOpenLab } = {}) {
   }
 
   function renderParam(key) {
-    const p = PARAMS.find((x) => x.key === key);
+    const p = activeParams.find((x) => x.key === key);
     const info = PARAM_INFO[key];
-    const share = (p.weight / TOTAL_WEIGHT) * 100;
+    const totalWeight = activeParams.reduce((sum, item) => sum + item.weight, 0);
+    const share = (p.weight / totalWeight) * 100;
     const unit = p.unit || '—';
 
-    const sources = ['earth', 'mars', 'moon']
-      .map((b) => `<div class="source"><span>${BODY_NAMES[b]}</span>${info.sources[b]}</div>`)
+    const sources = Object.entries(info.sources)
+      .map(([b, source]) => `<div class="source"><span>${BODY_NAMES[b]}</span>${source}</div>`)
       .join('');
 
     const result = context?.data.results.find((r) => r.param.key === key);
@@ -187,15 +197,16 @@ export function createParamGuide({ onOpenLab } = {}) {
   // --- Simulador: mueve los valores y recalcula con la misma función del HUD ---
   function bindSimulator(key) {
     const p = PARAMS.find((x) => x.key === key);
-    const lo = Math.min(p.earth[0], p.mars[0], p.moon[0]);
-    const hi = Math.max(p.earth[1], p.mars[1], p.moon[1]);
+    const ranges = [p.earth, p.mars, p.moon].filter(Boolean);
+    const lo = Math.min(...ranges.map((range) => range[0]));
+    const hi = Math.max(...ranges.map((range) => range[1]));
     const step = (hi - lo) / 200 || 0.01;
     const mid = ([a, b]) => (a + b) / 2;
 
     const result = context?.data.results.find((r) => r.param.key === key);
     const start = {
       earth: result ? result.earth : mid(p.earth),
-      analog: result ? result.analog : mid(p.mars),
+      analog: result ? result.analog : mid(p[context?.analogBody] ?? p.mars ?? p.moon),
     };
 
     const inputs = {};
@@ -249,6 +260,7 @@ export function createParamGuide({ onOpenLab } = {}) {
   // --- API ---
   function open(key = 'overall', ctx = context) {
     context = ctx;
+    refreshNavigation();
     overlay.hidden = false;
     launcher.hidden = true;
     show(key);
@@ -262,6 +274,8 @@ export function createParamGuide({ onOpenLab } = {}) {
   // El contexto cambia cuando se selecciona o se limpia un punto
   function setContext(ctx) {
     context = ctx;
+    refreshNavigation();
+    if (!overlay.hidden) show(currentKey ?? 'overall');
   }
 
   return { open, close, setContext };

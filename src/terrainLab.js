@@ -59,15 +59,20 @@ const SLIDERS = [
   { key: 'iron',    label: 'Óxidos de hierro',      unit: '%',    min: 0,     max: 25,   step: 0.5,  dec: 1 },
   { key: 'ice',     label: 'Potencial de hielo',    unit: 'pts',  min: 0,     max: 100,  step: 1,    dec: 0 },
   { key: 'iceConfidence', label: 'Confianza de evidencia', unit: '%', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'landingArea', label: 'Área segura para aterrizar', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'edlConditions', label: 'Condiciones atmosféricas EDL', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'traverseAccess', label: 'Acceso a objetivos', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'solarEnergy', label: 'Energía solar disponible', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
 ];
 
 // Valores ILUSTRATIVOS para comparar entornos (no son mediciones exactas)
 const PRESETS = {
-  atacama: { name: 'Atacama · Tierra',      base: 2500,  relief: 0.9, rough: 0.35, craters: 0,   temp: 12,  lapse: 6.5, albedo: 0.30, iron: 8,  ice: 5,  iceConfidence: 25 },
-  dryval:  { name: 'Valles Secos · Tierra', base: 800,   relief: 1.4, rough: 0.40, craters: 0,   temp: -20, lapse: 6.5, albedo: 0.35, iron: 5,  ice: 30, iceConfidence: 45 },
-  iceland: { name: 'Islandia · Tierra',     base: 400,   relief: 0.6, rough: 0.85, craters: 0,   temp: 3,   lapse: 6.5, albedo: 0.10, iron: 11, ice: 25, iceConfidence: 40 },
-  mars:    { name: 'Llanura · Marte',       base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, temp: -55, lapse: 2.5, albedo: 0.22, iron: 18, ice: 20, iceConfidence: 35 },
-  moon:    { name: 'Mar lunar · Luna',      base: -2000, relief: 0.3, rough: 0.50, craters: 1,   temp: -20, lapse: 0,   albedo: 0.08, iron: 18, ice: 55, iceConfidence: 40 },
+  atacama: { name: 'Atacama · Tierra',      body: 'earth', base: 2500, relief: 0.9, rough: 0.35, craters: 0, temp: 12, lapse: 6.5, albedo: 0.30, iron: 8, ice: 5, iceConfidence: 25, landingArea: 70, soilStability: 50, edlConditions: 60, traverseAccess: 75, solarEnergy: 80 },
+  dryval:  { name: 'Valles Secos · Tierra', body: 'earth', base: 800, relief: 1.4, rough: 0.40, craters: 0, temp: -20, lapse: 6.5, albedo: 0.35, iron: 5, ice: 30, iceConfidence: 45, landingArea: 55, soilStability: 55, edlConditions: 60, traverseAccess: 70, solarEnergy: 65 },
+  iceland: { name: 'Islandia · Tierra',     body: 'earth', base: 400, relief: 0.6, rough: 0.85, craters: 0, temp: 3, lapse: 6.5, albedo: 0.10, iron: 11, ice: 25, iceConfidence: 40, landingArea: 40, soilStability: 60, edlConditions: 55, traverseAccess: 60, solarEnergy: 55 },
+  mars:    { name: 'Llanura · Marte',       body: 'mars', base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, temp: -55, lapse: 2.5, albedo: 0.22, iron: 18, ice: 20, iceConfidence: 35, landingArea: 60, soilStability: 55, edlConditions: 55, traverseAccess: 65, solarEnergy: 50 },
+  moon:    { name: 'Mar lunar · Luna',      body: 'moon', base: -2000, relief: 0.3, rough: 0.50, craters: 1, temp: -20, lapse: 0, albedo: 0.08, iron: 18, ice: 55, iceConfidence: 40, landingArea: 60, soilStability: 55, edlConditions: 0, traverseAccess: 65, solarEnergy: 50 },
 };
 
 // Modos de visualización: qué color pinta el terreno y qué explica
@@ -111,6 +116,11 @@ const MODES = {
     caption: 'Mapa procedural de demostración del potencial relativo de hielo. No indica depósitos observados ni mide su abundancia; la confianza de evidencia se muestra por separado.',
     stops: ['#19223d', '#315e91', '#62b9dc', '#d7f7ff', '#ffffff'],
   },
+  landingArea: { label: 'Área libre de obstáculos', icon: 'target', unit: 'pts', caption: 'Índice de demostración: considera rocas, cráteres, dunas y otros obstáculos en la zona de aterrizaje.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  soilStability: { label: 'Estabilidad del suelo', icon: 'grid', unit: 'pts', caption: 'Índice de demostración de firmeza y transitabilidad; el polvo y la arena suelta pueden complicar el movimiento del rover.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  edlConditions: { label: 'Condiciones de descenso (EDL)', icon: 'thermo', unit: 'pts', caption: 'Índice ilustrativo de presión/densidad, viento y polvo durante la entrada, descenso y aterrizaje. Solo aplica a Marte.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  traverseAccess: { label: 'Acceso a objetivos científicos', icon: 'mountain', unit: 'pts', caption: 'Índice ilustrativo de acceso por rutas transitables, considerando pendiente, obstáculos y distancia.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  solarEnergy: { label: 'Energía solar disponible', icon: 'sun', unit: 'pts', caption: 'Índice de demostración de iluminación útil a lo largo del día y las estaciones; su importancia depende de la fuente de energía del rover.', stops: ['#263b75', '#468bd4', '#62cbb9', '#e9df67', '#f4954f'] },
 };
 
 // Rango de la leyenda de cada modo
@@ -122,6 +132,11 @@ const LEGEND_RANGE = {
   albedo: () => [0, 0.6],
   iron: () => [0, 25],
   ice: () => [0, 100],
+  landingArea: () => [0, 100],
+  soilStability: () => [0, 100],
+  edlConditions: () => [0, 100],
+  traverseAccess: () => [0, 100],
+  solarEnergy: () => [0, 100],
 };
 
 // ---------- Utilidades de color ----------
@@ -161,6 +176,8 @@ export function createTerrainLab() {
     hKm: new Float32Array(n), detail: new Float32Array(n), elev: new Float32Array(n), slope: new Float32Array(n),
     rough: new Float32Array(n), temp: new Float32Array(n), albedo: new Float32Array(n),
     iron: new Float32Array(n), ice: new Float32Array(n), iceConfidence: new Float32Array(n), minElev: 0, maxElev: 1,
+    landingArea: new Float32Array(n), soilStability: new Float32Array(n), edlConditions: new Float32Array(n),
+    traverseAccess: new Float32Array(n), solarEnergy: new Float32Array(n),
   };
 
   // ---------- DOM ----------
@@ -235,6 +252,12 @@ export function createTerrainLab() {
 
   function updateOutput(label) {
     const s = SLIDERS.find((x) => x.key === label.dataset.slider);
+    if (s.key === 'edlConditions' && state.body === 'moon') {
+      label.querySelector('output').textContent = 'No aplica';
+      label.querySelector('input').disabled = true;
+      return;
+    }
+    label.querySelector('input').disabled = false;
     label.querySelector('output').textContent = `${state[s.key].toFixed(s.dec)} ${s.unit}`;
   }
 
@@ -243,6 +266,9 @@ export function createTerrainLab() {
       label.querySelector('input').value = state[label.dataset.slider];
       updateOutput(label);
     });
+    const edlMode = root.querySelector('[data-mode="edlConditions"]');
+    if (edlMode) edlMode.disabled = state.body === 'moon';
+    if (state.body === 'moon' && mode === 'edlConditions') setMode('natural');
   }
 
   window.addEventListener('keydown', (e) => {
@@ -449,6 +475,11 @@ export function createTerrainLab() {
       const iceVariation = fbm(x * 0.34 + 13, z * 0.34 - 9, 3) - 0.5;
       data.ice[i] = THREE.MathUtils.clamp(state.ice + iceVariation * 60, 0, 100);
       data.iceConfidence[i] = state.iceConfidence;
+      data.landingArea[i] = THREE.MathUtils.clamp(state.landingArea + v * 32, 0, 100);
+      data.soilStability[i] = THREE.MathUtils.clamp(state.soilStability + v * 28, 0, 100);
+      data.edlConditions[i] = state.body === 'moon' ? 0 : THREE.MathUtils.clamp(state.edlConditions + v * 24, 0, 100);
+      data.traverseAccess[i] = THREE.MathUtils.clamp(state.traverseAccess + v * 30, 0, 100);
+      data.solarEnergy[i] = THREE.MathUtils.clamp(state.solarEnergy + v * 22, 0, 100);
     }
     data.minElev = minE;
     data.maxElev = maxE;
@@ -484,6 +515,8 @@ export function createTerrainLab() {
         const value = {
           elevation: data.elev, slope: data.slope, roughness: data.rough, temperature: data.temp,
           albedo: data.albedo, iron: data.iron, ice: data.ice,
+          landingArea: data.landingArea, soilStability: data.soilStability, edlConditions: data.edlConditions,
+          traverseAccess: data.traverseAccess, solarEnergy: data.solarEnergy,
         }[mode][i];
         ramp((value - range[0]) / (range[1] - range[0]), c);
         // Curvas de nivel cada 250 m en el modo elevación
@@ -557,11 +590,17 @@ export function createTerrainLab() {
       ${row('iron', 'Óx. de hierro', `${data.iron[best].toFixed(1)} %`)}
       ${row('ice', 'Potencial de hielo (demo)', `${data.ice[best].toFixed(0)} pts`)}
       ${row('ice', 'Confianza (demo)', `${data.iceConfidence[best].toFixed(0)} %`)}
+      ${row('landingArea', 'Área libre de obstáculos (demo)', `${data.landingArea[best].toFixed(0)} pts`)}
+      ${row('soilStability', 'Estabilidad del suelo (demo)', `${data.soilStability[best].toFixed(0)} pts`)}
+      ${row('edlConditions', 'Condiciones EDL (demo)', state.body === 'moon' ? 'No aplica' : `${data.edlConditions[best].toFixed(0)} pts`)}
+      ${row('traverseAccess', 'Acceso a objetivos (demo)', `${data.traverseAccess[best].toFixed(0)} pts`)}
+      ${row('solarEnergy', 'Energía solar disponible (demo)', `${data.solarEnergy[best].toFixed(0)} pts`)}
       <div class="lab-landing ${safe ? 'ok' : 'risk'}">Aterrizaje: ${safe ? 'APTO' : 'RIESGO'}</div>`;
     readout.hidden = false;
   }
 
   function setMode(key) {
+    if (key === 'edlConditions' && state.body === 'moon') key = 'natural';
     mode = MODES[key] ? key : 'natural';
     root.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
     if (terrain && built) paint('sweep', 1200);
