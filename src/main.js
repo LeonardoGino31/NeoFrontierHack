@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import './style.css';
-import { generateDemoParams } from './similarity.js';
 import { createSimilarityPanel } from './similarityPanel.js';
 import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
-import { TREK_SITES } from './trekSites.js';
+import { loadPlanetaryData, similarityDataFromCsv } from './planetaryData.js';
 import { EARTH_SITES } from './earthSites.js';
 import { createComparePanel } from './comparePanel.js';
+
+const { sites: TREK_SITES, comparisonsByEarthSite } = await loadPlanetaryData();
 
 // 1. Crear la escena
 const scene = new THREE.Scene();
@@ -328,6 +329,7 @@ const sitesById = Object.fromEntries(TREK_SITES.map((site) => [site.id, site]));
 EARTH_SITES.forEach((earthPoint, i) => {
   const site = sitesById[earthPoint.analogId];
   const analog = { body: site.body, lat: site.lat, lon: site.lon, name: site.name, site };
+  const comparisonRow = comparisonsByEarthSite[earthPoint.id];
 
   // MeshBasicMaterial no depende de la luz: el punto se ve aunque esté en la cara oscura
   const marker = new THREE.Mesh(
@@ -335,7 +337,7 @@ EARTH_SITES.forEach((earthPoint, i) => {
     new THREE.MeshBasicMaterial({ color: MARKER_COLORS[site.body] })
   );
   marker.position.copy(latLonToVector3(earthPoint.lat, earthPoint.lon, 1.02)); // encima de las nubes
-  marker.userData = { id: i + 1, earthPoint, analog, similarity: generateDemoParams(site.body) };
+  marker.userData = { id: i + 1, earthPoint, analog, similarity: similarityDataFromCsv(comparisonRow, site.body) };
   earthMarkers.add(marker);
 });
 

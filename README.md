@@ -71,6 +71,13 @@ FORCE=1 ./scripts/fetch-trek.sh  # vuelve a descargar todo
 
 Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (solo para la vista polar). Las tiles crudas quedan en `.trek-cache/`, que no se versiona. Usa los servicios WMTS públicos de Trek (`https://trek.nasa.gov/tiles/...`) y GIBS (`https://gibs.earthdata.nasa.gov/wmts/...`).
 
+### Datos de ubicaciones y similitud
+
+- `public/data/planetary_candidates.csv` es la fuente de ubicaciones objetivo de Marte/Luna y de los valores usados para calcular la similitud. Tiene una fila por pareja Tierra–análogo, con el identificador del sitio terrestre para enlazarla con `src/earthSites.js`.
+- `src/planetaryData.js` carga el CSV, crea los sitios extraterrestres para los marcadores y entrega los valores fijos al cálculo de similitud.
+- Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos generados dentro de los rangos anteriores, no mediciones ni resultados científicos. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
+- La lista y las coordenadas terrestres continúan en `src/earthSites.js`. Los rangos de parámetros en `src/similarity.js` se conservan para el simulador de la guía.
+
 Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
 
 ## Estructura
@@ -78,6 +85,7 @@ Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
 ```text
 src/
 ├── main.js             # Escena principal: globo, selección y modo comparación
+├── planetaryData.js    # Carga de ubicaciones y valores desde el CSV
 ├── similarity.js       # Parámetros y cálculo de similitud
 ├── similarityPanel.js  # HUD de similitud
 ├── paramInfo.js        # Textos explicativos de cada parámetro
@@ -91,6 +99,7 @@ src/
 public/textures/        # Texturas de la Tierra y estrellas (+ respaldo de Marte y la Luna)
 public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA Trek
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
+public/data/            # Candidatos extraterrestres y valores fijos para similitud (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
 ```
 
