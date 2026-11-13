@@ -1,4 +1,4 @@
-# Terra2Mars
+# NeoFrontier
 
 Plataforma interactiva para encontrar y comparar **análogos terrestres** de regiones de Marte y la Luna, construida con Three.js.
 
