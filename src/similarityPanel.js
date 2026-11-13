@@ -8,16 +8,24 @@ const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
 
 const fmt = (value, decimals) => value.toFixed(decimals);
 
-export function createSimilarityPanel({ onClose, onHelp }) {
+/**
+ * Crea el HUD de similitud (oculto).
+ * onNav(±1) se llama con las flechas ‹ › para pasar al punto anterior o siguiente.
+ */
+export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   const panel = document.createElement('div');
   panel.id = 'sim-panel';
   panel.className = 'hud';
   panel.hidden = true;
   panel.innerHTML = `
     <div class="hud-header">
-      <span>Análisis de similitud</span>
+      <div class="hud-nav">
+        <button class="hud-prev" title="Punto anterior (←)">‹</button>
+        <span>Análisis de similitud</span>
+        <span class="hud-nav-count"></span>
+        <button class="hud-next" title="Punto siguiente (→)">›</button>
+      </div>
       <div class="hud-actions">
-        <button class="hud-help" title="¿Qué significa cada parámetro?">?</button>
         <button class="hud-close" title="Cerrar (Esc)">✕</button>
       </div>
     </div>
@@ -30,7 +38,8 @@ export function createSimilarityPanel({ onClose, onHelp }) {
 
   const header = panel.querySelector('.hud-header');
   panel.querySelector('.hud-close').addEventListener('click', onClose);
-  panel.querySelector('.hud-help').addEventListener('click', () => onHelp('overall'));
+  panel.querySelector('.hud-prev').addEventListener('click', () => onNav(-1));
+  panel.querySelector('.hud-next').addEventListener('click', () => onNav(1));
 
   // Clic en una fila (o en el índice global) abre la guía en ese parámetro
   panel.addEventListener('click', (e) => {
@@ -63,13 +72,15 @@ export function createSimilarityPanel({ onClose, onHelp }) {
   // Por defecto: centrado entre los dos planetas
   function placeDefault() {
     panel.style.left = `${(window.innerWidth - panel.offsetWidth) / 2}px`;
-    panel.style.top = '100px';
+    panel.style.top = '64px';
   }
 
-  function show({ id, earthPoint, analogPoint, analogName, formatLatLon, data }) {
+  // nav = { index, total }: posición del punto entre los del cuerpo análogo seleccionado
+  function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav }) {
+    panel.querySelector('.hud-nav-count').textContent = `${nav.index + 1}/${nav.total}`;
     panel.querySelector('.hud-info').innerHTML = `
-      <div><span class="hud-key">Punto ${id} · Tierra</span>${formatLatLon(earthPoint)}</div>
-      <div><span class="hud-key">Análogo · ${analogName}</span>${formatLatLon(analogPoint)}</div>`;
+      <div><span class="hud-key">Tierra · ${earthPoint.name}</span>${formatLatLon(earthPoint)}</div>
+      <div><span class="hud-key">${analogName} · ${analogPoint.name}</span>${formatLatLon(analogPoint)}</div>`;
 
     const overallPct = data.overall * 100;
     panel.querySelector('.hud-score').dataset.key = 'overall';

@@ -29,3 +29,12 @@ public/textures/raw/
 
 # Respaldos locales
 *.backup.js
+
+# Tiles crudas de NASA Trek (se regeneran con scripts/fetch-trek.sh)
+.trek-cache/
+
+# Notas locales del asistente
+CLAUDE.md
+
+# pnpm solo se usa en local; el lockfile oficial del repo es package-lock.json
+pnpm-lock.yaml
