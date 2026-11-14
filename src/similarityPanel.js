@@ -2,7 +2,6 @@
 // Se puede arrastrar desde la cabecera.
 
 import { icon } from './icons.js';
-import { BODY_PROFILES } from './similarity.js';
 
 // Nivel de color según la similitud
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
@@ -77,8 +76,8 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   }
 
   // nav = { index, total }: posición del punto entre los del cuerpo análogo seleccionado
-  function show({ earthPoint, analogPoint, analogName, analogBody, formatLatLon, data, nav }) {
-    const purpose = BODY_PROFILES[analogBody].purpose;
+  function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav }) {
+    const { purpose } = data.profile;
     panel.querySelector('.hud-nav-count').textContent = `${nav.index + 1}/${nav.total}`;
     panel.querySelector('.hud-info').innerHTML = `
       <div><span class="hud-key">Tierra · ${earthPoint.name}</span>${formatLatLon(earthPoint)}</div>

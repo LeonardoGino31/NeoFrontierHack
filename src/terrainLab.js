@@ -71,7 +71,7 @@ const PRESETS = {
 };
 
 // Modos de visualización: qué color pinta el terreno y qué explica.
-// Las claves coinciden con el campo `lab` de los parámetros (similarity.js).
+// Las claves coinciden con el campo `lab` de los parámetros (public/data/parameter_model.json).
 const GOOD_BAD = ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'];
 const MODES = {
   natural: {

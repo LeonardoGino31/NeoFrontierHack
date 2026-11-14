@@ -98,7 +98,7 @@ Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (so
 - No agregues filas de notas ni encabezados intermedios al CSV: el cargador interpreta cada fila posterior al encabezado como un registro.
 - `src/planetaryData.js` carga y valida el CSV, crea las parejas para los marcadores y entrega los valores al cálculo de similitud.
 - Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos, no mediciones ni resultados científicos. La densidad de Marte se estimó con la elevación MOLA aproximada de cada sitio y la visibilidad de la Tierra de los sitios polares es ilustrativa. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
-- Los rangos y pesos de parámetros en `src/similarity.js` se conservan para el cálculo y el simulador de la guía. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
+- `public/data/parameter_model.json` define el modelo: ruta del CSV (`dataset`), grupos, subparámetros (con sus columnas del CSV, `span` y rangos del simulador), y por cuerpo su objetivo, los pesos de los grupos y el requisito del sitio. `src/parameterModel.js` lo carga y valida al iniciar; `src/similarity.js` solo contiene las fórmulas. Para cambiar un peso, un umbral o añadir un subparámetro se edita el JSON (y el CSV si hacen falta columnas nuevas), no el código. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
 - Las imágenes recortadas del panel NASA siguen siendo recursos aparte; agregarlas no es necesario para que aparezcan los marcadores ni para calcular similitudes.
 
 Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
@@ -109,7 +109,8 @@ Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
 src/
 ├── main.js             # Escena principal: globo, selección y modo comparación
 ├── planetaryData.js    # Carga de ubicaciones y valores desde el CSV
-├── similarity.js       # Parámetros y cálculo de similitud
+├── parameterModel.js   # Carga y validación del modelo de parámetros (JSON)
+├── similarity.js       # Fórmulas de similitud, grupos y requisitos
 ├── similarityPanel.js  # HUD de similitud
 ├── paramInfo.js        # Textos explicativos de cada parámetro
 ├── paramGuide.js       # Guía de parámetros y simulador
@@ -122,7 +123,7 @@ src/
 public/textures/        # Texturas de la Tierra y estrellas (+ respaldo de Marte y la Luna)
 public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA Trek
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
-public/data/            # Parejas Tierra–análogo y valores fijos para similitud (CSV)
+public/data/            # Modelo de parámetros (JSON) y parejas Tierra–análogo con sus valores (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
 ```
 
