@@ -25,7 +25,7 @@ La guía de parámetros explica qué significa cada indicador y enumera fuentes 
 | Cuerpo | Objetivo | Peso de los grupos | Requisito del sitio |
 |---|---|---|---|
 | Luna | Estación base permanente | Iluminación ×1.5 · Topografía ×1 · Hielo ×1.5 | Comunicación con la Tierra ≥ 50 % del tiempo |
-| Marte | Aterrizaje y recorridos de rover | Iluminación ×0.5 · Topografía ×2 · Hielo ×1 | Densidad del aire ≥ 0.018 kg/m³ (≈ aterrizar por debajo de +1 km) |
+| Marte | Aterrizaje y recorridos de rover | Iluminación ×0.5 · Topografía ×2 · Hielo ×1 | Densidad del aire ≥ 0.010 kg/m³ (mínimo del año a las 15 h; los sitios donde ya se aterrizó lo cumplen) |
 
 ### Parámetros comparados (Tierra – análogo)
 
@@ -102,6 +102,10 @@ Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (so
 - Las imágenes recortadas del panel NASA siguen siendo recursos aparte; agregarlas no es necesario para que aparezcan los marcadores ni para calcular similitudes.
 
 Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
+
+## Datos reales (pipeline)
+
+`pipeline/` descarga solo la ventana de cada sitio desde las fuentes abiertas (LOLA, MOLA, COP-DEM, Mars Climate Database, MODIS) y escribe `public/data/site_values.json` con cada valor y su fuente. Ver [`pipeline/README.md`](pipeline/README.md).
 
 ## Estructura
 

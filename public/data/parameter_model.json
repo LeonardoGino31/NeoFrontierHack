@@ -69,8 +69,8 @@
       "requirement": {
         "key": "descent", "column": "descent_density_analog",
         "label": "Densidad del aire para el descenso", "short": "Descenso",
-        "unit": "kg/m³", "decimals": 4, "min": 0.018, "icon": "parachute",
-        "note": "Con menos aire, el paracaídas frena menos; equivale a aterrizar por debajo de ~+1 km."
+        "unit": "kg/m³", "decimals": 4, "min": 0.010, "icon": "parachute",
+        "note": "Con menos aire, el paracaídas frena menos; mínimo del año a las 15 h según la Mars Climate Database; Jezero, Gale y Meridiani lo cumplen."
       }
     }
   }

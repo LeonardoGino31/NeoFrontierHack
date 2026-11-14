@@ -1,0 +1,1067 @@
+{
+  "generatedAt": "2026-11-14T19:24:56+00:00",
+  "windows": {
+    "mars": {
+      "sizeKm": 20,
+      "resolutionM": 463
+    },
+    "moon": {
+      "sizeKm": 5,
+      "resolutionM": 120
+    }
+  },
+  "thresholds": {
+    "slopeLimitDeg": [
+      {
+        "maxResolutionM": 120,
+        "limitDeg": 15
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitDeg": 5
+      }
+    ],
+    "moonPolarBelowLatDeg": -75,
+    "earthSnowDaysForIce": 180
+  },
+  "sites": {
+    "earth:salda": {
+      "body": "earth",
+      "name": "Lago Salda",
+      "lat": 37.55,
+      "lon": 29.68,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 664,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E029_00_DEM/Copernicus_DSM_COG_10_N37_00_E029_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 55.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E029_00_DEM/Copernicus_DSM_COG_10_N37_00_E029_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "mars:jezero": {
+      "body": "mars",
+      "name": "Cráter Jezero",
+      "lat": 18.38,
+      "lon": 77.58,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 244,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 99.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "descentDensity": {
+          "value": 0.01352,
+          "unit": "kg/m³",
+          "status": "estimated",
+          "source": {
+            "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+            "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
+          },
+          "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        }
+      }
+    },
+    "earth:hanksville": {
+      "body": "earth",
+      "name": "Hanksville",
+      "lat": 38.41,
+      "lon": -110.79,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 186,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N38_00_W111_00_DEM/Copernicus_DSM_COG_10_N38_00_W111_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 96.2,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N38_00_W111_00_DEM/Copernicus_DSM_COG_10_N38_00_W111_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "mars:gale": {
+      "body": "mars",
+      "name": "Cráter Gale",
+      "lat": -5.4,
+      "lon": 137.8,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 3664,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 17.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "descentDensity": {
+          "value": 0.0114,
+          "unit": "kg/m³",
+          "status": "estimated",
+          "source": {
+            "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+            "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
+          },
+          "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        }
+      }
+    },
+    "earth:lajoya": {
+      "body": "earth",
+      "name": "Pampas de La Joya",
+      "lat": -16.73,
+      "lon": -71.87,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 366,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S17_00_W072_00_DEM/Copernicus_DSM_COG_10_S17_00_W072_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S17_00_W072_00_DEM/Copernicus_DSM_COG_10_S17_00_W072_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "earth:riotinto": {
+      "body": "earth",
+      "name": "Río Tinto",
+      "lat": 37.72,
+      "lon": -6.55,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 322,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_W007_00_DEM/Copernicus_DSM_COG_10_N37_00_W007_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 74.3,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_W007_00_DEM/Copernicus_DSM_COG_10_N37_00_W007_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "mars:meridiani": {
+      "body": "mars",
+      "name": "Meridiani Planum",
+      "lat": -1.95,
+      "lon": -5.53,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 45,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "descentDensity": {
+          "value": 0.01156,
+          "unit": "kg/m³",
+          "status": "estimated",
+          "source": {
+            "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+            "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
+          },
+          "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        }
+      }
+    },
+    "earth:lavabeds": {
+      "body": "earth",
+      "name": "Lava Beds",
+      "lat": 41.71,
+      "lon": -121.51,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 842,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N41_00_W122_00_DEM/Copernicus_DSM_COG_10_N41_00_W122_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 83.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N41_00_W122_00_DEM/Copernicus_DSM_COG_10_N41_00_W122_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "mars:arsia": {
+      "body": "mars",
+      "name": "Arsia Mons",
+      "lat": -8.26,
+      "lon": -120.1,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 468,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 99.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "descentDensity": {
+          "value": 0.00271,
+          "unit": "kg/m³",
+          "status": "estimated",
+          "source": {
+            "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+            "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
+          },
+          "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        }
+      }
+    },
+    "earth:devon": {
+      "body": "earth",
+      "name": "Isla Devon · cráter Haughton",
+      "lat": 75.38,
+      "lon": -89.68,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 211,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W091_00_DEM/Copernicus_DSM_COG_10_N75_00_W091_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W090_00_DEM/Copernicus_DSM_COG_10_N75_00_W090_00_DEM.tif"
+            ]
+          }
+        },
+        "safeSlope": {
+          "value": 90.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W091_00_DEM/Copernicus_DSM_COG_10_N75_00_W091_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W090_00_DEM/Copernicus_DSM_COG_10_N75_00_W090_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        }
+      }
+    },
+    "mars:utopia": {
+      "body": "mars",
+      "name": "Utopia Planitia",
+      "lat": 46.7,
+      "lon": 117.5,
+      "window": {
+        "sizeKm": 20,
+        "resolutionM": 463
+      },
+      "metrics": {
+        "relief": {
+          "value": 79,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "descentDensity": {
+          "value": 0.01886,
+          "unit": "kg/m³",
+          "status": "estimated",
+          "source": {
+            "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+            "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
+          },
+          "note": "mínimo en Ls 90° a las 15 h, 10 m sobre el suelo"
+        }
+      }
+    },
+    "earth:lanzarote": {
+      "body": "earth",
+      "name": "Lanzarote · tubo de La Corona",
+      "lat": 29.16,
+      "lon": -13.44,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 191,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N29_00_W014_00_DEM/Copernicus_DSM_COG_10_N29_00_W014_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 99.9,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N29_00_W014_00_DEM/Copernicus_DSM_COG_10_N29_00_W014_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:marius": {
+      "body": "moon",
+      "name": "Colinas de Marius",
+      "lat": 14.09,
+      "lon": -56.8,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 164,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 98.9,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          }
+        },
+        "earthView": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cara visible = 100 %, sin libración"
+        }
+      }
+    },
+    "earth:spcrater": {
+      "body": "earth",
+      "name": "SP Crater",
+      "lat": 35.58,
+      "lon": -111.63,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 275,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 88.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:aristarchus": {
+      "body": "moon",
+      "name": "Meseta de Aristarco",
+      "lat": 23.7,
+      "lon": -47.4,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 225,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 95.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          }
+        },
+        "earthView": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cara visible = 100 %, sin libración"
+        }
+      }
+    },
+    "earth:cratersmoon": {
+      "body": "earth",
+      "name": "Craters of the Moon",
+      "lat": 43.42,
+      "lon": -113.52,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 151,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N43_00_W114_00_DEM/Copernicus_DSM_COG_10_N43_00_W114_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 97.2,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N43_00_W114_00_DEM/Copernicus_DSM_COG_10_N43_00_W114_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:tranquillitatis": {
+      "body": "moon",
+      "name": "Pozo de Tranquilidad",
+      "lat": 8.34,
+      "lon": 33.22,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 55,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 99.7,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          }
+        },
+        "earthView": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cara visible = 100 %, sin libración"
+        }
+      }
+    },
+    "earth:mcmurdo": {
+      "body": "earth",
+      "name": "Valles Secos de McMurdo",
+      "lat": -77.5,
+      "lon": 162.0,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 1352,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E161_00_DEM/Copernicus_DSM_COG_10_S78_00_E161_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E162_00_DEM/Copernicus_DSM_COG_10_S78_00_E162_00_DEM.tif"
+            ]
+          }
+        },
+        "safeSlope": {
+          "value": 48.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E161_00_DEM/Copernicus_DSM_COG_10_S78_00_E161_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E162_00_DEM/Copernicus_DSM_COG_10_S78_00_E162_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:shackleton": {
+      "body": "moon",
+      "name": "Polo sur · Shackleton",
+      "lat": -89.67,
+      "lon": 129.78,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 379,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          }
+        },
+        "safeSlope": {
+          "value": 94.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 0.0,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF"
+          },
+          "note": "mejor píxel de la ventana"
+        },
+        "earthView": {
+          "value": 0.0,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
+          },
+          "note": "en el píxel con más luz solar"
+        },
+        "ice": {
+          "value": 100,
+          "unit": "pts",
+          "status": "derived",
+          "note": "permanentShadow=sí",
+          "source": {
+            "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF"
+          }
+        },
+        "iceConfidence": {
+          "value": 33,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
+        }
+      }
+    },
+    "earth:domec": {
+      "body": "earth",
+      "name": "Domo C",
+      "lat": -75.1,
+      "lon": 123.39,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 3,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S76_00_E123_00_DEM/Copernicus_DSM_COG_10_S76_00_E123_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S76_00_E123_00_DEM/Copernicus_DSM_COG_10_S76_00_E123_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:nobile_rim_1": {
+      "body": "moon",
+      "name": "Nobile Rim 1",
+      "lat": -85.4381,
+      "lon": 37.36667,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 984,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          }
+        },
+        "safeSlope": {
+          "value": 48.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 53.7,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF"
+          },
+          "note": "mejor píxel de la ventana"
+        },
+        "earthView": {
+          "value": 62.1,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
+          },
+          "note": "en el píxel con más luz solar"
+        },
+        "ice": {
+          "value": 100,
+          "unit": "pts",
+          "status": "derived",
+          "note": "permanentShadow=sí",
+          "source": {
+            "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF"
+          }
+        },
+        "iceConfidence": {
+          "value": 33,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
+        }
+      }
+    },
+    "earth:chajnantor": {
+      "body": "earth",
+      "name": "Meseta de Chajnantor",
+      "lat": -23.0167,
+      "lon": -67.75,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 377,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S24_00_W068_00_DEM/Copernicus_DSM_COG_10_S24_00_W068_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S23_00_W068_00_DEM/Copernicus_DSM_COG_10_S23_00_W068_00_DEM.tif"
+            ]
+          }
+        },
+        "safeSlope": {
+          "value": 92.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S24_00_W068_00_DEM/Copernicus_DSM_COG_10_S24_00_W068_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S23_00_W068_00_DEM/Copernicus_DSM_COG_10_S23_00_W068_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:malapert_massif": {
+      "body": "moon",
+      "name": "Macizo de Malapert",
+      "lat": -85.9948,
+      "lon": -0.23578,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 705,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          }
+        },
+        "safeSlope": {
+          "value": 70.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 66.2,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF"
+          },
+          "note": "mejor píxel de la ventana"
+        },
+        "earthView": {
+          "value": 63.0,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
+          },
+          "note": "en el píxel con más luz solar"
+        },
+        "ice": {
+          "value": 100,
+          "unit": "pts",
+          "status": "derived",
+          "note": "permanentShadow=sí",
+          "source": {
+            "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF"
+          }
+        },
+        "iceConfidence": {
+          "value": 33,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
+        }
+      }
+    },
+    "earth:maunakea": {
+      "body": "earth",
+      "name": "Mauna Kea",
+      "lat": 19.8206,
+      "lon": -155.4681,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 476,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N19_00_W156_00_DEM/Copernicus_DSM_COG_10_N19_00_W156_00_DEM.tif"
+          }
+        },
+        "safeSlope": {
+          "value": 87.8,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N19_00_W156_00_DEM/Copernicus_DSM_COG_10_N19_00_W156_00_DEM.tif"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        }
+      }
+    },
+    "moon:mons_mouton": {
+      "body": "moon",
+      "name": "Mons Mouton",
+      "lat": -84.79059,
+      "lon": 29.19567,
+      "window": {
+        "sizeKm": 5,
+        "resolutionM": 120
+      },
+      "metrics": {
+        "relief": {
+          "value": 269,
+          "unit": "m",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          }
+        },
+        "safeSlope": {
+          "value": 98.8,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "sunlight": {
+          "value": 53.7,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF"
+          },
+          "note": "mejor píxel de la ventana"
+        },
+        "earthView": {
+          "value": 80.2,
+          "unit": "%",
+          "status": "measured",
+          "source": {
+            "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
+          },
+          "note": "en el píxel con más luz solar"
+        },
+        "ice": {
+          "value": 100,
+          "unit": "pts",
+          "status": "derived",
+          "note": "permanentShadow=sí",
+          "source": {
+            "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF"
+          }
+        },
+        "iceConfidence": {
+          "value": 33,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
+        }
+      }
+    }
+  }
+}

@@ -81,8 +81,8 @@ export const PARAM_INFO = {
     },
   },
   descent: {
-    what: 'Densidad de la atmósfera marciana en la superficie del sitio. Disminuye con la altitud: a más altura, menos aire para frenar. El valor demo se estima con la elevación MOLA y una escala de altura de ~11 km.',
-    why: 'El paracaídas y el escudo térmico necesitan aire para frenar. Por eso los aterrizajes en Marte se hacen por debajo de ~+1 km; las cumbres volcánicas como Arsia Mons quedan descartadas aunque su análogo sea bueno.',
+    what: 'Densidad de la atmósfera marciana en la superficie del sitio. Disminuye con la altitud: a más altura, menos aire para frenar. Se toma el peor caso del año: el mínimo de cuatro estaciones a las 15 h, según la Mars Climate Database.',
+    why: 'El paracaídas y el escudo térmico necesitan aire para frenar. Jezero, Gale y Meridiani, donde ya se aterrizó, superan los 0.011 kg/m³; las cumbres volcánicas como Arsia Mons quedan descartadas aunque su análogo sea bueno.',
     example: 'No tiene análogo terrestre: el aire en la Tierra es unas 60 veces más denso. Por eso es un requisito del sitio de Marte y no se compara con la Tierra.',
     sources: {
       mars: 'Mars Climate Database / MCS (Mars Reconnaissance Orbiter) y elevación MOLA',
