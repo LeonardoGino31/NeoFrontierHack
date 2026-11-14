@@ -32,13 +32,6 @@ export function createParamGuide({ model, onOpenLab }) {
     </div>`;
   document.body.appendChild(overlay);
 
-  // Botón fijo para abrir la guía en cualquier momento
-  const launcher = document.createElement('button');
-  launcher.id = 'guide-launcher';
-  launcher.innerHTML = `${icon('book')}<span>Parámetros</span>`;
-  launcher.addEventListener('click', () => open('overall'));
-  document.body.appendChild(launcher);
-
   const nav = overlay.querySelector('.guide-nav');
   const detail = overlay.querySelector('.guide-detail');
   let currentKey = null;
@@ -330,14 +323,12 @@ export function createParamGuide({ model, onOpenLab }) {
     context = ctx;
     refreshNavigation();
     overlay.hidden = false;
-    launcher.hidden = true;
     show(key);
   }
 
-  /** Cierra la guía y vuelve a mostrar el botón que la abre. */
+  /** Cierra la guía; se vuelve a abrir con clic en una fila del HUD. */
   function close() {
     overlay.hidden = true;
-    launcher.hidden = false;
   }
 
   /** Actualiza el punto seleccionado (o null) y refresca la página abierta. */

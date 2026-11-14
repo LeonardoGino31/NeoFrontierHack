@@ -1,5 +1,5 @@
-// Panel inferior del modo comparación: Tierra a la izquierda y análogo a la derecha, alineados
-// con las dos mitades de la pantalla. Imágenes reales de NASA GIBS (Tierra) y Solar System
+// Panel inferior del modo comparación: dos tarjetas pegadas a los bordes (Tierra a la izquierda,
+// análogo a la derecha) y una barra central con las pestañas, para no tapar el centro de la escena. Imágenes reales de NASA GIBS (Tierra) y Solar System
 // Treks (Marte y la Luna), con el mismo ancho en km para comparar a escala.
 
 import { TREK_LAYERS, siteImages, trekUrl } from './trekSites.js';
@@ -15,21 +15,21 @@ const TREK_NAMES = { mars: 'Mars Trek', moon: 'Moon Trek' };
 export function createComparePanel({ formatLatLon }) {
   const panel = document.createElement('section');
   panel.id = 'compare-panel';
-  panel.className = 'hud compare-panel';
+  panel.className = 'compare-panel';
   panel.hidden = true;
   panel.innerHTML = `
-    <div class="hud-header">
-      <span>Vista real · NASA</span>
-      <div class="cmp-tabs" role="tablist">
-        <button data-view="visible">Imagen</button>
-        <button data-view="relief">Relieve</button>
+    <div class="hud cmp-bar">
+      <div class="hud-header">
+        <span>Vista real · NASA</span>
+        <div class="cmp-tabs" role="tablist">
+          <button data-view="visible">Imagen</button>
+          <button data-view="relief">Relieve</button>
+        </div>
+        <button class="hud-close cmp-collapse" title="Contraer">–</button>
       </div>
-      <button class="hud-close cmp-collapse" title="Contraer">–</button>
     </div>
-    <div class="cmp-body">
-      <article class="cmp-side" data-side="earth"></article>
-      <article class="cmp-side" data-side="analog"></article>
-    </div>
+    <article class="hud cmp-side" data-side="earth"></article>
+    <article class="hud cmp-side" data-side="analog"></article>
   `;
   document.body.appendChild(panel);
 

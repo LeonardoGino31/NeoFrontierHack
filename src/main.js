@@ -7,6 +7,7 @@ import { createTerrainLab } from './terrainLab.js';
 import { loadPlanetaryData, similarityDataFromCsv } from './planetaryData.js';
 import { loadParameterModel } from './parameterModel.js';
 import { createComparePanel } from './comparePanel.js';
+import { createStartScreen } from './startScreen.js';
 
 const parameterModel = await loadParameterModel();
 const { pairs } = await loadPlanetaryData(parameterModel);
@@ -385,15 +386,6 @@ const psrOverlay = new THREE.Mesh(
 psrOverlay.visible = false;
 meshes.moon.add(psrOverlay);
 
-const psrToggle = document.createElement('button');
-psrToggle.id = 'psr-toggle';
-psrToggle.hidden = true;
-psrToggle.setAttribute('aria-pressed', 'true');
-psrToggle.title = 'LRO LOLA · regiones en sombra permanente del polo sur (Moon Trek)';
-psrToggle.innerHTML = '<span class="swatch"></span>Sombra permanente (hielo)';
-document.body.appendChild(psrToggle);
-
-let psrEnabled = true;
 let psrLoaded = false;
 
 loadOptionalTexture('/textures/trek/moon_psr_south_mask.png', (tex) => {
@@ -406,17 +398,10 @@ loadOptionalTexture('/textures/trek/moon_psr_south_mask.png', (tex) => {
   updatePsrVisibility();
 });
 
-psrToggle.addEventListener('click', () => {
-  psrEnabled = !psrEnabled;
-  psrToggle.setAttribute('aria-pressed', String(psrEnabled));
-  updatePsrVisibility();
-});
-
-/** Muestra la capa PSR (y su interruptor) solo cuando la Luna está en primer plano. */
+/** Muestra la capa PSR solo cuando la Luna está en primer plano. */
 function updatePsrVisibility() {
   const moonInFocus = compareBody ? compareBody === 'moon' : currentBody === 'moon';
-  psrToggle.hidden = !(psrLoaded && moonInFocus);
-  psrOverlay.visible = psrLoaded && psrEnabled && moonInFocus;
+  psrOverlay.visible = psrLoaded && moonInFocus;
 }
 
 let selectedMarker = null;
@@ -705,6 +690,14 @@ for (const mesh of Object.values(meshes)) {
   mesh.position.copy(mesh.userData.targetPosition);
   mesh.scale.setScalar(mesh.userData.targetScale);
 }
+
+// Al iniciar se elige cualquier punto de la Tierra: todos tienen un análogo en la Luna o en Marte
+createStartScreen({
+  onStart: () => {
+    const all = earthMarkers.children;
+    if (all.length) selectEarthPoint(all[Math.floor(Math.random() * all.length)]);
+  }
+});
 
 // 9. Animación
 const clock = new THREE.Clock();
