@@ -11,6 +11,8 @@ const ICONS = {
   target:   '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>',
   eye:      '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   cube:     '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
+  signal:   '<path d="M12 20v-6"/><path d="M8.5 10.5a5 5 0 0 1 7 0M5.6 7.6a9 9 0 0 1 12.8 0"/><circle cx="12" cy="13" r="1"/>',
+  parachute: '<path d="M3 11a9 9 0 0 1 18 0z"/><path d="M3 11l9 9 9-9M9 11l3 9 3-9"/>',
   book:     '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/>',
 };
 
