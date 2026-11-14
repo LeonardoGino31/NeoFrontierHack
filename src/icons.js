@@ -7,6 +7,7 @@ const ICONS = {
   sun:      '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
   rock:     '<path d="M4 15l3-7 6-3 6 5 1 7-8 3z"/><path d="M7 8l5 5 7-3M12 13l0 7"/>',
   drop:     '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  ice:      '<path d="M12 2v20M4 7l16 10M20 7 4 17M8 3l4 4 4-4M8 21l4-4 4 4M3 10l5-1 1-5M21 10l-5-1-1-5M3 14l5 1 1 5M21 14l-5 1-1 5"/>',
   target:   '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>',
   eye:      '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   cube:     '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',

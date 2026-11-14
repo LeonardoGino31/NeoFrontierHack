@@ -111,6 +111,11 @@ canvas {
   display: none;
 }
 
+#sim-panel {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
 .hud-header {
   display: flex;
   justify-content: space-between;
@@ -227,6 +232,14 @@ canvas {
   font-size: 14px;
   font-weight: 600;
   color: rgba(230, 247, 255, 0.85);
+}
+
+.hud-confidence {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.85;
 }
 
 .hud-big {
@@ -762,6 +775,13 @@ canvas {
   flex-direction: column;
   gap: 6px;
   width: 190px !important;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.lab-modes button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .lab-modes button {

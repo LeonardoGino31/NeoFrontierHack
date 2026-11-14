@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import './style.css';
-import { generateDemoParams } from './similarity.js';
 import { createSimilarityPanel } from './similarityPanel.js';
 import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
-import { TREK_SITES } from './trekSites.js';
-import { EARTH_SITES } from './earthSites.js';
+import { loadPlanetaryData, similarityDataFromCsv } from './planetaryData.js';
 import { createComparePanel } from './comparePanel.js';
+
+const { pairs } = await loadPlanetaryData();
 
 // 1. Crear la escena
 const scene = new THREE.Scene();
@@ -323,23 +323,24 @@ const earthMarkers = new THREE.Group();
 earthMarkers.visible = false;
 meshes.earth.add(earthMarkers);
 
-const sitesById = Object.fromEntries(TREK_SITES.map((site) => [site.id, site]));
-
-EARTH_SITES.forEach((earthPoint, i) => {
-  const site = sitesById[earthPoint.analogId];
-  const analog = { body: site.body, lat: site.lat, lon: site.lon, name: site.name, site };
-
+pairs.forEach(({ id: pairId, earthPoint, analog, comparison }, i) => {
   // MeshBasicMaterial no depende de la luz: el punto se ve aunque esté en la cara oscura
   const marker = new THREE.Mesh(
     markerGeometry,
-    new THREE.MeshBasicMaterial({ color: MARKER_COLORS[site.body] })
+    new THREE.MeshBasicMaterial({ color: MARKER_COLORS[analog.body] })
   );
   marker.position.copy(latLonToVector3(earthPoint.lat, earthPoint.lon, 1.02)); // encima de las nubes
-  marker.userData = { id: i + 1, earthPoint, analog, similarity: generateDemoParams(site.body) };
+  marker.userData = {
+    id: i + 1,
+    pairId,
+    earthPoint,
+    analog,
+    similarity: similarityDataFromCsv(comparison, analog.body),
+  };
   earthMarkers.add(marker);
 });
 
-/** Marcadores de la Tierra cuyo análogo está en `body`, en el orden de EARTH_SITES. */
+/** Marcadores de la Tierra cuyo análogo está en `body`, en el orden del CSV. */
 const markersFor = (body) => earthMarkers.children.filter((m) => m.userData.analog.body === body);
 
 // Un marcador de análogo por cuerpo objetivo (se reutiliza, solo se mueve)
@@ -541,7 +542,7 @@ function selectEarthPoint(marker) {
   updatePsrVisibility();
 
   // La guía también muestra los valores de este punto
-  paramGuide.setContext({ analogName: BODIES[analog.body].name, data: marker.userData.similarity });
+  paramGuide.setContext({ analogName: BODIES[analog.body].name, analogBody: analog.body, data: marker.userData.similarity });
 }
 
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */

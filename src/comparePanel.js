@@ -97,7 +97,7 @@ export function createComparePanel({ formatLatLon }) {
     }
   }
 
-  /** Muestra el par Tierra–análogo (objetos de earthSites.js y trekSites.js). */
+  /** Muestra el par Tierra–análogo cargado desde el CSV. */
   function show(earth, analog) {
     pair = { earth, analog };
     render();

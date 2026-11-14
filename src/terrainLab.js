@@ -57,23 +57,29 @@ const SLIDERS = [
   { key: 'lapse',   label: 'Gradiente térmico',     unit: '°C/km', min: 0,    max: 10,   step: 0.1,  dec: 1 },
   { key: 'albedo',  label: 'Albedo',                unit: '',     min: 0.05,  max: 0.6,  step: 0.01, dec: 2 },
   { key: 'iron',    label: 'Óxidos de hierro',      unit: '%',    min: 0,     max: 25,   step: 0.5,  dec: 1 },
-  { key: 'rh',      label: 'Humedad relativa',      unit: '%',    min: 0,     max: 100,  step: 1,    dec: 0 },
+  { key: 'ice',     label: 'Potencial de hielo',    unit: 'pts',  min: 0,     max: 100,  step: 1,    dec: 0 },
+  { key: 'iceConfidence', label: 'Confianza de evidencia', unit: '%', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'landingArea', label: 'Área segura para aterrizar', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'edlConditions', label: 'Condiciones atmosféricas EDL', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'traverseAccess', label: 'Acceso a objetivos', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'solarEnergy', label: 'Energía solar disponible', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
 ];
 
 // Valores ILUSTRATIVOS para comparar entornos (no son mediciones exactas)
 const PRESETS = {
-  atacama: { name: 'Atacama · Tierra',      base: 2500,  relief: 0.9, rough: 0.35, craters: 0,   temp: 12,  lapse: 6.5, albedo: 0.30, iron: 8,  rh: 15 },
-  dryval:  { name: 'Valles Secos · Tierra', base: 800,   relief: 1.4, rough: 0.40, craters: 0,   temp: -20, lapse: 6.5, albedo: 0.35, iron: 5,  rh: 40 },
-  iceland: { name: 'Islandia · Tierra',     base: 400,   relief: 0.6, rough: 0.85, craters: 0,   temp: 3,   lapse: 6.5, albedo: 0.10, iron: 11, rh: 80 },
-  mars:    { name: 'Llanura · Marte',       base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, temp: -55, lapse: 2.5, albedo: 0.22, iron: 18, rh: 2 },
-  moon:    { name: 'Mar lunar · Luna',      base: -2000, relief: 0.3, rough: 0.50, craters: 1,   temp: -20, lapse: 0,   albedo: 0.08, iron: 18, rh: 0 },
+  atacama: { name: 'Atacama · Tierra',      body: 'earth', base: 2500, relief: 0.9, rough: 0.35, craters: 0, temp: 12, lapse: 6.5, albedo: 0.30, iron: 8, ice: 5, iceConfidence: 25, landingArea: 70, soilStability: 50, edlConditions: 60, traverseAccess: 75, solarEnergy: 80 },
+  dryval:  { name: 'Valles Secos · Tierra', body: 'earth', base: 800, relief: 1.4, rough: 0.40, craters: 0, temp: -20, lapse: 6.5, albedo: 0.35, iron: 5, ice: 30, iceConfidence: 45, landingArea: 55, soilStability: 55, edlConditions: 60, traverseAccess: 70, solarEnergy: 65 },
+  iceland: { name: 'Islandia · Tierra',     body: 'earth', base: 400, relief: 0.6, rough: 0.85, craters: 0, temp: 3, lapse: 6.5, albedo: 0.10, iron: 11, ice: 25, iceConfidence: 40, landingArea: 40, soilStability: 60, edlConditions: 55, traverseAccess: 60, solarEnergy: 55 },
+  mars:    { name: 'Llanura · Marte',       body: 'mars', base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, temp: -55, lapse: 2.5, albedo: 0.22, iron: 18, ice: 20, iceConfidence: 35, landingArea: 60, soilStability: 55, edlConditions: 55, traverseAccess: 65, solarEnergy: 50 },
+  moon:    { name: 'Mar lunar · Luna',      body: 'moon', base: -2000, relief: 0.3, rough: 0.50, craters: 1, temp: -20, lapse: 0, albedo: 0.08, iron: 18, ice: 55, iceConfidence: 40, landingArea: 60, soilStability: 55, edlConditions: 0, traverseAccess: 65, solarEnergy: 50 },
 };
 
 // Modos de visualización: qué color pinta el terreno y qué explica
 const MODES = {
   natural: {
     label: 'Vista natural', icon: 'eye',
-    caption: 'El terreno con su aspecto aproximado: el albedo aclara u oscurece la roca, los óxidos de hierro la enrojecen, el frío forma escarcha en las cumbres y la humedad añade bruma y agua en lo más bajo.',
+    caption: 'Vista ilustrativa: albedo y óxidos modifican el color; el potencial de hielo puede resaltar zonas frías. No es un mapa de depósitos reales.',
   },
   elevation: {
     label: 'Elevación', icon: 'mountain', unit: 'm',
@@ -105,11 +111,16 @@ const MODES = {
     caption: 'Contenido de óxidos de hierro del suelo. El tono rojizo de Marte viene de este hierro oxidado.',
     stops: ['#6b6b6b', '#a98c6c', '#c8692c', '#9e2a12', '#5c120a'],
   },
-  humidity: {
-    label: 'Humedad', icon: 'drop', unit: '%',
-    caption: 'Humedad relativa del aire. Se acumula en los valles; con mucha humedad aparece bruma y agua en las zonas bajas. En Marte y la Luna es casi cero.',
-    stops: ['#e8d3a2', '#b9c98a', '#5fb3a1', '#2a7fb8', '#1b3f8f'],
+  ice: {
+    label: 'Potencial de hielo', icon: 'ice', unit: 'pts',
+    caption: 'Mapa procedural de demostración del potencial relativo de hielo. No indica depósitos observados ni mide su abundancia; la confianza de evidencia se muestra por separado.',
+    stops: ['#19223d', '#315e91', '#62b9dc', '#d7f7ff', '#ffffff'],
   },
+  landingArea: { label: 'Área libre de obstáculos', icon: 'target', unit: 'pts', caption: 'Índice de demostración: considera rocas, cráteres, dunas y otros obstáculos en la zona de aterrizaje.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  soilStability: { label: 'Estabilidad del suelo', icon: 'grid', unit: 'pts', caption: 'Índice de demostración de firmeza y transitabilidad; el polvo y la arena suelta pueden complicar el movimiento del rover.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  edlConditions: { label: 'Condiciones de descenso (EDL)', icon: 'thermo', unit: 'pts', caption: 'Índice ilustrativo de presión/densidad, viento y polvo durante la entrada, descenso y aterrizaje. Solo aplica a Marte.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  traverseAccess: { label: 'Acceso a objetivos científicos', icon: 'mountain', unit: 'pts', caption: 'Índice ilustrativo de acceso por rutas transitables, considerando pendiente, obstáculos y distancia.', stops: ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'] },
+  solarEnergy: { label: 'Energía solar disponible', icon: 'sun', unit: 'pts', caption: 'Índice de demostración de iluminación útil a lo largo del día y las estaciones; su importancia depende de la fuente de energía del rover.', stops: ['#263b75', '#468bd4', '#62cbb9', '#e9df67', '#f4954f'] },
 };
 
 // Rango de la leyenda de cada modo
@@ -120,7 +131,12 @@ const LEGEND_RANGE = {
   temperature: () => [-100, 50],
   albedo: () => [0, 0.6],
   iron: () => [0, 25],
-  humidity: () => [0, 100],
+  ice: () => [0, 100],
+  landingArea: () => [0, 100],
+  soilStability: () => [0, 100],
+  edlConditions: () => [0, 100],
+  traverseAccess: () => [0, 100],
+  solarEnergy: () => [0, 100],
 };
 
 // ---------- Utilidades de color ----------
@@ -138,7 +154,7 @@ const RAMPS = Object.fromEntries(
 
 // ---------- Módulo ----------
 export function createTerrainLab() {
-  let renderer, scene, camera, controls, terrain, water, marker, scanBar, raf = null;
+  let renderer, scene, camera, controls, terrain, marker, scanBar, raf = null;
   const CAMERA_HOME = new THREE.Vector3(14, 12, 18);
   let cameraGoal = null;
 
@@ -149,7 +165,6 @@ export function createTerrainLab() {
     from: new Float32Array((SEGMENTS + 1) ** 2 * 3), to: new Float32Array((SEGMENTS + 1) ** 2 * 3),
     start: 0, dur: 0, type: 'fade', active: false,
   };
-  const atmos = { sky: new THREE.Color(), density: 0, water: 0 };
   let built = false;
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
   let mode = 'natural';
@@ -160,7 +175,9 @@ export function createTerrainLab() {
   const data = {
     hKm: new Float32Array(n), detail: new Float32Array(n), elev: new Float32Array(n), slope: new Float32Array(n),
     rough: new Float32Array(n), temp: new Float32Array(n), albedo: new Float32Array(n),
-    iron: new Float32Array(n), rh: new Float32Array(n), minElev: 0, maxElev: 1,
+    iron: new Float32Array(n), ice: new Float32Array(n), iceConfidence: new Float32Array(n), minElev: 0, maxElev: 1,
+    landingArea: new Float32Array(n), soilStability: new Float32Array(n), edlConditions: new Float32Array(n),
+    traverseAccess: new Float32Array(n), solarEnergy: new Float32Array(n),
   };
 
   // ---------- DOM ----------
@@ -235,6 +252,12 @@ export function createTerrainLab() {
 
   function updateOutput(label) {
     const s = SLIDERS.find((x) => x.key === label.dataset.slider);
+    if (s.key === 'edlConditions' && state.body === 'moon') {
+      label.querySelector('output').textContent = 'No aplica';
+      label.querySelector('input').disabled = true;
+      return;
+    }
+    label.querySelector('input').disabled = false;
     label.querySelector('output').textContent = `${state[s.key].toFixed(s.dec)} ${s.unit}`;
   }
 
@@ -243,6 +266,9 @@ export function createTerrainLab() {
       label.querySelector('input').value = state[label.dataset.slider];
       updateOutput(label);
     });
+    const edlMode = root.querySelector('[data-mode="edlConditions"]');
+    if (edlMode) edlMode.disabled = state.body === 'moon';
+    if (state.body === 'moon' && mode === 'edlConditions') setMode('natural');
   }
 
   window.addEventListener('keydown', (e) => {
@@ -263,6 +289,7 @@ export function createTerrainLab() {
     root.prepend(renderer.domElement);
 
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b1424);
     camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
     camera.position.copy(CAMERA_HOME);
 
@@ -299,13 +326,6 @@ export function createTerrainLab() {
       new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: false })
     );
     scene.add(terrain);
-
-    // Agua en zonas bajas (solo con humedad alta)
-    water = new THREE.Mesh(
-      new THREE.PlaneGeometry(SIZE_KM, SIZE_KM).rotateX(-Math.PI / 2),
-      new THREE.MeshStandardMaterial({ color: 0x2a6f9e, transparent: true, opacity: 0.75, roughness: 0.2 })
-    );
-    scene.add(water);
 
     // Anillo que marca el punto bajo el mouse (verde = se puede aterrizar)
     marker = new THREE.Mesh(
@@ -438,7 +458,7 @@ export function createTerrainLab() {
     if (t === 1) terrain.geometry.computeBoundingSphere();
   }
 
-  // Atributos que no cambian la forma: elevación absoluta, temperatura, albedo, hierro, humedad
+  // Atributos ilustrativos que no cambian la forma del terreno.
   function computeAttributes() {
     const pos = terrain.geometry.attributes.position;
     let minE = Infinity, maxE = -Infinity;
@@ -452,27 +472,18 @@ export function createTerrainLab() {
       const v = fbm(x * 0.6 - 20, z * 0.6 + 7, 3) - 0.5; // variación local
       data.albedo[i] = THREE.MathUtils.clamp(state.albedo + v * 0.08, 0.02, 0.9);
       data.iron[i] = THREE.MathUtils.clamp(state.iron + v * 6, 0, 30);
-      data.rh[i] = THREE.MathUtils.clamp(state.rh - h * 18, 0, 100);
+      const iceVariation = fbm(x * 0.34 + 13, z * 0.34 - 9, 3) - 0.5;
+      data.ice[i] = THREE.MathUtils.clamp(state.ice + iceVariation * 60, 0, 100);
+      data.iceConfidence[i] = state.iceConfidence;
+      data.landingArea[i] = THREE.MathUtils.clamp(state.landingArea + v * 32, 0, 100);
+      data.soilStability[i] = THREE.MathUtils.clamp(state.soilStability + v * 28, 0, 100);
+      data.edlConditions[i] = state.body === 'moon' ? 0 : THREE.MathUtils.clamp(state.edlConditions + v * 24, 0, 100);
+      data.traverseAccess[i] = THREE.MathUtils.clamp(state.traverseAccess + v * 30, 0, 100);
+      data.solarEnergy[i] = THREE.MathUtils.clamp(state.solarEnergy + v * 22, 0, 100);
     }
     data.minElev = minE;
     data.maxElev = maxE;
 
-    // Bruma según humedad
-    // Cielo y bruma según humedad (el loop los acerca suavemente a estos valores)
-    atmos.sky.set(0x0b1424).lerp(new THREE.Color(0x8fa6b8), state.rh / 140);
-    atmos.density = 0.002 + (state.rh / 100) * 0.025;
-    if (!scene.fog) {
-      scene.background = atmos.sky.clone();
-      scene.fog = new THREE.FogExp2(atmos.sky.clone(), atmos.density);
-    }
-
-    // Agua: aparece con humedad > 60 % y sube con ella
-    const hs = Array.from(data.hKm);
-    const minH = Math.min(...hs), maxH = Math.max(...hs);
-    const hasWater = state.rh > 60 && state.temp > -5;
-    atmos.water = hasWater ? minH + (maxH - minH) * ((state.rh - 60) / 40) * 0.22 : minH - 0.5;
-    atmos.hasWater = hasWater;
-    if (hasWater) water.visible = true;
   }
 
   // ---------- Coloreado ----------
@@ -493,9 +504,9 @@ export function createTerrainLab() {
       if (mode === 'natural') {
         c.copy(dark).lerp(light, (data.albedo[i] - 0.05) / 0.55);
         c.lerp(rust, (data.iron[i] / 25) * 0.75);
-        // Escarcha: frío + algo de humedad, más en las zonas altas
-        if (data.temp[i] < 0 && state.rh > 10) {
-          const f = Math.min(1, (-data.temp[i] / 15) * (state.rh / 60));
+        // Resalte visual didáctico del potencial de hielo (no representa detección).
+        if (data.temp[i] < 0 && data.ice[i] > 0) {
+          const f = Math.min(1, (-data.temp[i] / 40) * (data.ice[i] / 100));
           c.lerp(frost, f * 0.85);
         }
         // Las paredes muy empinadas se ven más oscuras (roca expuesta)
@@ -503,7 +514,9 @@ export function createTerrainLab() {
       } else {
         const value = {
           elevation: data.elev, slope: data.slope, roughness: data.rough, temperature: data.temp,
-          albedo: data.albedo, iron: data.iron, humidity: data.rh,
+          albedo: data.albedo, iron: data.iron, ice: data.ice,
+          landingArea: data.landingArea, soilStability: data.soilStability, edlConditions: data.edlConditions,
+          traverseAccess: data.traverseAccess, solarEnergy: data.solarEnergy,
         }[mode][i];
         ramp((value - range[0]) / (range[1] - range[0]), c);
         // Curvas de nivel cada 250 m en el modo elevación
@@ -575,12 +588,19 @@ export function createTerrainLab() {
       ${row('temperature', 'Temperatura', `${data.temp[best].toFixed(1)} °C`)}
       ${row('albedo', 'Albedo', data.albedo[best].toFixed(2))}
       ${row('iron', 'Óx. de hierro', `${data.iron[best].toFixed(1)} %`)}
-      ${row('humidity', 'Humedad', `${data.rh[best].toFixed(0)} %`)}
+      ${row('ice', 'Potencial de hielo (demo)', `${data.ice[best].toFixed(0)} pts`)}
+      ${row('ice', 'Confianza (demo)', `${data.iceConfidence[best].toFixed(0)} %`)}
+      ${row('landingArea', 'Área libre de obstáculos (demo)', `${data.landingArea[best].toFixed(0)} pts`)}
+      ${row('soilStability', 'Estabilidad del suelo (demo)', `${data.soilStability[best].toFixed(0)} pts`)}
+      ${row('edlConditions', 'Condiciones EDL (demo)', state.body === 'moon' ? 'No aplica' : `${data.edlConditions[best].toFixed(0)} pts`)}
+      ${row('traverseAccess', 'Acceso a objetivos (demo)', `${data.traverseAccess[best].toFixed(0)} pts`)}
+      ${row('solarEnergy', 'Energía solar disponible (demo)', `${data.solarEnergy[best].toFixed(0)} pts`)}
       <div class="lab-landing ${safe ? 'ok' : 'risk'}">Aterrizaje: ${safe ? 'APTO' : 'RIESGO'}</div>`;
     readout.hidden = false;
   }
 
   function setMode(key) {
+    if (key === 'edlConditions' && state.body === 'moon') key = 'natural';
     mode = MODES[key] ? key : 'natural';
     root.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
     if (terrain && built) paint('sweep', 1200);
@@ -643,17 +663,10 @@ export function createTerrainLab() {
       }
     }
 
-    // 3) Cielo, bruma y nivel del agua se acercan suavemente a su objetivo
-    scene.background.lerp(atmos.sky, 0.06);
-    scene.fog.color.copy(scene.background);
-    scene.fog.density += (atmos.density - scene.fog.density) * 0.06;
-    water.position.y += (atmos.water - water.position.y) * 0.06;
-    if (!atmos.hasWater && Math.abs(water.position.y - atmos.water) < 0.05) water.visible = false;
-
-    // 4) Pulso del anillo de aterrizaje
+    // 3) Pulso del anillo de aterrizaje
     if (marker.visible) marker.scale.setScalar(1 + 0.15 * Math.sin(now / 180));
 
-    // 5) Vuelo inicial de la cámara
+    // 4) Vuelo inicial de la cámara
     if (cameraGoal) {
       camera.position.lerp(cameraGoal, 0.045);
       if (camera.position.distanceTo(cameraGoal) < 0.05) cameraGoal = null;
