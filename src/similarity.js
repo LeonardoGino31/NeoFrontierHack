@@ -46,7 +46,7 @@ export const REQUIREMENTS = {
     note: 'Tierra sobre el horizonte; por debajo del mínimo hace falta un satélite relé.',
   },
   mars: {
-    key: 'descent', column: 'descent_density_analog', label: 'Densidad del aire para el descenso', short: 'Densidad del aire',
+    key: 'descent', column: 'descent_density_analog', label: 'Densidad del aire para el descenso', short: 'Descenso',
     unit: 'kg/m³', decimals: 4, min: 0.018, icon: 'parachute',
     note: 'Con menos aire, el paracaídas frena menos; equivale a aterrizar por debajo de ~+1 km.',
   },

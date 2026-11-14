@@ -94,43 +94,31 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
         <span class="hud-big">${fmt(overallPct, 1)} %</span>
       </div>`;
 
-    const subRow = ({ param, earth, analog, confidence, similarity }) => `
-        <div class="hud-row hud-sub" data-key="${param.key}" title="Ver explicación">
-          <div class="hud-bar hud-${level(similarity)}">
-            <div class="hud-fill" data-width="${similarity * 100}"></div>
-            <span class="hud-label">${param.label}</span>
-            <span class="hud-values">${fmt(earth, param.decimals)} / ${fmt(analog, param.decimals)} ${param.unit}${confidence ? `<small class="hud-confidence">Confianza demo: ${Math.round(confidence.earth)}% / ${Math.round(confidence.analog)}%</small>` : ''}</span>
-          </div>
-          <div class="hud-pct hud-${level(similarity)}">${Math.round(similarity * 100)}%</div>
-        </div>`;
-
-    // Un subparámetro solo: el grupo es la propia fila (no se repite debajo)
-    const groupRows = data.groups.map(({ group, weight, items, similarity }) => `
-        <div class="hud-row hud-group" data-key="${items.length === 1 ? items[0].param.key : 'overall'}" title="Ver explicación">
+    // Solo los grupos en pantalla; los subparámetros se detallan en la guía (clic en la fila)
+    const groupRows = data.groups.map(({ group, items, similarity }) => `
+        <div class="hud-row hud-group" data-key="${items[0].param.key}" title="Ver explicación">
           <div class="hud-icon">${icon(group.icon)}</div>
           <div class="hud-bar hud-${level(similarity)}">
             <div class="hud-fill" data-width="${similarity * 100}"></div>
             <span class="hud-label">${group.label}</span>
-            <span class="hud-values">peso ×${weight}${items.length === 1 && items[0].confidence ? `<small class="hud-confidence">Confianza demo: ${Math.round(items[0].confidence.earth)}% / ${Math.round(items[0].confidence.analog)}%</small>` : ''}</span>
           </div>
           <div class="hud-pct hud-${level(similarity)}">${Math.round(similarity * 100)}%</div>
-        </div>
-        ${items.length > 1 ? items.map(subRow).join('') : ''}`);
+        </div>`);
 
     // Requisito de misión: solo del sitio de Marte o la Luna, no entra al índice
     const { req, value, pass } = data.requirement;
     const reqRow = `
-        <div class="hud-row hud-req ${pass ? 'hud-req-ok' : 'hud-req-fail'}" data-key="${req.key}" title="Ver explicación">
+        <div class="hud-row hud-req ${pass ? 'hud-req-ok' : 'hud-req-fail'}" data-key="${req.key}" title="Mínimo: ${fmt(req.min, req.decimals)} ${req.unit} · ver explicación">
           <div class="hud-icon">${icon(req.icon)}</div>
           <div class="hud-bar">
             <span class="hud-label">${req.short}</span>
-            <span class="hud-values">${fmt(value, req.decimals)} ${req.unit} · mín. ${fmt(req.min, req.decimals)}</span>
+            <span class="hud-values">${fmt(value, req.decimals)} ${req.unit}</span>
           </div>
           <div class="hud-pct">${pass ? 'APTO' : 'NO APTO'}</div>
         </div>`;
 
     panel.querySelector('.hud-rows').innerHTML =
-      groupRows.join('') + '<div class="hud-section">Requisito del sitio (no se compara con la Tierra)</div>' + reqRow;
+      groupRows.join('') + '<hr class="hud-divider">' + reqRow;
 
     panel.hidden = false;
     if (!userMoved) placeDefault();

@@ -262,26 +262,6 @@ canvas {
   color: rgb(var(--level));
 }
 
-/* Subparámetros de un grupo: filas más bajas y sangradas */
-.hud-sub {
-  margin-left: 50px;
-  margin-top: 3px;
-}
-
-.hud-sub .hud-bar {
-  min-height: 24px;
-}
-
-.hud-sub .hud-label,
-.hud-sub .hud-values {
-  font-size: 12px;
-}
-
-.hud-sub .hud-pct {
-  flex-basis: 48px;
-  font-size: 12px;
-}
-
 .hud-purpose {
   display: block;
   font-size: 11px;
@@ -290,12 +270,10 @@ canvas {
   color: rgba(var(--hud-cyan), 0.9);
 }
 
-.hud-section {
-  margin: 12px 10px 0;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(230, 247, 255, 0.55);
+.hud-divider {
+  margin: 10px 10px 4px;
+  border: 0;
+  border-top: 1px solid rgba(var(--hud-cyan), 0.35);
 }
 
 /* Requisito de misión: verde si el sitio lo cumple, rojo si no */
