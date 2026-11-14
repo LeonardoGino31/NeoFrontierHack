@@ -1,8 +1,8 @@
 // Guía de parámetros: pantalla dedicada que explica cada parámetro de similitud,
 // de dónde salen los datos y cómo se calcula, con un simulador interactivo.
 
-import { PARAMS, paramSimilarity } from './similarity.js';
-import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
+import { GROUPS, PARAMS, REQUIREMENTS, BODY_PROFILES, paramSimilarity } from './similarity.js';
+import { PARAM_INFO, OVERALL_INFO, REQUIREMENT_KEYS } from './paramInfo.js';
 import { icon } from './icons.js';
 
 const BODY_NAMES = { earth: 'Tierra', mars: 'Marte', moon: 'Luna' };
@@ -37,17 +37,25 @@ export function createParamGuide({ onOpenLab } = {}) {
   const detail = overlay.querySelector('.guide-detail');
   let currentKey = null;
   let context = null; // datos del punto seleccionado (si hay)
-  let activeParams = PARAMS;
+  let activeRequirements = Object.values(REQUIREMENTS);
   let keys = [];
 
+  /** Navegación: índice global, subparámetros agrupados y requisitos del cuerpo seleccionado. */
   function refreshNavigation() {
-    activeParams = context?.analogBody
-      ? PARAMS.filter((p) => !p.bodies || p.bodies.includes(context.analogBody))
-      : PARAMS;
-    keys = ['overall', ...activeParams.map((p) => p.key)];
+    activeRequirements = context?.analogBody
+      ? [REQUIREMENTS[context.analogBody]]
+      : Object.values(REQUIREMENTS);
+    keys = ['overall', ...PARAMS.map((p) => p.key), ...activeRequirements.map((r) => r.key)];
+    const button = (key, iconName, label) =>
+      `<button data-key="${key}">${icon(iconName)}<span>${label}</span></button>`;
     nav.innerHTML = [
-      `<button data-key="overall">${icon('target')}<span>Índice global</span></button>`,
-      ...activeParams.map((p) => `<button data-key="${p.key}">${icon(p.icon)}<span>${p.label}</span></button>`),
+      button('overall', 'target', 'Índice global'),
+      ...GROUPS.map((g) => [
+        `<div class="guide-nav-group">${g.label}</div>`,
+        ...PARAMS.filter((p) => p.group === g.key).map((p) => button(p.key, p.icon, p.label)),
+      ].join('')),
+      '<div class="guide-nav-group">Requisitos del sitio</div>',
+      ...activeRequirements.map((r) => button(r.key, r.icon, r.label)),
     ].join('');
     if (currentKey && !keys.includes(currentKey)) currentKey = 'overall';
   }
@@ -90,22 +98,33 @@ export function createParamGuide({ onOpenLab } = {}) {
     if (!keys.includes(key)) key = 'overall';
     currentKey = key;
     nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
-    detail.innerHTML = key === 'overall' ? renderOverall() : renderParam(key);
+    const isRequirement = REQUIREMENT_KEYS.includes(key);
+    detail.innerHTML = key === 'overall' ? renderOverall()
+      : isRequirement ? renderRequirement(key) : renderParam(key);
     detail.scrollTop = 0;
-    if (key !== 'overall') bindSimulator(key);
+    if (key !== 'overall' && !isRequirement) bindSimulator(key);
   }
 
   function renderOverall() {
-    const totalWeight = activeParams.reduce((sum, p) => sum + p.weight, 0);
-    const rows = activeParams.map((p) => {
-      const share = (p.weight / totalWeight) * 100;
+    // Pesos de los grupos para el cuerpo seleccionado, o para ambos si no hay selección
+    const bodies = context?.analogBody ? [context.analogBody] : Object.keys(BODY_PROFILES);
+    const rows = bodies.map((body) => {
+      const profile = BODY_PROFILES[body];
+      const total = Object.values(profile.weights).reduce((a, b) => a + b, 0);
       return `
-        <div class="weight-row">
-          <span class="weight-icon">${icon(p.icon)}</span>
-          <span class="weight-label">${p.label}</span>
-          <div class="weight-bar"><div style="width:${share}%"></div></div>
-          <span class="weight-value">×${p.weight} · ${share.toFixed(1)}%</span>
-        </div>`;
+        <h4 class="weight-body">${BODY_NAMES[body]} · ${profile.purpose}</h4>
+        <p class="guide-note">${profile.why}</p>
+        ${GROUPS.map((g) => {
+          const w = profile.weights[g.key];
+          const share = (w / total) * 100;
+          return `
+            <div class="weight-row">
+              <span class="weight-icon">${icon(g.icon)}</span>
+              <span class="weight-label">${g.label}</span>
+              <div class="weight-bar"><div style="width:${share}%"></div></div>
+              <span class="weight-value">×${w} · ${share.toFixed(1)}%</span>
+            </div>`;
+        }).join('')}`;
     }).join('');
 
     const current = context
@@ -125,19 +144,18 @@ export function createParamGuide({ onOpenLab } = {}) {
       <div class="guide-block"><h3>Qué es</h3><p>${OVERALL_INFO.what}</p></div>
       <div class="guide-block">
         <h3>Fórmula</h3>
-        <div class="formula">índice = Σ (peso<sub>i</sub> × similitud<sub>i</sub>) / Σ peso<sub>i</sub></div>
+        <div class="formula">grupo = promedio de sus subparámetros<br>índice = Σ (peso<sub>g</sub> × grupo<sub>g</sub>) / Σ peso<sub>g</sub></div>
       </div>
-      <div class="guide-block"><h3>Peso de cada parámetro</h3>${rows}<p class="guide-note">${OVERALL_INFO.note}</p></div>
+      <div class="guide-block"><h3>Peso de cada grupo según el objetivo</h3>${rows}<p class="guide-note">${OVERALL_INFO.note}</p></div>
       <div class="guide-block"><h3>Por qué sirve</h3><p>${OVERALL_INFO.why}</p></div>
       ${current}
       <p class="guide-disclaimer">Los valores en pantalla son de demo. Las fuentes de cada parámetro son los datasets que se usarán para los datos reales.</p>`;
   }
 
   function renderParam(key) {
-    const p = activeParams.find((x) => x.key === key);
+    const p = PARAMS.find((x) => x.key === key);
     const info = PARAM_INFO[key];
-    const totalWeight = activeParams.reduce((sum, item) => sum + item.weight, 0);
-    const share = (p.weight / totalWeight) * 100;
+    const group = GROUPS.find((g) => g.key === p.group);
     const unit = p.unit || '—';
 
     const sources = Object.entries(info.sources)
@@ -163,9 +181,9 @@ export function createParamGuide({ onOpenLab } = {}) {
         <div>
           <h2>${p.label}</h2>
           <span class="guide-tag">unidad: ${unit}</span>
-          <span class="guide-tag">peso ×${p.weight} (${share.toFixed(1)}% del índice)</span>
+          <span class="guide-tag">grupo: ${group.label}</span>
         </div>
-        <button class="guide-lab-btn" data-lab="${key}">${icon('cube')} Ver en 3D</button>
+        ${p.lab ? `<button class="guide-lab-btn" data-lab="${p.lab}">${icon('cube')} Ver en 3D</button>` : ''}
       </header>
 
       <div class="guide-block"><h3>Qué mide</h3><p>${info.what}</p></div>
@@ -190,6 +208,46 @@ export function createParamGuide({ onOpenLab } = {}) {
               <span class="hud-label">Similitud</span><span class="hud-big sim-pct"></span></div>
           </div>
         </div>
+      </div>
+      ${current}`;
+  }
+
+  /** Requisito de misión: se evalúa solo en el sitio de Marte o la Luna, sin simulador. */
+  function renderRequirement(key) {
+    const [body, req] = Object.entries(REQUIREMENTS).find(([, r]) => r.key === key);
+    const info = PARAM_INFO[key];
+    const sources = Object.entries(info.sources)
+      .map(([b, source]) => `<div class="source"><span>${BODY_NAMES[b]}</span>${source}</div>`)
+      .join('');
+    const result = context?.analogBody === body ? context.data.requirement : null;
+    const current = result
+      ? `<div class="guide-block guide-current">
+           <h3>En el punto seleccionado</h3>
+           <div class="current-grid">
+             <div><span>${context.analogName}</span>${result.value.toFixed(req.decimals)} ${req.unit}</div>
+             <div><span>Mínimo</span>${req.min.toFixed(req.decimals)} ${req.unit}</div>
+             <div><span>Resultado</span><strong class="lvl-${result.pass ? 'high' : 'low'}">${result.pass ? 'APTO' : 'NO APTO'}</strong></div>
+           </div>
+         </div>`
+      : '';
+
+    return `
+      <header class="guide-title">
+        <span class="guide-title-icon">${icon(req.icon)}</span>
+        <div>
+          <h2>${req.label}</h2>
+          <span class="guide-tag">requisito · ${BODY_NAMES[body]}</span>
+          <span class="guide-tag">mínimo: ${req.min} ${req.unit}</span>
+        </div>
+      </header>
+      <div class="guide-block"><h3>Qué mide</h3><p>${info.what}</p></div>
+      <div class="guide-block"><h3>Por qué importa</h3><p>${info.why}</p></div>
+      <div class="guide-block"><h3>¿Y en la Tierra?</h3><p>${info.example}</p></div>
+      <div class="guide-block"><h3>Fuentes de datos</h3><div class="sources">${sources}</div></div>
+      <div class="guide-block">
+        <h3>Cómo se evalúa</h3>
+        <div class="formula">apto = valor del sitio ≥ ${req.min} ${req.unit}</div>
+        <p class="guide-note">${req.note} No entra al índice de similitud: un sitio que no cumple se marca como no apto aunque su análogo terrestre se parezca mucho.</p>
       </div>
       ${current}`;
   }

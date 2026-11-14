@@ -2,6 +2,7 @@
 // Se puede arrastrar desde la cabecera.
 
 import { icon } from './icons.js';
+import { BODY_PROFILES } from './similarity.js';
 
 // Nivel de color según la similitud
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
@@ -76,7 +77,8 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   }
 
   // nav = { index, total }: posición del punto entre los del cuerpo análogo seleccionado
-  function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav }) {
+  function show({ earthPoint, analogPoint, analogName, analogBody, formatLatLon, data, nav }) {
+    const purpose = BODY_PROFILES[analogBody].purpose;
     panel.querySelector('.hud-nav-count').textContent = `${nav.index + 1}/${nav.total}`;
     panel.querySelector('.hud-info').innerHTML = `
       <div><span class="hud-key">Tierra · ${earthPoint.name}</span>${formatLatLon(earthPoint)}</div>
@@ -88,22 +90,47 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
       <div class="hud-icon">${icon('target')}</div>
       <div class="hud-bar hud-${level(data.overall)}">
         <div class="hud-fill" data-width="${overallPct}"></div>
-        <span class="hud-label">Índice global</span>
+        <span class="hud-label">Índice global<small class="hud-purpose">${purpose}</small></span>
         <span class="hud-big">${fmt(overallPct, 1)} %</span>
       </div>`;
 
-    panel.querySelector('.hud-rows').innerHTML = data.results
-      .map(({ param, earth, analog, confidence, similarity }) => `
-        <div class="hud-row" data-key="${param.key}" title="Ver explicación">
-          <div class="hud-icon">${icon(param.icon)}</div>
+    const subRow = ({ param, earth, analog, confidence, similarity }) => `
+        <div class="hud-row hud-sub" data-key="${param.key}" title="Ver explicación">
           <div class="hud-bar hud-${level(similarity)}">
             <div class="hud-fill" data-width="${similarity * 100}"></div>
             <span class="hud-label">${param.label}</span>
             <span class="hud-values">${fmt(earth, param.decimals)} / ${fmt(analog, param.decimals)} ${param.unit}${confidence ? `<small class="hud-confidence">Confianza demo: ${Math.round(confidence.earth)}% / ${Math.round(confidence.analog)}%</small>` : ''}</span>
           </div>
           <div class="hud-pct hud-${level(similarity)}">${Math.round(similarity * 100)}%</div>
-        </div>`)
-      .join('');
+        </div>`;
+
+    // Un subparámetro solo: el grupo es la propia fila (no se repite debajo)
+    const groupRows = data.groups.map(({ group, weight, items, similarity }) => `
+        <div class="hud-row hud-group" data-key="${items.length === 1 ? items[0].param.key : 'overall'}" title="Ver explicación">
+          <div class="hud-icon">${icon(group.icon)}</div>
+          <div class="hud-bar hud-${level(similarity)}">
+            <div class="hud-fill" data-width="${similarity * 100}"></div>
+            <span class="hud-label">${group.label}</span>
+            <span class="hud-values">peso ×${weight}${items.length === 1 && items[0].confidence ? `<small class="hud-confidence">Confianza demo: ${Math.round(items[0].confidence.earth)}% / ${Math.round(items[0].confidence.analog)}%</small>` : ''}</span>
+          </div>
+          <div class="hud-pct hud-${level(similarity)}">${Math.round(similarity * 100)}%</div>
+        </div>
+        ${items.length > 1 ? items.map(subRow).join('') : ''}`);
+
+    // Requisito de misión: solo del sitio de Marte o la Luna, no entra al índice
+    const { req, value, pass } = data.requirement;
+    const reqRow = `
+        <div class="hud-row hud-req ${pass ? 'hud-req-ok' : 'hud-req-fail'}" data-key="${req.key}" title="Ver explicación">
+          <div class="hud-icon">${icon(req.icon)}</div>
+          <div class="hud-bar">
+            <span class="hud-label">${req.short}</span>
+            <span class="hud-values">${fmt(value, req.decimals)} ${req.unit} · mín. ${fmt(req.min, req.decimals)}</span>
+          </div>
+          <div class="hud-pct">${pass ? 'APTO' : 'NO APTO'}</div>
+        </div>`;
+
+    panel.querySelector('.hud-rows').innerHTML =
+      groupRows.join('') + '<div class="hud-section">Requisito del sitio (no se compara con la Tierra)</div>' + reqRow;
 
     panel.hidden = false;
     if (!userMoved) placeDefault();

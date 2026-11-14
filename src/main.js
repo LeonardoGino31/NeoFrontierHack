@@ -533,6 +533,7 @@ function selectEarthPoint(marker) {
     earthPoint,
     analogPoint: analog,
     analogName: BODIES[analog.body].name,
+    analogBody: analog.body,
     formatLatLon,
     data: marker.userData.similarity,
     nav: { index: siblings.indexOf(marker), total: siblings.length }

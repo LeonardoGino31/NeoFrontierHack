@@ -1,6 +1,8 @@
 // Cada fila del CSV representa una pareja completa Tierra–análogo.
 
-import { PARAMS, paramSimilarity, overallSimilarity } from './similarity.js';
+import {
+  PARAMS, REQUIREMENTS, paramSimilarity, groupResults, overallSimilarity, checkRequirement,
+} from './similarity.js';
 
 function parseCsv(text) {
   const records = [];
@@ -147,24 +149,31 @@ export async function loadPlanetaryData() {
   return { pairs };
 }
 
+/**
+ * Calcula la similitud de una pareja a partir de su fila del CSV.
+ * Devuelve los subparámetros, los grupos, el índice global y el requisito de misión del cuerpo.
+ */
 export function similarityDataFromCsv(row, analogBody) {
   if (!row) throw new Error('Falta la fila de comparación en planetary_candidates.csv.');
 
   const toColumn = (key) => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-  const results = PARAMS
-    .filter((param) => !param.bodies || param.bodies.includes(analogBody))
-    .map((param) => {
-      const column = toColumn(param.key);
-      const earth = numberFrom(row, `${column}_earth`, row.earth_site_id);
-      const analog = numberFrom(row, `${column}_analog`, row.candidate_id);
-      const confidence = param.confidence
-        ? {
-            earth: numberFrom(row, 'ice_confidence_earth', row.earth_site_id),
-            analog: numberFrom(row, 'ice_confidence_analog', row.candidate_id),
-          }
-        : null;
-      return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
-    });
+  const results = PARAMS.map((param) => {
+    const column = toColumn(param.key);
+    const earth = numberFrom(row, `${column}_earth`, row.earth_site_id);
+    const analog = numberFrom(row, `${column}_analog`, row.candidate_id);
+    const confidence = param.confidence
+      ? {
+          earth: numberFrom(row, `${column}_confidence_earth`, row.earth_site_id),
+          analog: numberFrom(row, `${column}_confidence_analog`, row.candidate_id),
+        }
+      : null;
+    return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
+  });
 
-  return { results, overall: overallSimilarity(results) };
+  const groups = groupResults(results, analogBody);
+  const requirement = checkRequirement(
+    analogBody,
+    numberFrom(row, REQUIREMENTS[analogBody].column, row.candidate_id)
+  );
+  return { results, groups, overall: overallSimilarity(groups), requirement };
 }

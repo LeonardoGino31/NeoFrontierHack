@@ -262,6 +262,63 @@ canvas {
   color: rgb(var(--level));
 }
 
+/* Subparámetros de un grupo: filas más bajas y sangradas */
+.hud-sub {
+  margin-left: 50px;
+  margin-top: 3px;
+}
+
+.hud-sub .hud-bar {
+  min-height: 24px;
+}
+
+.hud-sub .hud-label,
+.hud-sub .hud-values {
+  font-size: 12px;
+}
+
+.hud-sub .hud-pct {
+  flex-basis: 48px;
+  font-size: 12px;
+}
+
+.hud-purpose {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(var(--hud-cyan), 0.9);
+}
+
+.hud-section {
+  margin: 12px 10px 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(230, 247, 255, 0.55);
+}
+
+/* Requisito de misión: verde si el sitio lo cumple, rojo si no */
+.hud-req-ok  { --req: 110, 240, 190; }
+.hud-req-fail { --req: 255, 110, 100; }
+
+.hud-req .hud-bar {
+  border-color: rgba(var(--req), 0.6);
+}
+
+.hud-req .hud-label,
+.hud-req .hud-values {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hud-req .hud-pct {
+  flex-basis: 64px;
+  font-size: 11px;
+  border-color: rgba(var(--req), 0.6);
+  color: rgb(var(--req));
+}
+
 /* Colores según el nivel de similitud */
 .hud-high { --level: 110, 240, 190; }
 .hud-mid  { --level: 255, 205, 90; }
@@ -519,6 +576,22 @@ canvas {
   font: 15px ui-monospace, Consolas, monospace;
   background: rgba(0, 0, 0, 0.35);
   border-left: 3px solid rgb(120, 220, 255);
+}
+
+.guide-nav-group {
+  margin: 10px 8px 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--hud-cyan), 0.75);
+}
+
+.weight-body {
+  margin: 12px 0 2px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--hud-cyan), 0.9);
 }
 
 .weight-row {
