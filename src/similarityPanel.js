@@ -10,7 +10,7 @@ const fmt = (value, decimals) => value.toFixed(decimals);
 
 /**
  * Crea el HUD de similitud (oculto).
- * onNav(±1) se llama con las flechas ‹ › para pasar al punto anterior o siguiente.
+ * onNav(±1) se llama desde la barra superior para pasar al punto anterior o siguiente.
  */
 export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   const panel = document.createElement('div');
@@ -19,12 +19,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   panel.hidden = true;
   panel.innerHTML = `
     <div class="hud-header">
-      <div class="hud-nav">
-        <button class="hud-prev" title="Punto anterior (←)">‹</button>
-        <span>Análisis de similitud</span>
-        <span class="hud-nav-count"></span>
-        <button class="hud-next" title="Punto siguiente (→)">›</button>
-      </div>
+      <span>Análisis de similitud</span>
       <div class="hud-actions">
         <button class="hud-close" title="Cerrar (Esc)">✕</button>
       </div>
@@ -36,10 +31,21 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   `;
   document.body.appendChild(panel);
 
+  // Navegación entre puntos arriba del todo, fuera del HUD, para que se vea como acción principal
+  const nav = document.createElement('nav');
+  nav.id = 'point-nav';
+  nav.hidden = true;
+  nav.innerHTML = `
+    <button class="nav-prev" title="Punto anterior (←)"><span aria-hidden="true">‹</span> Anterior</button>
+    <span class="nav-count"></span>
+    <button class="nav-next" title="Punto siguiente (→)">Siguiente <span aria-hidden="true">›</span></button>
+  `;
+  document.body.appendChild(nav);
+
   const header = panel.querySelector('.hud-header');
   panel.querySelector('.hud-close').addEventListener('click', onClose);
-  panel.querySelector('.hud-prev').addEventListener('click', () => onNav(-1));
-  panel.querySelector('.hud-next').addEventListener('click', () => onNav(1));
+  nav.querySelector('.nav-prev').addEventListener('click', () => onNav(-1));
+  nav.querySelector('.nav-next').addEventListener('click', () => onNav(1));
 
   // Clic en una fila (o en el índice global) abre la guía en ese parámetro
   panel.addEventListener('click', (e) => {
@@ -69,28 +75,34 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   header.addEventListener('pointerup', () => (drag = null));
 
-  // Por defecto: centrado entre los dos planetas
+  /** Posición por defecto: centrado entre los dos planetas. */
   function placeDefault() {
     panel.style.left = `${(window.innerWidth - panel.offsetWidth) / 2}px`;
-    panel.style.top = '64px';
+    panel.style.top = '76px'; // debajo de la barra de navegación
   }
 
-  // nav = { index, total }: posición del punto entre los del cuerpo análogo seleccionado
-  function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav }) {
+  /**
+   * Pinta el HUD para un par Tierra–análogo.
+   * `nav` = { index, total }: posición del punto entre los del cuerpo análogo seleccionado.
+   */
+  function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav: position }) {
     const { purpose } = data.profile;
-    panel.querySelector('.hud-nav-count').textContent = `${nav.index + 1}/${nav.total}`;
+    nav.querySelector('.nav-count').textContent = `${position.index + 1} / ${position.total}`;
+    nav.hidden = false;
     panel.querySelector('.hud-info').innerHTML = `
       <div><span class="hud-key">Tierra · ${earthPoint.name}</span>${formatLatLon(earthPoint)}</div>
       <div><span class="hud-key">${analogName} · ${analogPoint.name}</span>${formatLatLon(analogPoint)}</div>`;
 
     const overallPct = data.overall * 100;
-    panel.querySelector('.hud-score').dataset.key = 'overall';
+    const score = panel.querySelector('.hud-score');
+    score.dataset.key = 'overall';
+    score.className = `hud-score hud-${level(data.overall)}`;
     panel.querySelector('.hud-score').innerHTML = `
       <div class="hud-icon">${icon('target')}</div>
       <div class="hud-bar hud-${level(data.overall)}">
         <div class="hud-fill" data-width="${overallPct}"></div>
         <span class="hud-label">Índice global<small class="hud-purpose">${purpose}</small></span>
-        <span class="hud-big">${fmt(overallPct, 1)} %</span>
+        <span class="hud-big hud-level-text">${fmt(overallPct, 1)}<small>%</small></span>
       </div>`;
 
     // Solo los grupos en pantalla; los subparámetros se detallan en la guía (clic en la fila)
@@ -130,8 +142,10 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     );
   }
 
+  /** Oculta el HUD y su barra de navegación. */
   function hide() {
     panel.hidden = true;
+    nav.hidden = true;
   }
 
   window.addEventListener('resize', () => {

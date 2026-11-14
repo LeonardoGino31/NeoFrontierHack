@@ -330,19 +330,15 @@ canvas {
   border-color: rgba(var(--hud-cyan), 0.8);
 }
 
-/* ===== Botón para abrir la guía ===== */
-#guide-launcher,
+/* ===== Botón del laboratorio 3D (solo ícono, arriba a la izquierda) ===== */
 #lab-launcher {
   position: fixed;
-  left: 20px;
-  bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  font: 600 14px 'Rajdhani', 'Arial Narrow', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   color: #e6f7ff;
   background: rgba(6, 28, 44, 0.8);
   border: 1px solid rgba(120, 220, 255, 0.45);
@@ -350,18 +346,20 @@ canvas {
   z-index: 15;
 }
 
-#guide-launcher svg,
 #lab-launcher svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
-#guide-launcher:hover,
 #lab-launcher:hover {
   background: rgba(120, 220, 255, 0.2);
 }
 
-#guide-launcher[hidden],
+#lab-launcher:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 2px;
+}
+
 #lab-launcher[hidden] {
   display: none;
 }
@@ -704,10 +702,6 @@ canvas {
 .lvl-mid  { color: rgb(255, 205, 90); }
 .lvl-low  { color: rgb(255, 110, 100); }
 
-#lab-launcher {
-  bottom: 66px;
-}
-
 .guide-lab-btn {
   margin-left: auto;
   display: flex;
@@ -1048,17 +1042,29 @@ canvas {
 }
 
 /* ===== Panel inferior Tierra | análogo (NASA GIBS + NASA Trek) ===== */
-/* Centrado y dividido en dos, alineado con las mitades de la pantalla; deja libres los
-   botones de la izquierda y el interruptor PSR de la derecha */
+/* Cada tarjeta va pegada a su borde (bajo su planeta) y la barra de pestañas queda centrada:
+   así el centro de la escena y la línea divisoria quedan libres */
 .compare-panel {
+  position: fixed;
+  inset: auto 16px 16px;
+  height: 0;
+  z-index: 20;
+}
+
+.compare-panel[hidden] {
+  display: none;
+}
+
+.compare-panel .hud {
+  position: absolute;
+  bottom: 0;
+}
+
+.cmp-bar {
   left: 50%;
-  bottom: 16px;
   transform: translateX(-50%);
-  width: min(1040px, calc(100vw - 460px));
-  max-height: 42vh;
-  overflow-y: auto;
-  padding-bottom: 0;
-  user-select: text;
+  width: auto;
+  padding: 0;
 }
 
 .compare-panel .hud-header {
@@ -1066,7 +1072,7 @@ canvas {
   cursor: default;
 }
 
-.compare-panel.collapsed .cmp-body {
+.compare-panel.collapsed .cmp-side {
   display: none;
 }
 
@@ -1092,22 +1098,20 @@ canvas {
   border-color: rgba(var(--hud-cyan), 0.9);
 }
 
-.cmp-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
 .cmp-side {
   display: grid;
   grid-template-columns: 150px 1fr;
   gap: 12px;
+  width: min(460px, calc(50vw - 200px));
+  max-height: 40vh;
+  overflow-y: auto;
   padding: 10px 12px;
   font: 12.5px/1.4 system-ui, sans-serif;
+  user-select: text;
 }
 
-.cmp-side + .cmp-side {
-  border-left: 1px solid rgba(var(--hud-cyan), 0.35);
-}
+.cmp-side[data-side='earth']  { left: 0; }
+.cmp-side[data-side='analog'] { right: 0; }
 
 .cmp-side figure {
   margin: 0;
@@ -1184,88 +1188,202 @@ canvas {
   border-color: #facc15;
 }
 
-/* Flechas ‹ › del HUD: recorren los puntos del cuerpo seleccionado */
-.hud-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.hud-nav button {
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
-  line-height: 1;
-  color: #e6f7ff;
-  background: transparent;
-  border: 1px solid rgba(var(--hud-cyan), 0.5);
-  cursor: pointer;
-}
-
-.hud-nav button:hover {
-  background: rgba(var(--hud-cyan), 0.2);
-}
-
-.hud-nav-count {
-  min-width: 34px;
-  font-size: 12px;
-  text-align: center;
-  letter-spacing: 0.05em;
-}
-
-/* Interruptor de la capa de sombra permanente de la Luna */
-#psr-toggle {
+/* Barra superior: recorre los puntos del cuerpo análogo seleccionado */
+#point-nav {
   position: fixed;
-  right: 16px;
-  bottom: 24px;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  font: 600 13px 'Rajdhani', sans-serif;
-  letter-spacing: 0.06em;
-  color: #e6f7ff;
-  background: rgba(6, 28, 44, 0.82);
-  border: 1px solid rgba(56, 189, 248, 0.45);
-  border-radius: 999px;
-  cursor: pointer;
-  z-index: 10;
+  gap: 10px;
+  z-index: 25;
+  font-family: 'Rajdhani', 'Arial Narrow', sans-serif;
 }
 
-#psr-toggle[hidden] {
+#point-nav[hidden] {
   display: none;
 }
 
-#psr-toggle .swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #38bdf8;
+#point-nav button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font: 700 14px 'Rajdhani', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.85);
+  border: 1px solid rgba(120, 220, 255, 0.55);
+  box-shadow: 0 0 14px rgba(120, 220, 255, 0.15);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-#psr-toggle[aria-pressed='false'] .swatch {
-  background: transparent;
-  border: 1px solid #38bdf8;
+#point-nav button span {
+  font-size: 20px;
+  line-height: 0.8;
 }
 
+#point-nav button:hover {
+  background: rgba(120, 220, 255, 0.22);
+  box-shadow: 0 0 18px rgba(120, 220, 255, 0.35);
+}
+
+#point-nav button:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 2px;
+}
+
+.nav-count {
+  min-width: 56px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: #e6f7ff;
+}
+
+/* Índice global: el dato principal del HUD, más grande y con el color de su nivel */
+#sim-panel .hud-score {
+  margin: 12px 10px 10px;
+}
+
+#sim-panel .hud-score .hud-icon {
+  flex-basis: 52px;
+  color: rgb(var(--level));
+  border-color: rgba(var(--level), 0.7);
+  background: rgba(var(--level), 0.14);
+}
+
+#sim-panel .hud-score .hud-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+#sim-panel .hud-score .hud-bar {
+  min-height: 68px;
+  padding: 0 14px;
+  border: 1px solid rgba(var(--level), 0.85);
+  box-shadow: 0 0 22px rgba(var(--level), 0.28), inset 0 0 18px rgba(var(--level), 0.12);
+}
+
+#sim-panel .hud-score .hud-label {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+#sim-panel .hud-score .hud-purpose {
+  font-size: 12px;
+}
+
+.hud-level-text {
+  color: rgb(var(--level));
+  font-size: 38px;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(var(--level), 0.55);
+}
+
+.hud-level-text small {
+  margin-left: 2px;
+  font-size: 18px;
+}
+
+/* Pantallas angostas: las tarjetas se apilan sobre la barra, a todo el ancho */
 @media (max-width: 1100px) {
-  .compare-panel {
-    width: calc(100vw - 16px);
-    bottom: 70px;
-  }
-}
-
-@media (max-width: 720px) {
-  .cmp-body {
-    grid-template-columns: 1fr;
-  }
-
   .cmp-side {
     grid-template-columns: 100px 1fr;
+    width: 100%;
+    max-height: 22vh;
+    bottom: 46px;
   }
 
-  .cmp-side + .cmp-side {
-    border-left: 0;
-    border-top: 1px solid rgba(var(--hud-cyan), 0.35);
+  .cmp-side[data-side='earth'] {
+    bottom: calc(46px + 22vh + 8px);
+  }
+}
+
+/* ===== Pantalla de inicio ===== */
+#start-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(5, 8, 22, 0.35), rgba(5, 8, 22, 0.85) 70%);
+  z-index: 100;
+  transition: opacity 0.5s ease;
+}
+
+#start-screen.leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-card {
+  max-width: 460px;
+  text-align: center;
+  font-family: 'Rajdhani', 'Arial Narrow', sans-serif;
+  color: #e6f7ff;
+}
+
+.start-kicker {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.85);
+}
+
+.start-card h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(44px, 9vw, 72px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(120, 220, 255, 0.35);
+}
+
+.start-sub {
+  font: 16px/1.5 system-ui, sans-serif;
+  color: #cbd5e1;
+}
+
+.start-btn {
+  margin-top: 28px;
+  padding: 12px 48px;
+  font: 700 20px 'Rajdhani', sans-serif;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #0b1020;
+  background: #facc15;
+  border: 0;
+  box-shadow: 0 0 28px rgba(250, 204, 21, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(250, 204, 21, 0.65);
+}
+
+.start-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.start-hint {
+  margin-top: 16px;
+  font: 13px system-ui, sans-serif;
+  color: #94a3b8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #start-screen,
+  .start-btn {
+    transition: none;
   }
 }

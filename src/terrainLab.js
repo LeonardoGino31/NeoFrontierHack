@@ -198,7 +198,9 @@ export function createTerrainLab() {
   const launcher = document.createElement('button');
   launcher.id = 'lab-launcher';
   launcher.className = 'floating-launcher';
-  launcher.innerHTML = `${icon('cube')}<span>Laboratorio 3D</span>`;
+  launcher.title = 'Laboratorio 3D';
+  launcher.setAttribute('aria-label', 'Abrir laboratorio 3D');
+  launcher.innerHTML = icon('cube');
   launcher.addEventListener('click', () => open('natural'));
   document.body.appendChild(launcher);
 
