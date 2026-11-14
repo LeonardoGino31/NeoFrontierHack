@@ -13,6 +13,7 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 - **Navegación**: botones Marte / Luna para cambiar de cuerpo, flechas ‹ › (o ← →) para recorrer sus puntos, y arrastre de cada cuerpo por separado en el modo comparación.
 - **Sombra permanente del polo sur lunar**: capa de LRO LOLA con las regiones donde nunca da el sol (posible hielo), activable al ver la Luna.
 - **Laboratorio 3D**: terreno procedural de 20 × 20 km donde cada parámetro se visualiza sobre el relieve y se puede modificar en vivo.
+- **Rovers en el laboratorio**: Perseverance, Sojourner (Marte), Apollo LRV y Yutu-2 (Luna) modelados en 3D a escala real, con ruedas que giran y se orientan y suspensión que copia el suelo; se conducen sobre el terreno que se haya ajustado.
 
 > ⚠️ Estado actual: los sitios, sus pares en la Tierra y las imágenes son reales; los valores de similitud, la confianza del potencial de hielo y los índices del laboratorio siguen siendo **de demostración**. La metodología de abajo es una propuesta; debe definirse y validarse antes de sustituir los valores de demostración.
 
@@ -115,6 +116,8 @@ src/
 ├── paramInfo.js        # Textos explicativos de cada parámetro
 ├── paramGuide.js       # Guía de parámetros y simulador
 ├── terrainLab.js       # Laboratorio de terreno 3D
+├── noise.js            # Ruido procedural compartido (value noise + fBm)
+├── rover/              # Rovers del laboratorio: modelos, conducción y parche de detalle
 ├── trekSites.js        # Capas, imágenes y enlaces a NASA Trek
 ├── earthSites.js       # Capas y rutas de imágenes terrestres del panel
 ├── comparePanel.js     # Panel inferior Tierra | análogo con imágenes reales
@@ -137,6 +140,9 @@ scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y 
 | Punto anterior / siguiente | `←` `→` o ‹ › en el HUD |
 | Salir de la comparación o cerrar ventanas | `Esc` |
 | Ocultar paneles del laboratorio | `H` |
+| Conducir el rover (laboratorio) | `W` `A` `S` `D` · `Shift` más rápido · `Espacio` frenar |
+| Cámara del rover | Arrastrar / rueda · `C` vuelve detrás del rover |
+| Bajar del rover / cerrar el laboratorio | `Esc` (primero baja del rover, luego cierra) |
 
 ## Próximos pasos
 
