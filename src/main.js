@@ -6,10 +6,11 @@ import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
 import { loadPlanetaryData, similarityDataFromCsv } from './planetaryData.js';
 import { loadParameterModel } from './parameterModel.js';
+import { loadSiteValues } from './siteValues.js';
 import { createComparePanel } from './comparePanel.js';
 import { createStartScreen } from './startScreen.js';
 
-const parameterModel = await loadParameterModel();
+const [parameterModel, siteValues] = await Promise.all([loadParameterModel(), loadSiteValues()]);
 const { pairs } = await loadPlanetaryData(parameterModel);
 
 // 1. Crear la escena
@@ -301,7 +302,7 @@ const atmosphere = new THREE.Mesh(
 atmosphere.scale.setScalar(1.1);
 meshes.earth.add(atmosphere);
 
-// 5b. Puntos en la Tierra y sus análogos (sitios reales; la similitud aún es de demo)
+// 5b. Puntos en la Tierra y sus análogos (cada valor indica si es medido o de demo)
 
 // Convierte latitud/longitud (grados) a una posición 3D sobre la esfera.
 // Usa la misma convención que SphereGeometry, así el punto coincide con la textura.
@@ -338,7 +339,7 @@ pairs.forEach(({ id: pairId, earthPoint, analog, comparison }, i) => {
     pairId,
     earthPoint,
     analog,
-    similarity: similarityDataFromCsv(parameterModel, comparison, analog.body),
+    similarity: similarityDataFromCsv(parameterModel, comparison, analog.body, siteValues),
   };
   earthMarkers.add(marker);
 });

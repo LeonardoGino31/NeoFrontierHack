@@ -27,7 +27,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     <div class="hud-info"></div>
     <div class="hud-score"></div>
     <div class="hud-rows"></div>
-    <div class="hud-footer">Tierra / análogo · <span class="hud-demo">datos de demo</span></div>
+    <div class="hud-footer"></div>
   `;
   document.body.appendChild(panel);
 
@@ -130,6 +130,12 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
     panel.querySelector('.hud-rows').innerHTML =
       groupRows.join('') + '<hr class="hud-divider">' + reqRow;
+
+    // Cuántos de los valores de esta pareja salen de datos reales (el resto es demo)
+    const { real, total } = data.dataSummary;
+    panel.querySelector('.hud-footer').innerHTML = real
+      ? `Tierra / análogo · <span class="hud-real">${real} de ${total} valores con datos reales</span>`
+      : 'Tierra / análogo · <span class="hud-demo">datos de demo</span>';
 
     panel.hidden = false;
     if (!userMoved) placeDefault();

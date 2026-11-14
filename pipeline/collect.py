@@ -63,7 +63,7 @@ def collect_site(site, cfg: dict, cache_dir: Path, snow: dict) -> dict:
     steps = [("topography", lambda: dem.topography(site, cfg, cache_dir)),
              ("illumination", lambda: _illumination(site, cfg, cache_dir))]
     if site.body == "mars":
-        steps.append(("descentDensity", lambda: mcd.descent_density(site, cfg, cache_dir)))
+        steps.append(("descent", lambda: mcd.descent_density(site, cfg, cache_dir)))
 
     for name, step in steps:
         try:

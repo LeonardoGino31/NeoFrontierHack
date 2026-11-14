@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T19:24:56+00:00",
+  "generatedAt": "2026-11-14T19:37:22+00:00",
   "windows": {
     "mars": {
       "sizeKm": 20,
@@ -85,7 +85,7 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
-        "descentDensity": {
+        "descent": {
           "value": 0.01352,
           "unit": "kg/m³",
           "status": "estimated",
@@ -157,7 +157,7 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
-        "descentDensity": {
+        "descent": {
           "value": 0.0114,
           "unit": "kg/m³",
           "status": "estimated",
@@ -260,7 +260,7 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
-        "descentDensity": {
+        "descent": {
           "value": 0.01156,
           "unit": "kg/m³",
           "status": "estimated",
@@ -332,7 +332,7 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
-        "descentDensity": {
+        "descent": {
           "value": 0.00271,
           "unit": "kg/m³",
           "status": "estimated",
@@ -410,7 +410,7 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
-        "descentDensity": {
+        "descent": {
           "value": 0.01886,
           "unit": "kg/m³",
           "status": "estimated",

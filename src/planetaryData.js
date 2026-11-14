@@ -1,6 +1,7 @@
 // Cada fila del CSV representa una pareja completa Tierra–análogo.
 
 import { paramSimilarity, groupResults, overallSimilarity, checkRequirement } from './similarity.js';
+import { provenanceOf, countReal } from './siteValues.js';
 
 /** Convierte el texto CSV (con campos entre comillas) en objetos indexados por encabezado. */
 function parseCsv(text) {
@@ -156,31 +157,51 @@ export async function loadPlanetaryData(model) {
 
 /**
  * Calcula la similitud de una pareja a partir de su fila del CSV, según el modelo.
- * Devuelve los subparámetros, los grupos, el índice global, el perfil y el requisito del cuerpo.
+ * Cada valor lleva su procedencia (medido, calculado, estimado o demo) según site_values.json.
  */
-export function similarityDataFromCsv(model, row, analogBody) {
+export function similarityDataFromCsv(model, row, analogBody, siteValues) {
   if (!row) throw new Error('Falta la fila de comparación en el CSV de ubicaciones.');
+  const earthId = row.earth_site_id;
+  const analogId = row.candidate_id;
+  const origin = (body, id, metric, value) => provenanceOf(siteValues, body, id, metric, value);
 
   const results = model.parameters.map((param) => {
-    const earth = numberFrom(row, param.columns.earth, row.earth_site_id);
-    const analog = numberFrom(row, param.columns.analog, row.candidate_id);
+    const earth = numberFrom(row, param.columns.earth, earthId);
+    const analog = numberFrom(row, param.columns.analog, analogId);
     const confidence = param.confidenceColumns
       ? {
-          earth: numberFrom(row, param.confidenceColumns.earth, row.earth_site_id),
-          analog: numberFrom(row, param.confidenceColumns.analog, row.candidate_id),
+          earth: numberFrom(row, param.confidenceColumns.earth, earthId),
+          analog: numberFrom(row, param.confidenceColumns.analog, analogId),
         }
       : null;
-    return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
+    const provenance = {
+      earth: origin('earth', earthId, param.key, earth),
+      analog: origin(analogBody, analogId, param.key, analog),
+    };
+    if (confidence) {
+      provenance.confidence = {
+        earth: origin('earth', earthId, `${param.key}Confidence`, confidence.earth),
+        analog: origin(analogBody, analogId, `${param.key}Confidence`, confidence.analog),
+      };
+    }
+    return { param, earth, analog, confidence, provenance,
+             similarity: paramSimilarity(earth, analog, param.span) };
   });
 
   const profile = model.bodies[analogBody];
   const groups = groupResults(results, model.groups, profile.weights);
   const { requirement } = profile;
+  const requirementValue = numberFrom(row, requirement.column, analogId);
+  const requirementProvenance = origin(analogBody, analogId, requirement.key, requirementValue);
   return {
     results,
     groups,
     overall: overallSimilarity(groups),
     profile,
-    requirement: checkRequirement(requirement, numberFrom(row, requirement.column, row.candidate_id)),
+    requirement: { ...checkRequirement(requirement, requirementValue), provenance: requirementProvenance },
+    dataSummary: countReal([
+      ...results.flatMap((r) => [r.provenance.earth, r.provenance.analog]),
+      requirementProvenance,
+    ]),
   };
 }

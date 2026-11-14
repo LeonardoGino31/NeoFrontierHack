@@ -314,6 +314,31 @@ canvas {
   color: rgba(255, 205, 90, 0.8);
 }
 
+.hud-real {
+  color: rgba(110, 240, 190, 0.9);
+}
+
+/* Procedencia de cada valor en la guía: verde = real, ámbar = demo */
+.prov {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(110, 240, 190, 0.9);
+}
+
+.prov a {
+  color: inherit;
+}
+
+.prov-demo {
+  color: rgba(255, 205, 90, 0.85);
+}
+
+.prov-estimated {
+  color: rgba(150, 200, 255, 0.9);
+}
+
 /* ===== HUD: botones de cabecera y filas clicables ===== */
 .hud-actions {
   display: flex;

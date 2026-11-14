@@ -14,7 +14,7 @@ CSV_COLUMNS = {
     "iceConfidence": "ice_confidence",
 }
 # Requisitos: solo existen del lado del análogo
-ANALOG_ONLY_COLUMNS = {"earthView": "earth_view_analog", "descentDensity": "descent_density_analog"}
+ANALOG_ONLY_COLUMNS = {"earthView": "earth_view_analog", "descent": "descent_density_analog"}
 PARTIAL_STATUS = "medido_parcial"
 
 

@@ -25,6 +25,13 @@ python -m unittest discover -s pipeline/tests -t .   # pruebas de los cálculos 
 
 `apply` solo cambia las columnas que tienen dato real y marca la fila con `data_status=medido_parcial`. El resto conserva sus valores de demostración.
 
+### Dónde se ve en la app
+
+La app lee `site_values.json` junto al CSV. Un valor cuenta como real solo si el CSV tiene el mismo número que midió el pipeline (es decir, si se ejecutó `apply`).
+
+- **Panel de similitud:** el pie dice cuántos valores de la pareja son reales, por ejemplo "5 de 15 valores con datos reales". Sin ninguno, dice "datos de demo".
+- **Guía de parámetros**, en "En el punto seleccionado": cada valor lleva su etiqueta (Medido, Calculado, Estimado (modelo) o Demo) y, si es real, el dataset enlazado.
+
 ### MODIS (nieve en la Tierra)
 
 Necesita una cuenta gratuita de [Earthdata](https://urs.earthdata.nasa.gov/) en dos variables de entorno (nunca en el repo):

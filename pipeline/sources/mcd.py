@@ -35,7 +35,7 @@ def descent_density(site, cfg: dict, cache_dir: Path) -> dict:
     values = {ls: _density(source, site.lat, site.lon, ls, cache_dir) for ls in source["seasonsLs"]}
     worst_ls = min(values, key=values.get)
     return {
-        "descentDensity": {
+        "descent": {
             "value": round(values[worst_ls], 5), "unit": "kg/m³", "status": "estimated",
             "source": {"dataset": source["dataset"], "url": source["url"]},
             "note": f"mínimo en Ls {worst_ls}° a las {source['localTimeH']} h, {source['altitudeM']} m sobre el suelo",

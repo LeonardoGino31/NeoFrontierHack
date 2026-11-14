@@ -4,10 +4,22 @@
 import { paramSimilarity } from './similarity.js';
 import { requirementsOf } from './parameterModel.js';
 import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
+import { STATUS_LABELS } from './siteValues.js';
 import { icon } from './icons.js';
 
 const BODY_NAMES = { earth: 'Tierra', mars: 'Marte', moon: 'Luna' };
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
+
+/** Etiqueta de procedencia de un valor: estado y, si es real, el dataset enlazado. */
+function provenanceTag(provenance) {
+  const label = STATUS_LABELS[provenance.status];
+  const source = provenance.source;
+  if (!source) return `<small class="prov prov-${provenance.status}">${label}</small>`;
+  const url = typeof source.url === 'string' ? source.url : null;
+  const dataset = url ? `<a href="${url}" target="_blank" rel="noopener">${source.dataset}</a>` : source.dataset;
+  const note = provenance.note ? ` · ${provenance.note}` : '';
+  return `<small class="prov prov-${provenance.status}"><b>${label}</b> · ${dataset}${note}</small>`;
+}
 
 /**
  * Crea la guía de parámetros (oculta) a partir del modelo de parámetros.
@@ -148,7 +160,9 @@ export function createParamGuide({ model, onOpenLab }) {
       <div class="guide-block"><h3>Peso de cada grupo según el objetivo</h3>${rows}<p class="guide-note">${OVERALL_INFO.note}</p></div>
       <div class="guide-block"><h3>Por qué sirve</h3><p>${OVERALL_INFO.why}</p></div>
       ${current}
-      <p class="guide-disclaimer">Los valores en pantalla son de demo. Las fuentes de cada parámetro son los datasets que se usarán para los datos reales.</p>`;
+      <p class="guide-disclaimer">${context
+        ? `En este punto, ${context.data.dataSummary.real} de ${context.data.dataSummary.total} valores vienen de datos reales; el resto es de demostración.`
+        : 'Cada valor indica su procedencia: Medido, Calculado o Estimado vienen del pipeline de datos (con su fuente); Demo es ilustrativo.'} Abre un parámetro para ver la fuente de cada número.</p>`;
   }
 
   /** HTML de la página de un subparámetro, con fuentes, fórmula y simulador. */
@@ -167,11 +181,11 @@ export function createParamGuide({ model, onOpenLab }) {
       ? `<div class="guide-block guide-current">
            <h3>En el punto seleccionado</h3>
            <div class="current-grid">
-             <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}</div>
-             <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}</div>
+             <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.earth)}</div>
+             <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.analog)}</div>
              <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
            </div>
-           ${result.confidence ? `<p class="guide-note">Confianza de la estimación (demo): Tierra ${Math.round(result.confidence.earth)}% · ${context.analogName} ${Math.round(result.confidence.analog)}%. No forma parte del índice de similitud.</p>` : ''}
+           ${result.confidence ? `<p class="guide-note">Confianza de la estimación: Tierra ${Math.round(result.confidence.earth)}% (${STATUS_LABELS[result.provenance.confidence.earth.status].toLowerCase()}) · ${context.analogName} ${Math.round(result.confidence.analog)}% (${STATUS_LABELS[result.provenance.confidence.analog.status].toLowerCase()}). No forma parte del índice de similitud.</p>` : ''}
          </div>`
       : '';
 
@@ -195,7 +209,7 @@ export function createParamGuide({ model, onOpenLab }) {
         <h3>Cómo se compara</h3>
         <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
         <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
-        ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tendría la estimación. Los valores actuales son de demostración.</p>' : ''}
+        ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tiene la estimación.</p>' : ''}
         <div class="simulator">
           <svg class="sim-plot" viewBox="0 0 300 130"></svg>
           <div class="sim-controls">
@@ -225,7 +239,7 @@ export function createParamGuide({ model, onOpenLab }) {
       ? `<div class="guide-block guide-current">
            <h3>En el punto seleccionado</h3>
            <div class="current-grid">
-             <div><span>${context.analogName}</span>${result.value.toFixed(req.decimals)} ${req.unit}</div>
+             <div><span>${context.analogName}</span>${result.value.toFixed(req.decimals)} ${req.unit}${provenanceTag(result.provenance)}</div>
              <div><span>Mínimo</span>${req.min.toFixed(req.decimals)} ${req.unit}</div>
              <div><span>Resultado</span><strong class="lvl-${result.pass ? 'high' : 'low'}">${result.pass ? 'APTO' : 'NO APTO'}</strong></div>
            </div>
