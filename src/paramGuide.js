@@ -1,14 +1,20 @@
 // Guía de parámetros: pantalla dedicada que explica cada parámetro de similitud,
 // de dónde salen los datos y cómo se calcula, con un simulador interactivo.
 
-import { GROUPS, PARAMS, REQUIREMENTS, BODY_PROFILES, paramSimilarity } from './similarity.js';
-import { PARAM_INFO, OVERALL_INFO, REQUIREMENT_KEYS } from './paramInfo.js';
+import { paramSimilarity } from './similarity.js';
+import { requirementsOf } from './parameterModel.js';
+import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
 import { icon } from './icons.js';
 
 const BODY_NAMES = { earth: 'Tierra', mars: 'Marte', moon: 'Luna' };
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
 
-export function createParamGuide({ onOpenLab } = {}) {
+/**
+ * Crea la guía de parámetros (oculta) a partir del modelo de parámetros.
+ * onOpenLab(modo) abre el laboratorio 3D en el modo que ilustra un parámetro.
+ */
+export function createParamGuide({ model, onOpenLab }) {
+  const { groups, parameters, bodies } = model;
   // --- Estructura base ---
   const overlay = document.createElement('div');
   overlay.id = 'param-guide';
@@ -37,22 +43,20 @@ export function createParamGuide({ onOpenLab } = {}) {
   const detail = overlay.querySelector('.guide-detail');
   let currentKey = null;
   let context = null; // datos del punto seleccionado (si hay)
-  let activeRequirements = Object.values(REQUIREMENTS);
+  let activeRequirements = requirementsOf(model);
   let keys = [];
 
   /** Navegación: índice global, subparámetros agrupados y requisitos del cuerpo seleccionado. */
   function refreshNavigation() {
-    activeRequirements = context?.analogBody
-      ? [REQUIREMENTS[context.analogBody]]
-      : Object.values(REQUIREMENTS);
-    keys = ['overall', ...PARAMS.map((p) => p.key), ...activeRequirements.map((r) => r.key)];
+    activeRequirements = requirementsOf(model, context?.analogBody);
+    keys = ['overall', ...parameters.map((p) => p.key), ...activeRequirements.map((r) => r.key)];
     const button = (key, iconName, label) =>
       `<button data-key="${key}">${icon(iconName)}<span>${label}</span></button>`;
     nav.innerHTML = [
       button('overall', 'target', 'Índice global'),
-      ...GROUPS.map((g) => [
+      ...groups.map((g) => [
         `<div class="guide-nav-group">${g.label}</div>`,
-        ...PARAMS.filter((p) => p.group === g.key).map((p) => button(p.key, p.icon, p.label)),
+        ...parameters.filter((p) => p.group === g.key).map((p) => button(p.key, p.icon, p.label)),
       ].join('')),
       '<div class="guide-nav-group">Requisitos del sitio</div>',
       ...activeRequirements.map((r) => button(r.key, r.icon, r.label)),
@@ -94,27 +98,29 @@ export function createParamGuide({ onOpenLab } = {}) {
   );
 
   // --- Render ---
+  /** Muestra la página de `key` (índice global, parámetro o requisito) y marca su botón. */
   function show(key) {
     if (!keys.includes(key)) key = 'overall';
     currentKey = key;
     nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
-    const isRequirement = REQUIREMENT_KEYS.includes(key);
+    const isRequirement = activeRequirements.some((r) => r.key === key);
     detail.innerHTML = key === 'overall' ? renderOverall()
       : isRequirement ? renderRequirement(key) : renderParam(key);
     detail.scrollTop = 0;
     if (key !== 'overall' && !isRequirement) bindSimulator(key);
   }
 
+  /** HTML de la página del índice global: fórmula y pesos de los grupos por cuerpo. */
   function renderOverall() {
     // Pesos de los grupos para el cuerpo seleccionado, o para ambos si no hay selección
-    const bodies = context?.analogBody ? [context.analogBody] : Object.keys(BODY_PROFILES);
-    const rows = bodies.map((body) => {
-      const profile = BODY_PROFILES[body];
+    const shownBodies = context?.analogBody ? [context.analogBody] : Object.keys(bodies);
+    const rows = shownBodies.map((body) => {
+      const profile = bodies[body];
       const total = Object.values(profile.weights).reduce((a, b) => a + b, 0);
       return `
         <h4 class="weight-body">${BODY_NAMES[body]} · ${profile.purpose}</h4>
         <p class="guide-note">${profile.why}</p>
-        ${GROUPS.map((g) => {
+        ${groups.map((g) => {
           const w = profile.weights[g.key];
           const share = (w / total) * 100;
           return `
@@ -152,10 +158,11 @@ export function createParamGuide({ onOpenLab } = {}) {
       <p class="guide-disclaimer">Los valores en pantalla son de demo. Las fuentes de cada parámetro son los datasets que se usarán para los datos reales.</p>`;
   }
 
+  /** HTML de la página de un subparámetro, con fuentes, fórmula y simulador. */
   function renderParam(key) {
-    const p = PARAMS.find((x) => x.key === key);
+    const p = parameters.find((x) => x.key === key);
     const info = PARAM_INFO[key];
-    const group = GROUPS.find((g) => g.key === p.group);
+    const group = groups.find((g) => g.key === p.group);
     const unit = p.unit || '—';
 
     const sources = Object.entries(info.sources)
@@ -214,7 +221,8 @@ export function createParamGuide({ onOpenLab } = {}) {
 
   /** Requisito de misión: se evalúa solo en el sitio de Marte o la Luna, sin simulador. */
   function renderRequirement(key) {
-    const [body, req] = Object.entries(REQUIREMENTS).find(([, r]) => r.key === key);
+    const req = activeRequirements.find((r) => r.key === key);
+    const { body } = req;
     const info = PARAM_INFO[key];
     const sources = Object.entries(info.sources)
       .map(([b, source]) => `<div class="source"><span>${BODY_NAMES[b]}</span>${source}</div>`)
@@ -252,10 +260,11 @@ export function createParamGuide({ onOpenLab } = {}) {
       ${current}`;
   }
 
-  // --- Simulador: mueve los valores y recalcula con la misma función del HUD ---
+  // --- Simulador ---
+  /** Conecta los sliders del simulador y redibuja la similitud con la misma función del HUD. */
   function bindSimulator(key) {
-    const p = PARAMS.find((x) => x.key === key);
-    const ranges = [p.earth, p.mars, p.moon].filter(Boolean);
+    const p = parameters.find((x) => x.key === key);
+    const ranges = Object.values(p.ranges);
     const lo = Math.min(...ranges.map((range) => range[0]));
     const hi = Math.max(...ranges.map((range) => range[1]));
     const step = (hi - lo) / 200 || 0.01;
@@ -263,8 +272,8 @@ export function createParamGuide({ onOpenLab } = {}) {
 
     const result = context?.data.results.find((r) => r.param.key === key);
     const start = {
-      earth: result ? result.earth : mid(p.earth),
-      analog: result ? result.analog : mid(p[context?.analogBody] ?? p.mars ?? p.moon),
+      earth: result ? result.earth : mid(p.ranges.earth),
+      analog: result ? result.analog : mid(p.ranges[context?.analogBody] ?? p.ranges.mars),
     };
 
     const inputs = {};
@@ -316,6 +325,7 @@ export function createParamGuide({ onOpenLab } = {}) {
   }
 
   // --- API ---
+  /** Abre la guía en `key`, con el contexto del punto seleccionado si lo hay. */
   function open(key = 'overall', ctx = context) {
     context = ctx;
     refreshNavigation();
@@ -324,12 +334,13 @@ export function createParamGuide({ onOpenLab } = {}) {
     show(key);
   }
 
+  /** Cierra la guía y vuelve a mostrar el botón que la abre. */
   function close() {
     overlay.hidden = true;
     launcher.hidden = false;
   }
 
-  // El contexto cambia cuando se selecciona o se limpia un punto
+  /** Actualiza el punto seleccionado (o null) y refresca la página abierta. */
   function setContext(ctx) {
     context = ctx;
     refreshNavigation();

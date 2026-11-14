@@ -1,9 +1,8 @@
 // Cada fila del CSV representa una pareja completa Tierra–análogo.
 
-import {
-  PARAMS, REQUIREMENTS, paramSimilarity, groupResults, overallSimilarity, checkRequirement,
-} from './similarity.js';
+import { paramSimilarity, groupResults, overallSimilarity, checkRequirement } from './similarity.js';
 
+/** Convierte el texto CSV (con campos entre comillas) en objetos indexados por encabezado. */
 function parseCsv(text) {
   const records = [];
   let row = [];
@@ -48,12 +47,14 @@ function parseCsv(text) {
   ));
 }
 
+/** Texto obligatorio de la fila; falla con el ID del registro para encontrarlo en el CSV. */
 const textFrom = (row, key, recordId) => {
   const value = row[key]?.trim();
   if (!value) throw new Error(`Falta el dato ${key} (${recordId}).`);
   return value;
 };
 
+/** Número obligatorio y finito de la fila. */
 const numberFrom = (row, key, recordId) => {
   if (row[key] === undefined || row[key] === '') {
     throw new Error(`Falta el dato ${key} (${recordId}).`);
@@ -63,6 +64,7 @@ const numberFrom = (row, key, recordId) => {
   return value;
 };
 
+/** Coordenada en grados dentro de [min, max]. */
 function coordinateFrom(row, key, min, max, recordId) {
   const value = numberFrom(row, key, recordId);
   if (value < min || value > max) {
@@ -71,19 +73,22 @@ function coordinateFrom(row, key, min, max, recordId) {
   return value;
 }
 
+/** Booleano escrito como `true` o `false`. */
 function booleanFrom(row, key, recordId) {
   if (row[key] === 'true') return true;
   if (row[key] === 'false') return false;
   throw new Error(`El dato ${key} debe ser true o false (${recordId}).`);
 }
 
+/** Un candidato repetido en varias filas debe tener los mismos datos en todas. */
 function sameAnalogSite(first, second) {
   return ['body', 'name', 'lat', 'lon', 'footprintKm', 'kind', 'why', 'polar']
     .every((key) => first[key] === second[key]);
 }
 
-export async function loadPlanetaryData() {
-  const response = await fetch('/data/planetary_candidates.csv');
+/** Descarga el CSV indicado por el modelo y crea las parejas Tierra–análogo de los marcadores. */
+export async function loadPlanetaryData(model) {
+  const response = await fetch(model.dataset);
   if (!response.ok) {
     throw new Error(`No se pudo cargar el CSV de ubicaciones (${response.status}).`);
   }
@@ -150,30 +155,32 @@ export async function loadPlanetaryData() {
 }
 
 /**
- * Calcula la similitud de una pareja a partir de su fila del CSV.
- * Devuelve los subparámetros, los grupos, el índice global y el requisito de misión del cuerpo.
+ * Calcula la similitud de una pareja a partir de su fila del CSV, según el modelo.
+ * Devuelve los subparámetros, los grupos, el índice global, el perfil y el requisito del cuerpo.
  */
-export function similarityDataFromCsv(row, analogBody) {
-  if (!row) throw new Error('Falta la fila de comparación en planetary_candidates.csv.');
+export function similarityDataFromCsv(model, row, analogBody) {
+  if (!row) throw new Error('Falta la fila de comparación en el CSV de ubicaciones.');
 
-  const toColumn = (key) => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-  const results = PARAMS.map((param) => {
-    const column = toColumn(param.key);
-    const earth = numberFrom(row, `${column}_earth`, row.earth_site_id);
-    const analog = numberFrom(row, `${column}_analog`, row.candidate_id);
-    const confidence = param.confidence
+  const results = model.parameters.map((param) => {
+    const earth = numberFrom(row, param.columns.earth, row.earth_site_id);
+    const analog = numberFrom(row, param.columns.analog, row.candidate_id);
+    const confidence = param.confidenceColumns
       ? {
-          earth: numberFrom(row, `${column}_confidence_earth`, row.earth_site_id),
-          analog: numberFrom(row, `${column}_confidence_analog`, row.candidate_id),
+          earth: numberFrom(row, param.confidenceColumns.earth, row.earth_site_id),
+          analog: numberFrom(row, param.confidenceColumns.analog, row.candidate_id),
         }
       : null;
     return { param, earth, analog, confidence, similarity: paramSimilarity(earth, analog, param.span) };
   });
 
-  const groups = groupResults(results, analogBody);
-  const requirement = checkRequirement(
-    analogBody,
-    numberFrom(row, REQUIREMENTS[analogBody].column, row.candidate_id)
-  );
-  return { results, groups, overall: overallSimilarity(groups), requirement };
+  const profile = model.bodies[analogBody];
+  const groups = groupResults(results, model.groups, profile.weights);
+  const { requirement } = profile;
+  return {
+    results,
+    groups,
+    overall: overallSimilarity(groups),
+    profile,
+    requirement: checkRequirement(requirement, numberFrom(row, requirement.column, row.candidate_id)),
+  };
 }

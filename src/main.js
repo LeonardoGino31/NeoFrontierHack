@@ -5,9 +5,11 @@ import { createSimilarityPanel } from './similarityPanel.js';
 import { createParamGuide } from './paramGuide.js';
 import { createTerrainLab } from './terrainLab.js';
 import { loadPlanetaryData, similarityDataFromCsv } from './planetaryData.js';
+import { loadParameterModel } from './parameterModel.js';
 import { createComparePanel } from './comparePanel.js';
 
-const { pairs } = await loadPlanetaryData();
+const parameterModel = await loadParameterModel();
+const { pairs } = await loadPlanetaryData(parameterModel);
 
 // 1. Crear la escena
 const scene = new THREE.Scene();
@@ -335,7 +337,7 @@ pairs.forEach(({ id: pairId, earthPoint, analog, comparison }, i) => {
     pairId,
     earthPoint,
     analog,
-    similarity: similarityDataFromCsv(comparison, analog.body),
+    similarity: similarityDataFromCsv(parameterModel, comparison, analog.body),
   };
   earthMarkers.add(marker);
 });
@@ -423,6 +425,7 @@ const comparePanel = createComparePanel({ formatLatLon });
 const compareLabels = document.getElementById('compare-labels');
 const terrainLab = createTerrainLab();
 const paramGuide = createParamGuide({
+  model: parameterModel,
   onOpenLab: (key) => {
     paramGuide.close();
     terrainLab.open(key); // abre el laboratorio en el modo de ese parámetro
@@ -533,7 +536,6 @@ function selectEarthPoint(marker) {
     earthPoint,
     analogPoint: analog,
     analogName: BODIES[analog.body].name,
-    analogBody: analog.body,
     formatLatLon,
     data: marker.userData.similarity,
     nav: { index: siblings.indexOf(marker), total: siblings.length }

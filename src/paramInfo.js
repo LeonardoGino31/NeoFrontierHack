@@ -90,9 +90,6 @@ export const PARAM_INFO = {
   },
 };
 
-// Requisitos (earthView, descent): la guía los muestra sin simulador de similitud
-export const REQUIREMENT_KEYS = ['earthView', 'descent'];
-
 export const OVERALL_INFO = {
   what: 'Resume la comparación en un número entre 0 % y 100 %. Primero se promedian los subparámetros de cada grupo; después, los grupos se combinan con los pesos del objetivo del cuerpo.',
   why: 'Permite ordenar candidatos y comparar regiones rápido. No es una caja negra: cada número se puede rastrear hasta su subparámetro y su fórmula.',
