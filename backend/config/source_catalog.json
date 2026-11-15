@@ -19,13 +19,83 @@
         "LRO LOLA Shaded Relief Global",
         "LRO LOLA South Pole Illumination / PSR"
       ],
+      "downloadable_layers": {
+        "sunlight": {
+          "provider": "NASA GSFC PGDA / LRO LOLA PDS",
+          "source_page": "https://pgda.gsfc.nasa.gov/products/69",
+          "description": "Visibilidad promedio del disco solar; fracción de los pasos de tiempo iluminados durante un ciclo de nutación lunar de aproximadamente 18.6 años.",
+          "units": "%",
+          "scale": 100,
+          "regions": {
+            "north": {
+              "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65N_240M_201608.TIF",
+              "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65N_240M_201608",
+              "native_resolution_m": 240,
+              "coverage": "65N–90N"
+            },
+            "south": {
+              "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65S_240M_201608.TIF",
+              "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65S_240M_201608",
+              "native_resolution_m": 240,
+              "coverage": "65S–90S"
+            }
+          }
+        },
+        "earthView": {
+          "provider": "NASA GSFC PGDA / LRO LOLA PDS",
+          "source_page": "https://pgda.gsfc.nasa.gov/products/69",
+          "description": "Visibilidad promedio de cualquier parte del disco terrestre; no equivale a disponibilidad de enlace de comunicaciones.",
+          "units": "%",
+          "scale": 100,
+          "regions": {
+            "north": {
+              "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65N_240M_201608_EARTH.TIF",
+              "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65N_240M_201608_EARTH",
+              "native_resolution_m": 240,
+              "coverage": "65N–90N"
+            },
+            "south": {
+              "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65S_240M_201608_EARTH.TIF",
+              "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65S_240M_201608_EARTH",
+              "native_resolution_m": 240,
+              "coverage": "65S–90S"
+            }
+          }
+        }
+      },
       "additional_data": {
-        "illumination": "Moon Trek / LRO LOLA illumination products or a time-series illumination raster",
+        "illumination": "Implementada con mapas numéricos polares LOLA; representa promedio de largo plazo, no una ventana de misión específica.",
         "albedo": "LRO Diviner reflectance or another documented lunar reflectance product",
         "craterFree": "LROC crater/rock hazard product at a stated spatial resolution",
         "soilStability": "A documented geotechnical proxy raster; do not infer it from the DEM alone",
-        "ice": "A documented ice-potential raster derived from relevant LRO observations",
-        "iceConfidence": "A separate confidence raster for the ice-potential estimate"
+        "ice": "LRO Diviner Polar Resource Product (PDS4 ASCII triangular mesh) reports modeled depth to water-ice permafrost; LEND provides hydrogen evidence, not a direct ice probability. Both need documented conversion before use as a raster score.",
+        "iceConfidence": "The cited polar products do not supply a calibrated probability/confidence raster; keep this parameter unevaluated until an uncertainty layer is selected."
+      },
+      "reference_sources": {
+        "ice": [
+          {
+            "source_id": "LRO-L-DLRE-5-PRP-V2.0",
+            "provider": "NASA PDS Geosciences Node / LRO Diviner",
+            "url": "https://pds-geosciences.wustl.edu/missions/lro/diviner.htm",
+            "format": "PDS4 ASCII triangular mesh",
+            "reported_measurement": "Annual temperature and modeled depth to water-ice permafrost",
+            "integration_status": "catalogued_not_ingested",
+            "limitation": "Requires mesh-to-raster conversion; depth to stable ice is not a probability or abundance score."
+          },
+          {
+            "source_id": "LRO-L-LEND",
+            "provider": "NASA PDS / LRO LEND",
+            "url": "https://pds-geosciences.wustl.edu/missions/lro/lend.htm",
+            "format": "PDS science products",
+            "reported_measurement": "Neutron-derived hydrogen evidence in near-surface regolith",
+            "integration_status": "catalogued_not_ingested",
+            "limitation": "Hydrogen is indirect evidence; it is not a calibrated water-ice probability map."
+          }
+        ],
+        "iceConfidence": {
+          "integration_status": "not_available_as_calibrated_layer",
+          "limitation": "No cited source currently supplies a calibrated spatial confidence probability for the proposed ice score."
+        }
       }
     },
     "mars": {
@@ -46,12 +116,51 @@
         "MGS MOLA Color Shaded Relief"
       ],
       "additional_data": {
-        "illumination": "A documented solar-illumination raster for the selected season and mission duration",
+        "illumination": "A documented solar-illumination raster or Mars Climate Database output for the selected season and mission duration",
         "albedo": "A documented TES or other calibrated reflectance product",
-        "craterFree": "CTX/HiRISE crater, rock and hazard information at a stated spatial resolution",
-        "soilStability": "A documented thermal-inertia or geotechnical proxy raster",
-        "ice": "A documented subsurface-ice potential raster",
-        "iceConfidence": "A separate confidence raster for the ice-potential estimate"
+        "craterFree": "CTX/HiRISE hazard information is local and resolution-dependent; there is no equivalent global, landing-scale hazard raster in the current catalog.",
+        "soilStability": "TES thermal inertia is available as a documented surface-property proxy; it is not a direct geotechnical bearing-strength measurement.",
+        "ice": "NASA-supported SWIM4IMIM provides GeoTIFF ice-consistency products over approximately 60S–60N at 3 km. Consistency is not a probability; product range and no-data handling must be preserved.",
+        "iceConfidence": "SWIM combines multiple evidence types but does not provide a calibrated probability raster; keep confidence separate and unevaluated unless a dedicated uncertainty layer is supplied."
+      },
+      "reference_sources": {
+        "ice": {
+          "source_id": "SWIM4IMIM-ice-consistency",
+          "provider": "NASA-supported Subsurface Water Ice Mapping project",
+          "url": "https://swim.psi.edu/SWIM4MIMProducts.php",
+          "format": "GeoTIFF, simple cylindrical, 3 km, 0–360E, 60S–60N",
+          "no_data": -30,
+          "integration_status": "catalogued_not_ingested",
+          "limitation": "Consistency among evidence products is not a probability; product-specific scale, no-data, and longitude convention must be checked before conversion."
+        },
+        "soilStability": {
+          "source_id": "MGS-TES-thermal-inertia",
+          "provider": "Arizona State University Mars Global Data Sets",
+          "url": "https://www.mars.asu.edu/data/",
+          "format": "Thermal-inertia products at several resolutions",
+          "integration_status": "catalogued_not_ingested",
+          "limitation": "Thermal inertia is a surface-material proxy, not direct bearing strength or geotechnical stability."
+        },
+        "illumination": {
+          "source_id": "Mars-Climate-Database",
+          "provider": "LMD / Oxford / Open University / ESA",
+          "url": "https://www-mars.lmd.jussieu.fr/mcd_python/",
+          "format": "Model output requiring selected season, latitude, and mission interval",
+          "integration_status": "catalogued_not_ingested",
+          "limitation": "A mission-wide value needs a chosen season and operational interval; a generic global percent would hide that dependency."
+        },
+        "craterFree": {
+          "source_id": "MRO-CTX-HIRISE-local-terrain-products",
+          "provider": "NASA PDS / University of Arizona HiRISE",
+          "url": "https://hirise.lpl.arizona.edu/dtm/about.php",
+          "format": "Regional imagery and digital terrain models",
+          "integration_status": "catalogued_not_ingested",
+          "limitation": "Coverage is regional; high-resolution hazard checks belong after global screening."
+        },
+        "iceConfidence": {
+          "integration_status": "not_available_as_calibrated_layer",
+          "limitation": "SWIM evidence consistency is not a calibrated probability or uncertainty raster."
+        }
       }
     }
   },

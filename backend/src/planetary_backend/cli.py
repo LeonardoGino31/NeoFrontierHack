@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from .engine import AnalysisError, analyze
-from .sources import download_dem, load_source_catalog
+from .sources import download_dem, download_layer, load_source_catalog
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -51,6 +51,20 @@ def _parser() -> argparse.ArgumentParser:
     download_parser.add_argument("--output", type=Path, default=DEFAULT_RAW)
     download_parser.add_argument("--accept-large-download", action="store_true")
 
+    layer_parser = subparsers.add_parser(
+        "download-layer", help="Descarga una capa científica catalogada y la registra en el manifiesto."
+    )
+    layer_parser.add_argument("--body", choices=("moon", "mars"), required=True)
+    layer_parser.add_argument("--layer", required=True, help="Nombre de capa definido en source_catalog.json.")
+    layer_parser.add_argument(
+        "--region", choices=("north", "south", "both"), default="both",
+        help="Región planetaria disponible en el catálogo (por defecto: both).",
+    )
+    layer_parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    layer_parser.add_argument("--output", type=Path, default=DEFAULT_RAW)
+    layer_parser.add_argument("--manifest", type=Path, help="Manifiesto a actualizar.")
+    layer_parser.add_argument("--accept-download", action="store_true")
+
     sources_parser = subparsers.add_parser("sources", help="Muestra las fuentes de datos configuradas.")
     sources_parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     return parser
@@ -68,6 +82,20 @@ def main() -> int:
                 args.body, args.catalog, args.output, args.accept_large_download
             )
             print(f"DEM disponible: {path}")
+            return 0
+        if args.command == "download-layer":
+            manifest = args.manifest or BACKEND_ROOT / "examples" / f"{args.body}_manifest.json"
+            paths = download_layer(
+                args.body,
+                args.layer,
+                args.region,
+                args.catalog,
+                args.output,
+                manifest,
+                args.accept_download,
+            )
+            for path in paths:
+                print(f"Capa disponible: {path}")
             return 0
 
         manifest = args.manifest or BACKEND_ROOT / "examples" / f"{args.body}_manifest.json"

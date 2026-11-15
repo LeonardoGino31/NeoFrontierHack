@@ -23,6 +23,7 @@ LAYER_KEYS = (
     "soilStability",
     "ice",
     "iceConfidence",
+    "earthView",
 )
 
 
@@ -129,18 +130,27 @@ def _grid_info(crs: Any, body_radius_km: float, path: Path | None = None) -> dic
         return {"kind": "geographic", "radius_km": body_radius_km}
 
     parameters = crs.to_dict()
-    if crs.is_projected and parameters.get("proj") == "eqc":
+    if crs.is_projected and parameters.get("proj") in {"eqc", "stere"}:
         units = parameters.get("units", "m")
         if units not in {"m", "metre", "meter"}:
             label = f"{path} " if path else ""
-            raise AnalysisError(f"{label}usa una proyección equirectangular que no está expresada en metros.")
+            raise AnalysisError(f"{label}usa una proyección planetaria que no está expresada en metros.")
         projected_radius_km = float(parameters.get("R", parameters.get("a", 0))) / 1000
         if projected_radius_km <= 0:
             label = f"{path} " if path else ""
-            raise AnalysisError(f"{label}no declara el radio del cuerpo en su CRS equirectangular.")
+            raise AnalysisError(f"{label}no declara el radio del cuerpo en su CRS.")
         if abs(projected_radius_km - body_radius_km) / body_radius_km > 0.05:
             label = f"{path} " if path else ""
             raise AnalysisError(f"{label}declara un radio incompatible con el cuerpo seleccionado.")
+        if parameters.get("proj") == "stere":
+            if abs(abs(float(parameters.get("lat_0", 0))) - 90) > 0.01:
+                label = f"{path} " if path else ""
+                raise AnalysisError(f"{label}usa una proyección estereográfica que no está centrada en un polo.")
+            return {
+                "kind": "polar_stereographic",
+                "radius_km": projected_radius_km,
+                "parameters": parameters,
+            }
         lat_ts = float(parameters.get("lat_ts", 0))
         if abs(math.cos(math.radians(lat_ts))) < 0.1:
             label = f"{path} " if path else ""
@@ -174,46 +184,165 @@ def _read_metric_layer(
     crs: Any,
     radius_km: float,
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    path = _resolve_path(manifest_path.parent, config.get("path"))
-    if not path.is_file():
-        raise AnalysisError(f"No se encontró la capa {key}: {path}")
-    band = int(config.get("band", 1))
-    scale = float(config.get("scale", 1))
-    offset = float(config.get("offset", 0))
+    sources = config.get("sources")
+    if sources is None:
+        sources = [config]
+    if not isinstance(sources, list) or not sources:
+        raise AnalysisError(f"La capa {key} necesita una ruta o una lista no vacía de fuentes.")
 
-    with rasterio.open(path) as dataset:
-        if band < 1 or band > dataset.count:
-            raise AnalysisError(f"La banda {band} no existe en la capa {key} ({path}).")
-        _validate_planetary_grid(dataset, path, radius_km)
-        if dataset.crs != crs:
-            raise AnalysisError(
-                f"La capa {key} usa un CRS distinto al DEM. Reproyéctala al mismo marco geográfico planetario antes del análisis."
+    combined = np.full(shape, np.nan, dtype=np.float32)
+    source_details = []
+    for source_config in sources:
+        if not isinstance(source_config, dict):
+            raise AnalysisError(f"Cada fuente de la capa {key} debe ser un objeto.")
+        path = _resolve_path(manifest_path.parent, source_config.get("path"))
+        if not path.is_file():
+            raise AnalysisError(f"No se encontró la capa {key}: {path}")
+        band = int(source_config.get("band", config.get("band", 1)))
+        scale = float(source_config.get("scale", config.get("scale", 1)))
+        offset = float(source_config.get("offset", config.get("offset", 0)))
+
+        with rasterio.open(path) as dataset:
+            if band < 1 or band > dataset.count:
+                raise AnalysisError(f"La banda {band} no existe en la capa {key} ({path}).")
+            _validate_planetary_grid(dataset, path, radius_km)
+            destination = np.full(shape, np.nan, dtype=np.float32)
+            reproject(
+                source=rasterio.band(dataset, band),
+                destination=destination,
+                src_transform=dataset.transform,
+                src_crs=dataset.crs,
+                src_nodata=dataset.nodata,
+                dst_transform=transform,
+                dst_crs=crs,
+                dst_nodata=np.nan,
+                resampling=Resampling.bilinear,
             )
-        destination = np.full(shape, np.nan, dtype=np.float32)
-        reproject(
-            source=rasterio.band(dataset, band),
-            destination=destination,
-            src_transform=dataset.transform,
-            src_crs=dataset.crs,
-            src_nodata=dataset.nodata,
-            dst_transform=transform,
-            dst_crs=crs,
-            dst_nodata=np.nan,
-            resampling=Resampling.bilinear,
-        )
-        destination = destination * scale + offset
-        details = {
-            "path": str(path),
-            "source_id": config.get("source_id", key),
-            "source_url": config.get("source_url"),
-            "units": config.get("units"),
-            "band": band,
-            "scale": scale,
-            "offset": offset,
-            "native_size": [dataset.width, dataset.height],
-            "crs": str(dataset.crs),
+            destination = destination * scale + offset
+            valid = np.isfinite(destination) & ~np.isfinite(combined)
+            combined[valid] = destination[valid]
+            source_details.append(
+                {
+                    "path": str(path),
+                    "source_id": source_config.get("source_id", config.get("source_id", key)),
+                    "source_url": source_config.get("source_url", config.get("source_url")),
+                    "data_url": source_config.get("data_url"),
+                    "units": source_config.get("units", config.get("units")),
+                    "coverage": source_config.get("coverage"),
+                    "native_resolution_m": source_config.get("native_resolution_m"),
+                    "band": band,
+                    "scale": scale,
+                    "offset": offset,
+                    "native_size": [dataset.width, dataset.height],
+                    "crs": str(dataset.crs),
+                }
+            )
+    details = {
+        "units": config.get("units"),
+        "mosaic_sources": source_details,
+        "valid_cell_count": int(np.count_nonzero(np.isfinite(combined))),
+    }
+    return combined, details
+
+
+def _filter_result(value: float | None, rule: dict[str, Any]) -> dict[str, Any]:
+    operator = rule["operator"]
+    threshold = float(rule["threshold"])
+    if value is None:
+        return {
+            "status": "not_evaluated",
+            "value": None,
+            "operator": operator,
+            "threshold": threshold,
+            "unit": rule.get("unit"),
+            "label": rule.get("label"),
+            "required": bool(rule.get("required", False)),
         }
-    return destination, details
+    passed = value >= threshold if operator == "gte" else value <= threshold
+    return {
+        "status": "passed" if passed else "failed",
+        "value": value,
+        "operator": operator,
+        "threshold": threshold,
+        "unit": rule.get("unit"),
+        "label": rule.get("label"),
+        "required": bool(rule.get("required", False)),
+    }
+
+
+def _apply_hard_filters(
+    eligible: np.ndarray,
+    metric_values: dict[str, np.ndarray],
+    profile: dict[str, Any],
+    loaded_layers: set[str],
+) -> tuple[np.ndarray, list[dict[str, Any]]]:
+    filtered = eligible.copy()
+    summary = []
+    for rule in profile.get("hard_filters", []):
+        key = rule.get("key")
+        operator = rule.get("operator")
+        threshold = float(rule.get("threshold", 0))
+        if key not in metric_values or operator not in {"gte", "lte"}:
+            raise AnalysisError(f"Filtro inválido para {key!r}; se requiere una métrica y gte/lte.")
+        values = metric_values[key]
+        valid = np.isfinite(values)
+        available = bool(valid.any())
+        required = bool(rule.get("required", False))
+        if not available:
+            configured_without_coverage = key in loaded_layers and bool(
+                rule.get("require_coverage", False)
+            )
+            reject_all = required or configured_without_coverage
+            summary.append(
+                {
+                    "key": key,
+                    "label": rule.get("label"),
+                    "operator": operator,
+                    "threshold": threshold,
+                    "unit": rule.get("unit"),
+                    "required": required,
+                    "status": (
+                        "missing_required"
+                        if required
+                        else "configured_no_coverage"
+                        if configured_without_coverage
+                        else "not_available"
+                    ),
+                    "evaluated_cells": 0,
+                    "rejected_cells": 0,
+                    "source_layer_configured": key in loaded_layers,
+                }
+            )
+            if reject_all:
+                filtered[:] = False
+            continue
+        passed = values >= threshold if operator == "gte" else values <= threshold
+        current = filtered.copy()
+        observed = current & valid
+        rejected_values = observed & ~passed
+        rejected_missing = current & ~valid if rule.get("require_coverage", False) else np.zeros_like(current)
+        rejected = rejected_values | rejected_missing
+        keep = passed & valid
+        if not rule.get("require_coverage", False):
+            keep |= ~valid
+        filtered &= keep
+        summary.append(
+            {
+                "key": key,
+                "label": rule.get("label"),
+                "operator": operator,
+                "threshold": threshold,
+                "unit": rule.get("unit"),
+                "required": required,
+                "status": "applied",
+                "evaluated_cells": int(np.count_nonzero(observed)),
+                "rejected_cells": int(np.count_nonzero(rejected)),
+                "rejected_for_missing_data": int(np.count_nonzero(rejected_missing)),
+                "remaining_cells": int(np.count_nonzero(filtered)),
+                "source_layer_configured": key in loaded_layers,
+            }
+        )
+    return filtered, summary
 
 
 def _window_statistics(values: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -292,12 +421,21 @@ def _derive_terrain(
 
 
 def _requirement_grid(
-    body: str, dem_m: np.ndarray, transform: Any, crs: Any, radius_km: float
+    body: str,
+    dem_m: np.ndarray,
+    transform: Any,
+    crs: Any,
+    radius_km: float,
+    earth_view_layer: np.ndarray | None = None,
 ) -> tuple[np.ndarray, str, str]:
     if body == "mars":
         # Approximation documented in the project's parameter guide; elevation is above areoid.
         density = 0.020 * np.exp(-((dem_m / 1000.0) / 11.1))
         return density.astype(np.float32), "descent_density_analog", "kg/m³"
+    if earth_view_layer is not None:
+        earth_view = np.asarray(earth_view_layer, dtype=np.float32).copy()
+        earth_view[~np.isfinite(dem_m)] = np.nan
+        return earth_view, "earth_view_analog", "%"
     info = _grid_info(crs, radius_km)
     lat, lon = _latitude_longitude_arrays(dem_m.shape, transform, info)
     lon = ((lon + 180.0) % 360.0) - 180.0
@@ -456,6 +594,7 @@ def analyze(
         "soilStability": np.full(dem_m.shape, np.nan, dtype=np.float32),
         "ice": np.full(dem_m.shape, np.nan, dtype=np.float32),
         "iceConfidence": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "earthView": np.full(dem_m.shape, np.nan, dtype=np.float32),
     }
     layer_sources: dict[str, Any] = {}
     layers = manifest.get("layers", {})
@@ -474,7 +613,12 @@ def analyze(
         layer_sources[key] = details
 
     requirement_grid, requirement_key, requirement_units = _requirement_grid(
-        body, dem_m, transform, crs, radius_km
+        body,
+        dem_m,
+        transform,
+        crs,
+        radius_km,
+        metric_values["earthView"] if "earthView" in layer_sources else None,
     )
     requirement = model["bodies"][body]["requirement"]
     if requirement["column"] != requirement_key:
@@ -486,6 +630,16 @@ def analyze(
     if not eligible.any():
         raise AnalysisError(
             f"Ninguna celda cumple el requisito {requirement['short']} >= {min_requirement} {requirement_units}."
+        )
+
+    eligible_before_hard_filters = int(np.count_nonzero(eligible))
+    eligible, hard_filter_summary = _apply_hard_filters(
+        eligible, metric_values, profile, set(layer_sources)
+    )
+    if not eligible.any():
+        raise AnalysisError(
+            "Ninguna celda cumple los filtros estrictos. Revisa los límites de "
+            "backend/config/site_selection.json y la cobertura de las capas."
         )
 
     parameter_model = {item["key"]: item for item in model["parameters"]}
@@ -603,6 +757,23 @@ def analyze(
             key: _json_number(grid[row, col]) if key in grid else None
             for key, grid in metric_scores.items()
         }
+        feature_filters = {
+            rule["key"]: _filter_result(
+                _json_number(metric_values[rule["key"]][row, col]), rule
+            )
+            for rule in profile.get("hard_filters", [])
+        }
+        feature_filter_status = (
+            "partial"
+            if any(item["status"] == "not_evaluated" for item in feature_filters.values())
+            else "passed"
+        )
+        evaluated_filter_count = sum(
+            item["status"] in {"passed", "failed"} for item in feature_filters.values()
+        )
+        filter_coverage = (
+            100 * evaluated_filter_count / len(feature_filters) if feature_filters else 100
+        )
         cell_width_km, cell_height_km = _cell_size_km(lat, transform, crs, radius_km)
         features.append(
             {
@@ -621,7 +792,7 @@ def analyze(
                     "grid_cell_height_km": round(cell_height_km, 3),
                     "polar_scale_warning": abs(lat) >= 75,
                     "overall_score": round(score, 2),
-                    "score_is_partial": len(metric_scores) < len(all_parameters),
+                    "score_is_partial": present_parameters < len(all_parameters),
                     "scoring_coverage_percent": round(
                         100 * float(weight_sum[row, col]) / all_group_weight, 1
                     )
@@ -631,6 +802,9 @@ def analyze(
                         100 * present_parameters / len(all_parameters), 1
                     ),
                     "eligible": True,
+                    "filter_status": feature_filter_status,
+                    "hard_filter_coverage_percent": round(filter_coverage, 1),
+                    "hard_filters": feature_filters,
                     "requirement": {
                         "key": requirement["key"],
                         "label": requirement["label"],
@@ -658,13 +832,24 @@ def analyze(
         encoding="utf-8",
     )
 
-    missing_layers = [key for key in LAYER_KEYS if key not in layer_sources]
+    missing_layers = [key for key in LAYER_KEYS if key != "earthView" and key not in layer_sources]
+    unavailable_filters = [
+        item["key"]
+        for item in hard_filter_summary
+        if item["status"] in {"not_available", "missing_required", "configured_no_coverage"}
+    ]
+    requirement_method = (
+        "capa de visibilidad promedio de la Tierra derivada de LOLA"
+        if body == "moon" and "earthView" in layer_sources
+        else profile.get("requirement_method", {}).get(requirement["column"])
+    )
     run_info = {
         "body": body,
         "mission": profile["mission"],
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "result": geojson_path.name,
         "candidate_count": len(features),
+        "eligible_cell_count_before_hard_filters": eligible_before_hard_filters,
         "eligible_cell_count_before_spatial_separation": int(np.count_nonzero(candidates)),
         "grid_km_at_equator": round(grid_km, 3),
         "coordinate_crs": str(crs),
@@ -677,8 +862,10 @@ def analyze(
             "description": requirement["label"],
             "minimum": min_requirement,
             "unit": requirement_units,
-            "method": profile.get("requirement_method", {}).get(requirement["column"]),
+            "method": requirement_method,
         },
+        "hard_filter_summary": hard_filter_summary,
+        "filters_not_evaluated": unavailable_filters,
         "model_weights": weights,
         "scoring_coverage_percent": round(
             float(
@@ -698,9 +885,11 @@ def analyze(
         "sources": {"dem": dem_source, "layers": layer_sources},
         "heuristic_criteria": profile.get("criteria", {}),
         "limitations": [
+            "Los umbrales son heurísticos configurables para exploración; no son límites certificados de misión.",
             "Resultado exploratorio aproximado; no es recomendación de aterrizaje ni certificación de seguridad.",
             "La pendiente y el desnivel se derivan del DEM remuestreado a la resolución de análisis.",
-            "Cráteres/rocas, estabilidad del suelo, albedo, iluminación e hielo requieren capas de entrada documentadas.",
+            "Los filtros de capas opcionales solo se evalúan si se proporciona una capa; revisar filters_not_evaluated.",
+            "Cráteres/rocas y estabilidad del suelo requieren capas de entrada documentadas.",
             "La similitud con la Tierra y el CSV planetary_candidates.csv no participan en este proceso.",
             "La puntuación se calcula solo con los parámetros disponibles; consultar data_coverage y scoring_coverage.",
             "La cuadrícula geográfica se estrecha hacia los polos; revisar la advertencia polar y usar productos polares para análisis de detalle.",
