@@ -650,7 +650,7 @@ function startBackdrop(canvas) {
     drawRidge(0.82, 0.05, 4.1, '#252c47', 14, true);
     // Escenografía entre la capa media y la cercana: módulo, bandera y astronauta
     const u = Math.min(w, h) / 720; // escala según el tamaño de la ventana
-    drawLander(w * 0.82 + mouse.x * -22, h * 0.9, 1.0 * u);
+    drawLander(w * 0.85 + mouse.x * -22, h * 0.9, 1.9 * u);
     drawFlag(w * 0.31 + mouse.x * -26, h * 0.905, 1.0 * u);
     drawAstronaut(w * 0.17 + mouse.x * -30, h * 0.915, 1.7 * u);
     drawRidge(0.92, 0.04, 7.7, '#323a5a', 30, true);
