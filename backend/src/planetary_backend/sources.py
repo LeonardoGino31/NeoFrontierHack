@@ -143,7 +143,7 @@ def download_layer(
                 "offset": 0,
                 "units": layer_source.get("units"),
                 "source_id": source["source_id"],
-                "source_url": layer_source["source_page"],
+                "source_url": source.get("source_page", layer_source["source_page"]),
                 "data_url": source["url"],
                 "coverage": source.get("coverage"),
                 "native_resolution_m": source.get("native_resolution_m"),
@@ -172,6 +172,7 @@ def download_layer(
     by_source_id.update({item["source_id"]: item for item in registered_sources})
     layers[layer] = {
         "units": layer_source.get("units"),
+        "normalization": layer_source.get("normalization"),
         "sources": unkeyed_sources + list(by_source_id.values()),
     }
     manifest_path.write_text(

@@ -20,6 +20,29 @@
         "LRO LOLA South Pole Illumination / PSR"
       ],
       "downloadable_layers": {
+        "ice": {
+          "provider": "USGS Astrogeology Science Center",
+          "source_page": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_south_pole_591mp",
+          "description": "Ice Favorability Index predictivo, integrado con edad geológica, estabilidad térmica, fracción de trampas frías y modelo de impacto. No mide cantidad de hielo ni detección directa.",
+          "units": "relative_favorability_0_100",
+          "normalization": "joint_minmax",
+          "regions": {
+            "north": {
+              "url": "https://planetarymaps.usgs.gov/mosaic/Lunar_Research/IceFavorabilityIndex/Moon_IceFavorabilityIndex_90N000E_591mp.tif",
+              "source_id": "USGS-Moon-IceFavorabilityIndex-North-591m",
+              "source_page": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_north_pole_591mp",
+              "native_resolution_m": 591,
+              "coverage": "75.863N–90N"
+            },
+            "south": {
+              "url": "https://planetarymaps.usgs.gov/mosaic/Lunar_Research/IceFavorabilityIndex/Moon_IceFavorabilityIndex_90S000E_591mp.tif",
+              "source_id": "USGS-Moon-IceFavorabilityIndex-South-591m",
+              "source_page": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_south_pole_591mp",
+              "native_resolution_m": 591,
+              "coverage": "75.863S–90S"
+            }
+          }
+        },
         "sunlight": {
           "provider": "NASA GSFC PGDA / LRO LOLA PDS",
           "source_page": "https://pgda.gsfc.nasa.gov/products/69",
@@ -68,19 +91,28 @@
         "albedo": "LRO Diviner reflectance or another documented lunar reflectance product",
         "craterFree": "LROC crater/rock hazard product at a stated spatial resolution",
         "soilStability": "A documented geotechnical proxy raster; do not infer it from the DEM alone",
-        "ice": "LRO Diviner Polar Resource Product (PDS4 ASCII triangular mesh) reports modeled depth to water-ice permafrost; LEND provides hydrogen evidence, not a direct ice probability. Both need documented conversion before use as a raster score.",
-        "iceConfidence": "The cited polar products do not supply a calibrated probability/confidence raster; keep this parameter unevaluated until an uncertainty layer is selected."
+        "ice": "USGS Astrogeology Ice Favorability Index (IFI), a unitless predictive raster built from geologic age, thermal stability, cold-trap fraction, and impact models. It is normalized to 0–100 relative to the joint north/south raster range; it is not abundance or detection.",
+        "iceConfidence": "Derived locally from IFI raster coverage and neighborhood coherence at the analysis grid; this is representativeness/data-quality confidence, not a probability of ice presence or a NASA uncertainty measurement."
       },
       "reference_sources": {
         "ice": [
+          {
+            "source_id": "USGS-Moon-IceFavorabilityIndex-591m",
+            "provider": "USGS Astrogeology Science Center",
+            "url": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_south_pole_591mp",
+            "format": "GeoTIFF polar stereographic, 591 m",
+            "reported_measurement": "Predictive favorability index for deposits of subsurface ice",
+            "integration_status": "downloadable",
+            "limitation": "Predictive, not based on direct ice detection; relative index, not abundance, reserve, or probability."
+          },
           {
             "source_id": "LRO-L-DLRE-5-PRP-V2.0",
             "provider": "NASA PDS Geosciences Node / LRO Diviner",
             "url": "https://pds-geosciences.wustl.edu/missions/lro/diviner.htm",
             "format": "PDS4 ASCII triangular mesh",
             "reported_measurement": "Annual temperature and modeled depth to water-ice permafrost",
-            "integration_status": "catalogued_not_ingested",
-            "limitation": "Requires mesh-to-raster conversion; depth to stable ice is not a probability or abundance score."
+            "integration_status": "reference_source",
+            "limitation": "Depth to stable ice is not a probability or abundance score; retained as supporting provenance for the IFI."
           },
           {
             "source_id": "LRO-L-LEND",
@@ -93,8 +125,9 @@
           }
         ],
         "iceConfidence": {
-          "integration_status": "not_available_as_calibrated_layer",
-          "limitation": "No cited source currently supplies a calibrated spatial confidence probability for the proposed ice score."
+          "integration_status": "derived_from_ice_layer",
+          "method": "3x3 analysis-grid coverage multiplied by spatial coherence",
+          "limitation": "A data-quality/representativeness proxy only; not calibrated confidence in ice presence. LEND hydrogen products remain a possible independent validation source."
         }
       }
     },
@@ -121,7 +154,7 @@
         "craterFree": "CTX/HiRISE hazard information is local and resolution-dependent; there is no equivalent global, landing-scale hazard raster in the current catalog.",
         "soilStability": "TES thermal inertia is available as a documented surface-property proxy; it is not a direct geotechnical bearing-strength measurement.",
         "ice": "NASA-supported SWIM4IMIM provides GeoTIFF ice-consistency products over approximately 60S–60N at 3 km. Consistency is not a probability; product range and no-data handling must be preserved.",
-        "iceConfidence": "SWIM combines multiple evidence types but does not provide a calibrated probability raster; keep confidence separate and unevaluated unless a dedicated uncertainty layer is supplied."
+        "iceConfidence": "When an ice raster is ingested, the backend can calculate local coverage/coherence as a data-quality proxy. SWIM consistency and this proxy are not calibrated probabilities or per-pixel uncertainty."
       },
       "reference_sources": {
         "ice": {
@@ -158,8 +191,9 @@
           "limitation": "Coverage is regional; high-resolution hazard checks belong after global screening."
         },
         "iceConfidence": {
-          "integration_status": "not_available_as_calibrated_layer",
-          "limitation": "SWIM evidence consistency is not a calibrated probability or uncertainty raster."
+          "integration_status": "derived_from_ice_layer",
+          "method": "3x3 analysis-grid coverage multiplied by spatial coherence",
+          "limitation": "Data-quality/representativeness proxy only; neither SWIM consistency nor this value is calibrated confidence in ice presence."
         }
       }
     }

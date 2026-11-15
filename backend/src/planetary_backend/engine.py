@@ -206,6 +206,8 @@ def _read_metric_layer(
             if band < 1 or band > dataset.count:
                 raise AnalysisError(f"La banda {band} no existe en la capa {key} ({path}).")
             _validate_planetary_grid(dataset, path, radius_km)
+            raster_scale = float(dataset.scales[band - 1]) if dataset.scales else 1.0
+            raster_offset = float(dataset.offsets[band - 1]) if dataset.offsets else 0.0
             destination = np.full(shape, np.nan, dtype=np.float32)
             reproject(
                 source=rasterio.band(dataset, band),
@@ -218,7 +220,7 @@ def _read_metric_layer(
                 dst_nodata=np.nan,
                 resampling=Resampling.bilinear,
             )
-            destination = destination * scale + offset
+            destination = (destination * raster_scale + raster_offset) * scale + offset
             valid = np.isfinite(destination) & ~np.isfinite(combined)
             combined[valid] = destination[valid]
             source_details.append(
@@ -233,16 +235,98 @@ def _read_metric_layer(
                     "band": band,
                     "scale": scale,
                     "offset": offset,
+                    "raster_scale": raster_scale,
+                    "raster_offset": raster_offset,
+                    "effective_scale": raster_scale * scale,
+                    "effective_offset": raster_offset * scale + offset,
                     "native_size": [dataset.width, dataset.height],
                     "crs": str(dataset.crs),
                 }
             )
     details = {
         "units": config.get("units"),
+        "normalization": config.get("normalization"),
         "mosaic_sources": source_details,
         "valid_cell_count": int(np.count_nonzero(np.isfinite(combined))),
     }
+    normalization = config.get("normalization")
+    if normalization == "joint_minmax":
+        valid_values = combined[np.isfinite(combined)]
+        if valid_values.size:
+            minimum = float(np.min(valid_values))
+            maximum = float(np.max(valid_values))
+            details["normalization_input_minimum"] = minimum
+            details["normalization_input_maximum"] = maximum
+            if maximum > minimum:
+                combined = (combined - minimum) * (100.0 / (maximum - minimum))
+            else:
+                # A constant product has no relative ranking information.
+                combined[np.isfinite(combined)] = 50.0
+            details["normalized_range"] = [0, 100]
+    elif normalization not in (None, ""):
+        raise AnalysisError(
+            f"Normalización no reconocida para {key}: {normalization!r}."
+        )
     return combined, details
+
+
+def _derive_ice_confidence(ice: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
+    """Estimate local representativeness from ice-layer coverage and coherence.
+
+    This is a data-quality score at the analysis-grid scale, not a probability
+    that water ice is present. It uses a 3x3 neighborhood; at high latitudes
+    the east-west footprint narrows with the geographic analysis grid.
+    """
+    valid = np.isfinite(ice)
+    values = np.where(valid, ice, 0.0).astype(np.float32)
+    total = np.zeros(ice.shape, dtype=np.float32)
+    total_squares = np.zeros(ice.shape, dtype=np.float32)
+    sample_count = np.zeros(ice.shape, dtype=np.float32)
+
+    for row_offset in (-1, 0, 1):
+        for column_offset in (-1, 0, 1):
+            source_rows = slice(max(0, -row_offset), min(ice.shape[0], ice.shape[0] - row_offset))
+            source_columns = slice(
+                max(0, -column_offset), min(ice.shape[1], ice.shape[1] - column_offset)
+            )
+            target_rows = slice(max(0, row_offset), min(ice.shape[0], ice.shape[0] + row_offset))
+            target_columns = slice(
+                max(0, column_offset), min(ice.shape[1], ice.shape[1] + column_offset)
+            )
+            neighborhood_valid = valid[source_rows, source_columns]
+            neighborhood_values = values[source_rows, source_columns]
+            total[target_rows, target_columns] += neighborhood_values
+            total_squares[target_rows, target_columns] += neighborhood_values**2
+            sample_count[target_rows, target_columns] += neighborhood_valid
+
+    mean = np.divide(
+        total,
+        sample_count,
+        out=np.zeros(ice.shape, dtype=np.float32),
+        where=sample_count > 0,
+    )
+    variance = np.divide(
+        total_squares,
+        sample_count,
+        out=np.zeros(ice.shape, dtype=np.float32),
+        where=sample_count > 0,
+    ) - mean**2
+    standard_deviation = np.sqrt(np.maximum(variance, 0.0))
+    coverage_percent = sample_count * (100.0 / 9.0)
+    coherence_percent = np.clip(100.0 * (1.0 - standard_deviation / 50.0), 0.0, 100.0)
+    confidence = coverage_percent * coherence_percent / 100.0
+    confidence[~valid] = np.nan
+    details = {
+        "units": "pts",
+        "method": "3x3 local coverage multiplied by spatial coherence",
+        "formula": "coverage_percent * (1 - local_stddev / 50)",
+        "neighborhood_cells": 9,
+        "data_quality_proxy": True,
+        "not_probability": True,
+        "derived_from": "ice",
+        "valid_cell_count": int(np.count_nonzero(np.isfinite(confidence))),
+    }
+    return confidence.astype(np.float32), details
 
 
 def _filter_result(value: float | None, rule: dict[str, Any]) -> dict[str, Any]:
@@ -612,6 +696,12 @@ def analyze(
         metric_values[key] = array
         layer_sources[key] = details
 
+    configured_layers = set(layer_sources)
+    if "ice" in layer_sources and "iceConfidence" not in layer_sources:
+        confidence, confidence_details = _derive_ice_confidence(metric_values["ice"])
+        metric_values["iceConfidence"] = confidence
+        layer_sources["iceConfidence"] = confidence_details
+
     requirement_grid, requirement_key, requirement_units = _requirement_grid(
         body,
         dem_m,
@@ -634,7 +724,7 @@ def analyze(
 
     eligible_before_hard_filters = int(np.count_nonzero(eligible))
     eligible, hard_filter_summary = _apply_hard_filters(
-        eligible, metric_values, profile, set(layer_sources)
+        eligible, metric_values, profile, configured_layers
     )
     if not eligible.any():
         raise AnalysisError(
@@ -818,6 +908,13 @@ def analyze(
                     "parameter_scores": feature_scores,
                     "group_scores": feature_groups,
                     "ice_confidence": raw_metrics.get("iceConfidence"),
+                    "ice_confidence_type": (
+                        "local coverage and spatial coherence; not probability"
+                        if layer_sources.get("iceConfidence", {}).get("derived_from") == "ice"
+                        else "input confidence raster; consult its source metadata"
+                        if raw_metrics.get("iceConfidence") is not None
+                        else None
+                    ),
                     "data_status": "partial" if present_parameters < len(all_parameters) else "available",
                 },
             }
@@ -882,6 +979,12 @@ def analyze(
             key for key, grid in metric_scores.items() if np.isfinite(grid).any()
         ),
         "not_scored": profile.get("not_scored", {}),
+        "ice_confidence_interpretation": (
+            layer_sources.get("iceConfidence", {}).get("method")
+            or "Confidence raster supplied as input; interpret using its source metadata."
+            if "iceConfidence" in layer_sources
+            else None
+        ),
         "sources": {"dem": dem_source, "layers": layer_sources},
         "heuristic_criteria": profile.get("criteria", {}),
         "limitations": [

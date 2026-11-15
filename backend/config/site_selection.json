@@ -14,11 +14,11 @@
       "hard_filters": [
         { "key": "safeSlope", "operator": "gte", "threshold": 80, "unit": "%", "required": true, "require_coverage": true, "label": "Al menos 80% del entorno analizado con pendiente ≤15°" },
         { "key": "relief", "operator": "lte", "threshold": 1000, "unit": "m", "required": true, "require_coverage": true, "label": "Desnivel local máximo de 1.000 m" },
-        { "key": "sunlight", "operator": "gte", "threshold": 70, "unit": "%", "required": false, "require_coverage": true, "label": "Iluminación solar promedio mínima de 70%" },
+        { "key": "sunlight", "operator": "gte", "threshold": 30, "unit": "%", "required": false, "require_coverage": true, "label": "Visibilidad solar promedio mínima de 30% en el período del producto LOLA" },
         { "key": "craterFree", "operator": "gte", "threshold": 70, "unit": "%", "required": false, "require_coverage": true, "label": "Superficie libre de peligros ≥70%" },
         { "key": "soilStability", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Estabilidad del suelo ≥50 puntos" },
         { "key": "ice", "operator": "gte", "threshold": 25, "unit": "pts", "required": false, "require_coverage": true, "label": "Potencial de hielo ≥25 puntos" },
-        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Confianza del indicador de hielo ≥50 puntos" }
+        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Cobertura y coherencia espacial del indicador de hielo ≥50 puntos" }
       ],
       "criteria": {
         "sunlight": { "direction": "higher", "scale": 100 },
@@ -43,7 +43,7 @@
         { "key": "sunlight", "operator": "gte", "threshold": 30, "unit": "%", "required": false, "require_coverage": true, "label": "Iluminación solar promedio mínima de 30%" },
         { "key": "craterFree", "operator": "gte", "threshold": 75, "unit": "%", "required": false, "require_coverage": true, "label": "Superficie libre de peligros ≥75%" },
         { "key": "soilStability", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Estabilidad del suelo ≥50 puntos" },
-        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Si se puntúa hielo, su confianza debe ser ≥50 puntos" }
+        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos" }
       ],
       "criteria": {
         "sunlight": { "direction": "higher", "scale": 100 },
