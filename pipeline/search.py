@@ -18,7 +18,7 @@ import numpy as np
 
 from .collect import collect_site
 from .earth import grid
-from .sites import Site
+from .sites import Site, is_candidate_only
 
 MARS_BLOCK = 4          # 4 × 4 celdas de 0.05° ≈ ventana de 20 km
 MIN_LAND_PCT = 90       # una celda medio en el mar no es un sitio comparable
@@ -131,6 +131,8 @@ def _known_analogs(csv_path: Path) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {}
     with csv_path.open(encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
+            if is_candidate_only(row):
+                continue
             out.setdefault(row["candidate_id"], []).append({
                 "id": row["earth_site_id"], "name": row["earth_site_name"],
                 "lat": float(row["earth_latitude"]), "lon": float(row["earth_longitude"])})

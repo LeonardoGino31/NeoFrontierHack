@@ -6,7 +6,7 @@
     python -m pipeline earth-topo       # topografía global de la Tierra (horas; reanudable)
     python -m pipeline earth-topo --bbox -70,-25,-66,-21   # solo una región (oeste,sur,este,norte)
     python -m pipeline earth-modis      # hielo, luz solar y suelo globales (requiere Earthdata)
-    python -m pipeline targets          # objetivos: CSV + oficiales + propuestas propias
+    python -m pipeline targets          # objetivos: CSV + backend + oficiales + propuestas propias
     python -m pipeline search           # candidatos en la Tierra -> public/data/earth_candidates.json
 """
 

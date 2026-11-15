@@ -150,5 +150,15 @@
     "maxIceDistanceKm": 10,
     "minSeparationKm": 15,
     "count": 10
+  },
+  "backendCandidates": {
+    "files": [
+      "backend/data/outputs/moon_candidates.geojson",
+      "backend/data/outputs/moon_candidate_alternatives.geojson",
+      "backend/data/outputs/mars_candidates.geojson",
+      "backend/data/outputs/mars_candidate_alternatives.geojson"
+    ],
+    "maxPerBody": 25,
+    "_note": "Cada objetivo se mide en la red (ventanas de LOLA/MOLA y la MCD); el tope limita el tiempo de `search`."
   }
 }

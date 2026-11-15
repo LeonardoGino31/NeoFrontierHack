@@ -5,6 +5,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .sites import is_candidate_only
+
 # Métrica del pipeline → prefijo de columna del CSV (se completa con _earth o _analog)
 CSV_COLUMNS = {
     "sunlight": "sunlight",
@@ -42,6 +44,8 @@ def apply_to_csv(values_path: Path, csv_path: Path) -> int:
 
     changed = 0
     for row in rows:
+        if is_candidate_only(row):
+            continue  # valores del backend: mezclar fuentes en una fila ocultaría su procedencia
         sides = {"earth": sites.get(f"earth:{row['earth_site_id']}"),
                  "analog": sites.get(f"{row['body']}:{row['candidate_id']}")}
         touched = False
