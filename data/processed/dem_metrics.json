@@ -1,0 +1,149 @@
+{
+  "source": "Copernicus GLO-30 (30 m)",
+  "slope_limit_deg": 15.0,
+  "sites": {
+    "chajnantor": {
+      "relief_m": 1041.4,
+      "safe_slope_pct": 75.9,
+      "mean_slope_deg": 10.81,
+      "elev_min_m": 3995.5,
+      "elev_max_m": 5707.9,
+      "elev_std_m": 231.3,
+      "masked_frac": 0.002,
+      "flat_warning": false,
+      "pixels": 454841
+    },
+    "cratersmoon": {
+      "relief_m": 538.1,
+      "safe_slope_pct": 90.0,
+      "mean_slope_deg": 4.41,
+      "elev_min_m": 1605.5,
+      "elev_max_m": 2469.1,
+      "elev_std_m": 113.1,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 575830
+    },
+    "devon": {
+      "relief_m": 218.2,
+      "safe_slope_pct": 87.5,
+      "mean_slope_deg": 7.29,
+      "elev_min_m": 39.8,
+      "elev_max_m": 352.6,
+      "elev_std_m": 57.7,
+      "masked_frac": 0.001,
+      "flat_warning": false,
+      "pixels": 552538
+    },
+    "domec": {
+      "relief_m": 6.3,
+      "safe_slope_pct": 100.0,
+      "mean_slope_deg": 1.39,
+      "elev_min_m": 3256.8,
+      "elev_max_m": 3275.9,
+      "elev_std_m": 1.6,
+      "masked_frac": 0.0,
+      "flat_warning": true,
+      "pixels": 542186
+    },
+    "hanksville": {
+      "relief_m": 190.7,
+      "safe_slope_pct": 90.3,
+      "mean_slope_deg": 5.67,
+      "elev_min_m": 1289.5,
+      "elev_max_m": 1558.9,
+      "elev_std_m": 46.9,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 533775
+    },
+    "lajoya": {
+      "relief_m": 368.9,
+      "safe_slope_pct": 100.0,
+      "mean_slope_deg": 1.32,
+      "elev_min_m": 1132.8,
+      "elev_max_m": 1597.3,
+      "elev_std_m": 100.0,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 436725
+    },
+    "lanzarote": {
+      "relief_m": 560.7,
+      "safe_slope_pct": 71.8,
+      "mean_slope_deg": 11.09,
+      "elev_min_m": -1.8,
+      "elev_max_m": 672.9,
+      "elev_std_m": 164.9,
+      "masked_frac": 0.62,
+      "flat_warning": false,
+      "pixels": 479427
+    },
+    "lavabeds": {
+      "relief_m": 850.4,
+      "safe_slope_pct": 95.1,
+      "mean_slope_deg": 4.96,
+      "elev_min_m": 1228.2,
+      "elev_max_m": 2357.0,
+      "elev_std_m": 239.7,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 560302
+    },
+    "maunakea": {
+      "relief_m": 2135.3,
+      "safe_slope_pct": 65.7,
+      "mean_slope_deg": 12.86,
+      "elev_min_m": 1485.8,
+      "elev_max_m": 4204.2,
+      "elev_std_m": 598.2,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 445136
+    },
+    "mcmurdo": {
+      "relief_m": 1559.8,
+      "safe_slope_pct": 50.2,
+      "mean_slope_deg": 16.64,
+      "elev_min_m": 89.3,
+      "elev_max_m": 2064.2,
+      "elev_std_m": 460.8,
+      "masked_frac": 0.001,
+      "flat_warning": false,
+      "pixels": 644412
+    },
+    "riotinto": {
+      "relief_m": 335.9,
+      "safe_slope_pct": 73.4,
+      "mean_slope_deg": 11.18,
+      "elev_min_m": 145.5,
+      "elev_max_m": 694.6,
+      "elev_std_m": 87.8,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 529246
+    },
+    "salda": {
+      "relief_m": 677.0,
+      "safe_slope_pct": 74.4,
+      "mean_slope_deg": 9.51,
+      "elev_min_m": 1014.7,
+      "elev_max_m": 2077.0,
+      "elev_std_m": 173.1,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 527952
+    },
+    "spcrater": {
+      "relief_m": 531.3,
+      "safe_slope_pct": 94.1,
+      "mean_slope_deg": 4.25,
+      "elev_min_m": 1598.3,
+      "elev_max_m": 2343.8,
+      "elev_std_m": 136.4,
+      "masked_frac": 0.0,
+      "flat_warning": false,
+      "pixels": 514365
+    }
+  }
+}

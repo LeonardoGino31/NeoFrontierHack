@@ -38,3 +38,10 @@ CLAUDE.md
 
 # pnpm solo se usa en local; el lockfile oficial del repo es package-lock.json
 pnpm-lock.yaml
+
+# Backend Python
+backend/.venv/
+__pycache__/
+
+# Datos crudos descargados (pesados, se regeneran con los scripts)
+data/raw/
