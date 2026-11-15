@@ -199,6 +199,10 @@ main() {
 
   build_global "$MOON_WAC"  "$GLOBAL_Z" "$OUT_TEX/moon_lro_wac.jpg"     -quality 88
   build_global "$MARS_MDIM" "$GLOBAL_Z" "$OUT_TEX/mars_viking_mdim.jpg" -quality 88
+  # Versiones de 2048 px: la app arranca con ellas y cambia a las de 4096 en segundo plano
+  for name in moon_lro_wac mars_viking_mdim; do
+    magick "$OUT_TEX/$name.jpg" -resize 2048x1024 -strip -quality 85 "$OUT_TEX/${name}_2k.jpg"
+  done
   build_psr_band
 
   local id body lat lon km vis rel

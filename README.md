@@ -108,16 +108,19 @@ Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
 
 ```text
 src/
-├── main.js             # Escena principal: globo, selección y modo comparación
+├── main.js             # Arranque y escena principal: carrusel, selección y modo comparación
+├── globe/              # Globo: texturas (carga sin bloquear), cuerpos, marcadores y fondo
+├── keyboard.js         # Teclado centralizado por capas (globo, guía, laboratorio)
+├── noise.js            # Ruido procedural compartido (value noise + fBm)
 ├── planetaryData.js    # Carga de ubicaciones y valores desde el CSV
 ├── parameterModel.js   # Carga y validación del modelo de parámetros (JSON)
 ├── similarity.js       # Fórmulas de similitud, grupos y requisitos
 ├── similarityPanel.js  # HUD de similitud
 ├── paramInfo.js        # Textos explicativos de cada parámetro
 ├── paramGuide.js       # Guía de parámetros y simulador
-├── terrainLab.js       # Laboratorio de terreno 3D
-├── noise.js            # Ruido procedural compartido (value noise + fBm)
-├── rover/              # Rovers del laboratorio: modelos, conducción y parche de detalle
+├── startScreen.js      # Pantalla de inicio con progreso de carga
+├── lab/                # Laboratorio 3D (se descarga al abrirlo): terreno, configuración,
+│   └── rover/          #   menú de rovers y, en rover/, modelos, conducción y parche de detalle
 ├── trekSites.js        # Capas, imágenes y enlaces a NASA Trek
 ├── earthSites.js       # Capas y rutas de imágenes terrestres del panel
 ├── comparePanel.js     # Panel inferior Tierra | análogo con imágenes reales
