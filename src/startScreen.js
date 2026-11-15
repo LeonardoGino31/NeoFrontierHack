@@ -329,61 +329,187 @@ function startBackdrop(canvas) {
     g.stroke();
   }
 
-  /** Módulo lunar dorado con antena parabólica y patas. */
+  /** Nave de exploración aterrizada: fuselaje con paneles, aletas, patas, escalera y luces. */
   function drawLander(x, y, s) {
+    const blink = Math.sin(t * 3) > 0;
+    const glow = 0.5 + 0.5 * Math.sin(t * 2);
     g.save();
     g.translate(x, y);
     g.scale(s, s);
-    g.fillStyle = 'rgba(0,0,0,0.3)';
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+
+    // Sombra y charco de luz de la escotilla sobre el suelo
+    g.fillStyle = 'rgba(0,0,0,0.35)';
     g.beginPath();
-    g.ellipse(10, 2, 80, 8, 0, 0, Math.PI * 2);
+    g.ellipse(14, 3, 92, 9, 0, 0, Math.PI * 2);
     g.fill();
-    g.strokeStyle = '#9aa3b8';
+    const pool = g.createRadialGradient(46, 2, 0, 46, 2, 60);
+    pool.addColorStop(0, `rgba(255,220,140,${0.28 + glow * 0.1})`);
+    pool.addColorStop(1, 'rgba(255,220,140,0)');
+    g.fillStyle = pool;
+    g.beginPath();
+    g.ellipse(46, 2, 60, 9, 0, 0, Math.PI * 2);
+    g.fill();
+
+    // Patas con puntales y platos de apoyo (la central queda detrás del fuselaje)
+    g.strokeStyle = '#7d879f';
     g.lineWidth = 4;
     g.beginPath();
-    g.moveTo(-30, -52); g.lineTo(-70, -2);
-    g.moveTo(30, -52); g.lineTo(72, -2);
-    g.moveTo(-12, -48); g.lineTo(-26, -2);
-    g.moveTo(14, -48); g.lineTo(30, -2);
+    g.moveTo(-18, -36); g.lineTo(-62, -3);
+    g.moveTo(18, -36); g.lineTo(66, -3);
+    g.moveTo(0, -30); g.lineTo(2, -3);
+    g.stroke();
+    g.strokeStyle = '#a9b2c8';
+    g.lineWidth = 2.5;
+    g.beginPath();
+    g.moveTo(-24, -62); g.lineTo(-46, -20);
+    g.moveTo(24, -62); g.lineTo(50, -20);
     g.stroke();
     g.fillStyle = '#c7ceda';
-    for (const px of [-70, -26, 30, 72]) {
+    for (const px of [-64, 2, 68]) {
       g.beginPath();
-      g.ellipse(px, -1, 11, 3, 0, 0, Math.PI * 2);
+      g.ellipse(px, -2, 12, 3.5, 0, 0, Math.PI * 2);
       g.fill();
     }
-    // Etapa de descenso (envoltura dorada)
-    const gold = g.createLinearGradient(-40, -90, 40, -40);
-    gold.addColorStop(0, '#f0c75a');
-    gold.addColorStop(0.5, '#a8741c');
-    gold.addColorStop(1, '#5e3f0e');
-    g.fillStyle = gold;
+
+    // Aletas laterales (acento naranja)
+    g.fillStyle = '#c8461f';
     g.beginPath();
-    g.moveTo(-40, -52); g.lineTo(-30, -90); g.lineTo(30, -90); g.lineTo(40, -52);
+    g.moveTo(-26, -62); g.lineTo(-52, -22); g.lineTo(-26, -30);
+    g.closePath();
+    g.moveTo(26, -62); g.lineTo(52, -22); g.lineTo(26, -30);
     g.closePath();
     g.fill();
-    // Etapa de ascenso
-    g.fillStyle = '#d6dbe6';
+    g.fillStyle = '#8f2c10';
     g.beginPath();
-    g.moveTo(-26, -90); g.lineTo(-20, -128); g.lineTo(20, -128); g.lineTo(26, -90);
+    g.moveTo(-26, -62); g.lineTo(-52, -22); g.lineTo(-45, -22); g.lineTo(-26, -52);
     g.closePath();
     g.fill();
-    g.fillStyle = '#1a2038';
+
+    // Tobera del motor con su brillo
+    const engine = g.createRadialGradient(0, -16, 1, 0, -16, 26);
+    engine.addColorStop(0, `rgba(255,170,80,${0.55 + glow * 0.3})`);
+    engine.addColorStop(1, 'rgba(255,120,40,0)');
+    g.fillStyle = engine;
+    g.fillRect(-28, -42, 56, 40);
+    g.fillStyle = '#2b3042';
     g.beginPath();
-    g.moveTo(-14, -114); g.lineTo(-6, -122); g.lineTo(-6, -108);
-    g.closePath();
-    g.moveTo(14, -114); g.lineTo(6, -122); g.lineTo(6, -108);
+    g.moveTo(-10, -30); g.lineTo(-17, -12); g.lineTo(17, -12); g.lineTo(10, -30);
     g.closePath();
     g.fill();
-    // Antena parabólica
+
+    // Fuselaje cilíndrico (luz a la izquierda, reflejo azul de la Tierra a la derecha)
+    const body = g.createLinearGradient(-28, 0, 28, 0);
+    body.addColorStop(0, '#f4f6fb');
+    body.addColorStop(0.45, '#d5dbe9');
+    body.addColorStop(0.85, '#8e9bb8');
+    body.addColorStop(1, '#6f8fd0');
+    g.fillStyle = body;
+    g.beginPath();
+    g.moveTo(-26, -30);
+    g.lineTo(-26, -132);
+    g.quadraticCurveTo(-24, -168, 0, -190);
+    g.quadraticCurveTo(24, -168, 26, -132);
+    g.lineTo(26, -30);
+    g.closePath();
+    g.fill();
+
+    // Escudo térmico oscuro en la base y banda naranja
+    g.fillStyle = '#2f364d';
+    g.fillRect(-26, -42, 52, 12);
+    g.fillStyle = '#e0572a';
+    g.fillRect(-26, -50, 52, 6);
+
+    // Líneas de paneles y remaches
+    g.strokeStyle = 'rgba(60,72,104,0.45)';
+    g.lineWidth = 1;
+    g.beginPath();
+    for (const py of [-70, -96, -126]) {
+      g.moveTo(-26, py); g.lineTo(26, py);
+    }
+    g.moveTo(-8, -126); g.lineTo(-8, -96);
+    g.moveTo(10, -96); g.lineTo(10, -70);
+    g.stroke();
+    g.fillStyle = 'rgba(60,72,104,0.55)';
+    for (const py of [-70, -96, -126]) {
+      for (const px of [-21, 21]) {
+        g.beginPath();
+        g.arc(px, py + 4, 1, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+
+    // Emblema NeoFrontier: planeta con anillo
+    g.strokeStyle = '#16336e';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(0, -82, 8, 0, Math.PI * 2);
+    g.stroke();
+    g.beginPath();
+    g.ellipse(0, -82, 14, 3.5, -0.4, 0, Math.PI * 2);
+    g.stroke();
+
+    // Ventanillas con luz interior
+    for (const px of [-13, 0, 13]) {
+      const lit = g.createRadialGradient(px - 1, -113, 0.5, px, -111, 6);
+      lit.addColorStop(0, '#fff3c0');
+      lit.addColorStop(0.5, '#4aa8e8');
+      lit.addColorStop(1, '#16407a');
+      g.fillStyle = lit;
+      g.strokeStyle = '#4b5470';
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(px, -111, 5.5, 0, Math.PI * 2);
+      g.fill();
+      g.stroke();
+    }
+
+    // Escotilla iluminada y escalera
+    g.fillStyle = '#ffe6a0';
+    g.fillRect(8, -66, 12, 16);
+    g.strokeStyle = '#4b5470';
+    g.lineWidth = 1.5;
+    g.strokeRect(8, -66, 12, 16);
+    g.strokeStyle = '#a9b2c8';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(24, -50); g.lineTo(40, -2);
+    g.moveTo(30, -50); g.lineTo(46, -2);
+    g.stroke();
+    g.lineWidth = 1.5;
+    g.beginPath();
+    for (let i = 1; i <= 6; i++) {
+      const ty = -50 + i * 8;
+      const k = (ty + 50) / 48;
+      g.moveTo(24 + 16 * k, ty); g.lineTo(30 + 16 * k, ty);
+    }
+    g.stroke();
+
+    // Antena parabólica lateral y mástil con baliza
     g.strokeStyle = '#c7ceda';
     g.lineWidth = 2;
     g.beginPath();
-    g.moveTo(10, -128); g.lineTo(24, -150);
+    g.moveTo(-26, -118); g.lineTo(-40, -132);
     g.stroke();
     g.fillStyle = '#e6e9f2';
     g.beginPath();
-    g.ellipse(24, -152, 12, 4, -0.7, 0, Math.PI * 2);
+    g.ellipse(-42, -134, 12, 4, -0.8, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = '#c7ceda';
+    g.beginPath();
+    g.moveTo(0, -190); g.lineTo(0, -206);
+    g.stroke();
+    if (blink) {
+      const beacon = g.createRadialGradient(0, -207, 0, 0, -207, 12);
+      beacon.addColorStop(0, 'rgba(255,90,80,1)');
+      beacon.addColorStop(1, 'rgba(255,90,80,0)');
+      g.fillStyle = beacon;
+      g.fillRect(-12, -219, 24, 24);
+    }
+    g.fillStyle = blink ? '#ff5a4d' : '#7a2a28';
+    g.beginPath();
+    g.arc(0, -207, 2.5, 0, Math.PI * 2);
     g.fill();
     g.restore();
   }
@@ -524,7 +650,7 @@ function startBackdrop(canvas) {
     drawRidge(0.82, 0.05, 4.1, '#252c47', 14, true);
     // Escenografía entre la capa media y la cercana: módulo, bandera y astronauta
     const u = Math.min(w, h) / 720; // escala según el tamaño de la ventana
-    drawLander(w * 0.84 + mouse.x * -22, h * 0.9, 1.1 * u);
+    drawLander(w * 0.82 + mouse.x * -22, h * 0.9, 1.0 * u);
     drawFlag(w * 0.31 + mouse.x * -26, h * 0.905, 1.0 * u);
     drawAstronaut(w * 0.17 + mouse.x * -30, h * 0.915, 1.7 * u);
     drawRidge(0.92, 0.04, 7.7, '#323a5a', 30, true);
