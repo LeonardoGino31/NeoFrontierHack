@@ -7,6 +7,9 @@ import { icon } from './icons.js';
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
 
 const fmt = (value, decimals) => value.toFixed(decimals);
+const escapeMarkup = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[char]);
 
 /**
  * Crea el HUD de similitud (oculto).
@@ -49,6 +52,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   // Clic en una fila (o en el índice global) abre la guía en ese parámetro
   panel.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
     const row = e.target.closest('[data-key]');
     if (row) onHelp(row.dataset.key);
   });
@@ -160,21 +164,21 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     const statusText = {
       passed_but_too_close: 'Cumple los filtros evaluados; quedó cerca de un candidato principal',
       near_miss: 'Casi cumple; el potencial de hielo quedó bajo el umbral',
-      ice_unassessed: 'Potencial de hielo sin evaluar por falta de cobertura',
+      ice_unassessed: 'El IFI no cubría el punto; el valor actual es un proxy de latitud',
     }[candidate.status] ?? candidate.status;
     const detail = candidate.selectionDetail;
     const detailText = candidate.status === 'passed_but_too_close'
       ? `Distancia al candidato principal: ${detail.distance_to_nearest_selected_km ?? '—'} km (separación mínima ${detail.minimum_separation_km ?? '—'} km).`
       : candidate.status === 'near_miss'
         ? `Hielo: ${detail.value ?? '—'} pts; umbral ${detail.threshold ?? '—'} pts; diferencia ${detail.shortfall ?? '—'} pts.`
-        : 'No hay cobertura raster de hielo para evaluar este punto.';
+        : 'El valor de hielo mostrado ahora es un proxy de latitud con confianza muy baja.';
 
     nav.querySelector('.nav-count').textContent = `${position.index + 1} / ${position.total}`;
     nav.hidden = false;
     panel.querySelector('.hud-info').innerHTML = `
       <div><span class="hud-key">${bodyName} · ${candidate.site.name}</span>${formatLatLon(candidate.site)}</div>
       <div><span class="hud-key">${statusText}</span>${detailText}</div>
-      <div class="hud-candidate-coverage">Datos de parámetros: ${candidate.parameterDataCoveragePercent ?? 0}% · filtros evaluados: ${candidate.hardFilterCoveragePercent ?? 0}%</div>`;
+      <div class="hud-candidate-coverage">Cobertura de datos de origen: ${candidate.parameterDataCoveragePercent ?? 0}% · filtros evaluados: ${candidate.hardFilterCoveragePercent ?? 0}%</div>`;
 
     const overallPct = data.overall * 100;
     const score = panel.querySelector('.hud-score');
@@ -200,16 +204,32 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
             <span class="hud-values">${groupPct == null ? 'Sin puntuación' : `${Math.round(groupPct)}%`}</span>
           </div>
         </div>`;
-      const factorRows = items.map(({ param, analog, confidence }) => {
-        const value = analog == null ? 'Sin datos' : `${fmt(analog, param.decimals)} ${param.unit}`;
-        const confidenceText = confidence?.analog == null
-          ? ''
-          : `<small class="hud-confidence">Confianza del indicador: ${Math.round(confidence.analog)}%</small>`;
+      const factorRows = items.map(({ param, analog, confidence, factorMetadata }) => {
+        const unit = param.unit || factorMetadata?.unit || '';
+        const value = analog == null ? 'Sin datos' : `${fmt(analog, param.decimals)} ${unit}`;
+        const confidenceValue = factorMetadata?.confidence_percent ?? confidence?.analog;
+        const confidenceText = factorMetadata?.confidence
+          ? `<small class="hud-confidence">Confianza del dato: ${factorMetadata.confidence}${confidenceValue == null ? '' : ` (${Math.round(confidenceValue)}%)`}</small>`
+          : confidenceValue == null
+            ? ''
+            : `<small class="hud-confidence">Confianza del indicador: ${Math.round(confidenceValue)}%</small>`;
+        const sourceUrl = factorMetadata?.source_url
+          ?? factorMetadata?.reference_source_url
+          ?? factorMetadata?.planned_source_url;
+        const sourceText = factorMetadata?.source
+          ? escapeMarkup(factorMetadata.source)
+          : '';
+        const sourceLinkText = factorMetadata?.planned_source_url || factorMetadata?.reference_source_url
+          ? 'Producto de referencia (no usado)'
+          : 'Abrir fuente';
+        const provenance = factorMetadata
+          ? `<small class="hud-factor-note">${factorMetadata.kind === 'usgs_ice_favorability_raster' ? 'Fuente directa' : 'Estimación aproximada'} · ${escapeMarkup(factorMetadata.method)}<br>${sourceText ? `Fuente: ${sourceText}<br>` : ''}${escapeMarkup(factorMetadata.limitation)}${sourceUrl ? `<br><a href="${escapeMarkup(sourceUrl)}" target="_blank" rel="noopener noreferrer">${sourceLinkText}</a>` : ''}</small>`
+          : '';
         return `
           <div class="candidate-factor" data-key="${param.key}" title="Ver explicación del factor">
             <span class="candidate-factor-icon">${icon(param.icon)}</span>
             <span class="candidate-factor-label">${param.label}</span>
-            <span class="candidate-factor-value">${value}${confidenceText}</span>
+            <span class="candidate-factor-value">${value}${confidenceText}${provenance}</span>
           </div>`;
       }).join('');
       return groupRow + factorRows;
