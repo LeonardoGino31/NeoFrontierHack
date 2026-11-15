@@ -1,0 +1,1481 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0001",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -161.359082,
+          32.376651
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0001",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0004",
+          "distance_to_nearest_selected_km": 8.59,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 8.602,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02852,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0002",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          167.889055,
+          3.692828
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0002",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0006",
+          "distance_to_nearest_selected_km": 10.14,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.165,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02606,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0003",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          168.060896,
+          3.692828
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0003",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0006",
+          "distance_to_nearest_selected_km": 20.29,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.165,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02606,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0004",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -155.000949,
+          33.235448
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0004",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0007",
+          "distance_to_nearest_selected_km": 8.5,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 8.52,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02853,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0005",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          167.889055,
+          3.864587
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0005",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0006",
+          "distance_to_nearest_selected_km": 14.36,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.163,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02606,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0006",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          168.060896,
+          3.864587
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0006",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0006",
+          "distance_to_nearest_selected_km": 22.69,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.163,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02606,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0007",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -152.938853,
+          26.193312
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0007",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0003",
+          "distance_to_nearest_selected_km": 9.12,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 9.14,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02831,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0008",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          175.621918,
+          4.208106
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0008",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0013",
+          "distance_to_nearest_selected_km": 10.16,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.158,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.0263,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0009",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          175.79376,
+          4.208106
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0009",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0013",
+          "distance_to_nearest_selected_km": 14.35,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 10.158,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.0263,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0010",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.322184,
+          89.572539
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0010",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0010",
+          "distance_to_nearest_selected_km": 20.71,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 0.076,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": true,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02384,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0011",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.494025,
+          89.572539
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0011",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0010",
+          "distance_to_nearest_selected_km": 20.71,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 0.076,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": true,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.02384,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mars-alt-passed_but_too_close-0012",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -153.110694,
+          26.70859
+        ]
+      },
+      "properties": {
+        "candidate_id": "mars-alt-passed_but_too_close-0012",
+        "candidate_status": "passed_but_too_close",
+        "selection_detail": {
+          "nearest_selected_candidate": "mars-approx-0014",
+          "distance_to_nearest_selected_km": 9.08,
+          "minimum_separation_km": 30.0
+        },
+        "body": "mars",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Aterrizaje y recorridos de rover aproximados",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 9.099,
+        "grid_cell_height_km": 10.181,
+        "polar_scale_warning": false,
+        "overall_score": 99.97,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 57.1,
+        "parameter_data_coverage_percent": 28.6,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 33.3,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 1.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Iluminación solar promedio mínima de 30%",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 75.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥75%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "descent",
+          "label": "Densidad del aire para el descenso",
+          "value": 0.0283,
+          "unit": "kg/m³",
+          "minimum": 0.018,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": null,
+          "albedo": null,
+          "relief": 1.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null,
+          "iceConfidence": null,
+          "earthView": null
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "topography": 99.975
+        },
+        "ice_confidence": null,
+        "ice_confidence_type": null,
+        "data_status": "partial"
+      }
+    }
+  ]
+}
