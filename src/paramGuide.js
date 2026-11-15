@@ -2,6 +2,7 @@
 // de dónde salen los datos y cómo se calcula, con un simulador interactivo.
 
 import { paramSimilarity } from './similarity.js';
+import { addKeyLayer, KEY_PRIORITY } from './keyboard.js';
 import { requirementsOf } from './parameterModel.js';
 import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
 import { STATUS_LABELS } from './siteValues.js';
@@ -84,14 +85,13 @@ export function createParamGuide({ model, onOpenLab }) {
     if (btn) show(btn.dataset.key);
   });
 
-  // Teclado: Esc cierra y ↑/↓ navegan. Se registra en fase de captura para
-  // que Esc cierre solo la guía y no también la comparación de atrás.
-  window.addEventListener(
-    'keydown',
-    (e) => {
-      if (overlay.hidden) return;
+  // Teclado: Esc cierra y ↑/↓ navegan. Como capa de mayor prioridad que el globo,
+  // Esc cierra solo la guía y no también la comparación de atrás.
+  addKeyLayer({
+    priority: KEY_PRIORITY.guide,
+    isActive: () => !overlay.hidden,
+    onKeyDown(e) {
       if (e.key === 'Escape') {
-        e.stopImmediatePropagation();
         close();
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
@@ -99,8 +99,7 @@ export function createParamGuide({ model, onOpenLab }) {
         show(keys[(i + keys.length) % keys.length]);
       }
     },
-    true
-  );
+  });
 
   // --- Render ---
   /** Muestra la página de `key` (índice global, parámetro o requisito) y marca su botón. */

@@ -1,153 +1,52 @@
 // Laboratorio de terreno: un entorno 3D para VER qué significa cada parámetro.
-// Genera un terreno procedural de 10 × 10 km y lo colorea según el parámetro elegido.
+// Genera un terreno procedural de 20 × 20 km y lo colorea según el parámetro elegido.
 // Los sliders cambian el terreno en vivo y al pasar el mouse se leen los valores.
+// Desde el menú de rovers se puede desplegar uno y conducirlo a escala real.
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { icon } from './icons.js';
-
-// ---------- Ruido procedural (value noise + fBm) ----------
-// Hash entero → número pseudoaleatorio en [0, 1). Determinista: mismo terreno siempre.
-function hash(ix, iy) {
-  let h = Math.imul(ix, 374761393) + Math.imul(iy, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
-const smooth = (t) => t * t * (3 - 2 * t);
-
-function valueNoise(x, y) {
-  const ix = Math.floor(x), iy = Math.floor(y);
-  const fx = smooth(x - ix), fy = smooth(y - iy);
-  const a = hash(ix, iy), b = hash(ix + 1, iy);
-  const c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
-  return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
-}
-
-// fBm: suma de varias "octavas" de ruido, cada una más fina y más débil
-function fbm(x, y, octaves) {
-  let sum = 0, amp = 0.5, freq = 1, norm = 0;
-  for (let i = 0; i < octaves; i++) {
-    sum += amp * valueNoise(x * freq, y * freq);
-    norm += amp;
-    amp *= 0.5;
-    freq *= 2;
-  }
-  return sum / norm; // [0, 1]
-}
-
-// ---------- Configuración ----------
-const SIZE_KM = 20;     // el terreno mide 20 × 20 km
-const SEGMENTS = 240;   // resolución de la malla (~83 m entre vértices)
-const CELL_KM = SIZE_KM / SEGMENTS;
-const SLOPE_LIMIT = 15; // pendiente máxima típica para aterrizar (°)
-
-// Cráteres fijos: [x, z, radio] en km
-const CRATERS = [
-  [3.6, -2.4, 2.2], [-4.8, 3.2, 1.4], [-1.2, -5.6, 0.9], [5.6, 5.2, 1.1],
-  [-6.4, -4.0, 0.8], [1.5, 6.5, 0.6], [-7.0, 6.8, 1.6], [7.2, -6.8, 0.7], [0.4, 1.2, 0.5],
-];
-
-const SLIDERS = [
-  { key: 'base',    label: 'Elevación base',        unit: 'm',    min: -4000, max: 5000, step: 50,   dec: 0 },
-  { key: 'relief',  label: 'Relieve',               unit: 'km',   min: 0,     max: 2.5,  step: 0.05, dec: 2 },
-  { key: 'rough',   label: 'Rugosidad (rocas)',     unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'craters', label: 'Cráteres',              unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'sunlight', label: 'Tiempo con luz solar', unit: '%',    min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'albedo',  label: 'Albedo',                unit: '',     min: 0.05,  max: 0.6,  step: 0.01, dec: 2 },
-  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
-  { key: 'ice',     label: 'Potencial de hielo',    unit: 'pts',  min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'iceConfidence', label: 'Confianza de evidencia', unit: '%', min: 0, max: 100, step: 1, dec: 0 },
-];
-
-// Valores ILUSTRATIVOS para comparar entornos (no son mediciones exactas).
-// `rust` solo tiñe la vista natural (polvo oxidado de Marte); no es un parámetro.
-const PRESETS = {
-  atacama: { name: 'Atacama · Tierra',      body: 'earth', base: 2500, relief: 0.9, rough: 0.35, craters: 0, sunlight: 80, albedo: 0.30, soilStability: 50, ice: 5, iceConfidence: 25, rust: 0.3 },
-  dryval:  { name: 'Valles Secos · Tierra', body: 'earth', base: 800, relief: 1.4, rough: 0.40, craters: 0, sunlight: 55, albedo: 0.35, soilStability: 55, ice: 30, iceConfidence: 45, rust: 0.15 },
-  iceland: { name: 'Islandia · Tierra',     body: 'earth', base: 400, relief: 0.6, rough: 0.85, craters: 0, sunlight: 45, albedo: 0.10, soilStability: 60, ice: 25, iceConfidence: 40, rust: 0.4 },
-  mars:    { name: 'Llanura · Marte',       body: 'mars', base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, sunlight: 50, albedo: 0.22, soilStability: 55, ice: 20, iceConfidence: 35, rust: 0.75 },
-  moon:    { name: 'Polo sur · Luna',       body: 'moon', base: 1500, relief: 1.6, rough: 0.50, craters: 1, sunlight: 70, albedo: 0.10, soilStability: 55, ice: 55, iceConfidence: 40, rust: 0 },
-};
-
-// Modos de visualización: qué color pinta el terreno y qué explica.
-// Las claves coinciden con el campo `lab` de los parámetros (public/data/parameter_model.json).
-const GOOD_BAD = ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'];
-const MODES = {
-  natural: {
-    label: 'Vista natural', icon: 'eye',
-    caption: 'Vista ilustrativa: el albedo aclara u oscurece el suelo y el hielo potencial se resalta en las zonas con menos sol. No es un mapa de depósitos reales.',
-  },
-  elevation: {
-    label: 'Desnivel', icon: 'mountain', unit: 'm',
-    caption: 'Cada color es una altura. Lo que se compara es el desnivel (máxima − mínima) dentro del recorte, no la altitud. Las líneas finas son curvas de nivel cada 250 m.',
-    stops: ['#2c1e5e', '#3b6fb6', '#3fb8a5', '#b8d86b', '#f3e9b5', '#ffffff'],
-  },
-  slope: {
-    label: 'Pendiente segura', icon: 'slope', unit: '°',
-    caption: `Inclinación del terreno. En verde, zonas aptas para aterrizar; desde ~${SLOPE_LIMIT}° (naranja) el riesgo crece. El porcentaje de área bajo ese límite es la "pendiente segura".`,
-    stops: ['#3ddc84', '#c6e85a', '#ffc94d', '#ff7a3d', '#d7301f'],
-  },
-  hazards: {
-    label: 'Cráteres y rocas', icon: 'target', unit: '',
-    caption: 'En rojo, celdas con obstáculos: dentro de un cráter o con rocas (rugosidad alta). Sube los sliders de cráteres o rugosidad y mira cómo se reduce el área libre.',
-    stops: GOOD_BAD.slice().reverse(),
-  },
-  soilStability: {
-    label: 'Estabilidad del suelo', icon: 'grid', unit: 'pts',
-    caption: 'Índice de demostración de firmeza del suelo; el polvo y la arena suelta pueden atascar un rover o hundir un aterrizador.',
-    stops: GOOD_BAD,
-  },
-  sunlight: {
-    label: 'Luz solar', icon: 'sun', unit: '%',
-    caption: 'Ilustrativo: las partes altas reciben sol más tiempo y el fondo de los cráteres queda en sombra, como en los polos lunares.',
-    stops: ['#263b75', '#468bd4', '#62cbb9', '#e9df67', '#f4954f'],
-  },
-  albedo: {
-    label: 'Albedo', icon: 'eye', unit: '',
-    caption: 'Fracción de luz que refleja el suelo: oscuro = absorbe (basalto, regolito lunar), claro = refleja (salares, hielo).',
-    stops: ['#111111', '#555555', '#aaaaaa', '#f2f2f2'],
-  },
-  ice: {
-    label: 'Potencial de hielo', icon: 'ice', unit: 'pts',
-    caption: 'Mapa procedural de demostración del potencial relativo de hielo, mayor en las zonas con menos sol. No indica depósitos observados; la confianza de evidencia se muestra por separado.',
-    stops: ['#19223d', '#315e91', '#62b9dc', '#d7f7ff', '#ffffff'],
-  },
-};
-
-// Rango de la leyenda de cada modo
-const LEGEND_RANGE = {
-  elevation: (d) => [d.minElev, d.maxElev],
-  slope: () => [0, 40],
-  hazards: () => [0, 1],
-  soilStability: () => [0, 100],
-  sunlight: () => [0, 100],
-  albedo: () => [0, 0.6],
-  ice: () => [0, 100],
-};
-
-// ---------- Utilidades de color ----------
-function makeRamp(hexStops) {
-  const cols = hexStops.map((h) => new THREE.Color(h));
-  return (t, out) => {
-    t = Math.min(1, Math.max(0, t)) * (cols.length - 1);
-    const i = Math.min(Math.floor(t), cols.length - 2);
-    return out.copy(cols[i]).lerp(cols[i + 1], t - i);
-  };
-}
-const RAMPS = Object.fromEntries(
-  Object.entries(MODES).filter(([, m]) => m.stops).map(([k, m]) => [k, makeRamp(m.stops)])
-);
+import { icon } from '../icons.js';
+import { addKeyLayer, isTyping, KEY_PRIORITY } from '../keyboard.js';
+import { fbm } from '../noise.js';
+import {
+  SIZE_KM, SEGMENTS, CELL_KM, SLOPE_LIMIT, SLIDERS, PRESETS, MODES, LEGEND_RANGE, RAMPS,
+} from './config.js';
+import { createTerrainField } from './terrainField.js';
+import { createTerrainBlock } from './terrainBlock.js';
+import { createCameraPad } from './cameraPad.js';
+import { roverMenuHtml, renderDriveTelemetry } from './roverPanel.js';
+import { createDetailTile, patchCoarseMaterial, sampleGrid } from './rover/detailTile.js';
+import { createRoverDrive } from './rover/roverDrive.js';
 
 // ---------- Módulo ----------
-export function createTerrainLab() {
-  let renderer, scene, camera, controls, terrain, marker, scanBar, raf = null;
+/**
+ * Crea el laboratorio (oculto). Usa el renderer de la app: al abrirse mueve su canvas
+ * dentro del laboratorio y al cerrarse lo devuelve, así no se crea un segundo contexto WebGL.
+ * @param {object} o
+ * @param {THREE.WebGLRenderer} o.renderer  renderer compartido con el globo
+ * @param {HTMLElement} o.launcher  botón que abre el laboratorio (se oculta mientras está abierto)
+ * @param {() => void} [o.onClose]  se llama al cerrar, con el canvas ya devuelto
+ */
+export function createTerrainLab({ renderer, launcher, onClose }) {
+  let scene, camera, controls, terrain, marker, scanBar, raf = null;
+  let canvasHome = null;  // dónde estaba el canvas antes de abrir
+  let savedExposure = 1;  // exposición del globo, que usa otra
   const CAMERA_HOME = new THREE.Vector3(14, 12, 18);
   let cameraGoal = null;
+  let targetGoal = null;    // a dónde mira la cámara al volver de un rover
+  let pendingRestore = null; // ajustes de cámara a restaurar cuando termine ese vuelo
+  let tile = null, drive = null;
+  let tileDirty = false;    // el parche de detalle espera a que termine el morph del terreno
+  let terrainCreated = false; // la superficie ya existe: habilita el menú de rovers
+  let lastFrame = 0, lastTelemetry = 0;
 
   // Estado de las animaciones
   const xs = new Float32Array((SEGMENTS + 1) ** 2);
   const morph = { from: new Float32Array((SEGMENTS + 1) ** 2), start: 0, dur: 0, active: false };
+  // Base del bloque (km): se anima junto con las alturas para que las paredes no salten
+  const bottom = { from: 0, to: 0, now: 0 };
+  let block = null; // paredes y base del terreno (solo estético)
+  let pad = null;   // control circular de cámara
   const fade = {
     from: new Float32Array((SEGMENTS + 1) ** 2 * 3), to: new Float32Array((SEGMENTS + 1) ** 2 * 3),
     start: 0, dur: 0, type: 'fade', active: false,
@@ -192,19 +91,22 @@ export function createTerrainLab() {
           <input type="range" min="${s.min}" max="${s.max}" step="${s.step}">
         </label>`).join('')}</div>
     </aside>
-    <div class="lab-readout hud" hidden></div>`;
+    <div class="lab-readout hud" hidden></div>
+    ${roverMenuHtml()}`;
   document.body.appendChild(root);
 
-  const launcher = document.createElement('button');
-  launcher.id = 'lab-launcher';
-  launcher.className = 'floating-launcher';
-  launcher.title = 'Laboratorio 3D';
-  launcher.setAttribute('aria-label', 'Abrir laboratorio 3D');
-  launcher.innerHTML = icon('cube');
-  launcher.addEventListener('click', () => open('natural'));
-  document.body.appendChild(launcher);
 
   const readout = root.querySelector('.lab-readout');
+  const roverMenu = root.querySelector('.lab-rovers');
+  const driveBox = root.querySelector('.lab-drive');
+
+  roverMenu.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rover]');
+    if (b && !b.disabled) deployRover(b.dataset.rover);
+    if (e.target.closest('.lab-rover-exit')) exitRover();
+    // Sin foco, Espacio (frenar) no vuelve a "pulsar" el botón
+    e.target.closest('button')?.blur();
+  });
 
   root.querySelector('.hud-close').addEventListener('click', close);
   root.querySelector('.lab-toggle').addEventListener('click', togglePanels);
@@ -251,23 +153,24 @@ export function createTerrainLab() {
     });
   }
 
-  window.addEventListener('keydown', (e) => {
-    if (root.hidden) return;
-    if (e.key === 'Escape') {
-      e.stopImmediatePropagation();
-      close();
-    } else if (e.key.toLowerCase() === 'h' && e.target.tagName !== 'INPUT') {
-      togglePanels();
-    }
-  }, true);
+  addKeyLayer({
+    priority: KEY_PRIORITY.lab,
+    isActive: () => !root.hidden,
+    onKeyDown(e) {
+      if (e.key === 'Escape') {
+        // Primero se baja del rover; un segundo Esc cierra el laboratorio
+        if (drive?.isActive()) exitRover();
+        else close();
+      } else if (e.key.toLowerCase() === 'h' && !isTyping(e.target)) {
+        togglePanels();
+      }
+    },
+  });
 
   // ---------- Escena 3D (se crea la primera vez que se abre) ----------
   function initScene() {
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    root.prepend(renderer.domElement);
-
+    // El renderer viene de la app con profundidad logarítmica (con un rover de 3 m y un
+    // terreno de 20 km a la vista, la lineal haría parpadear la superficie lejana) y sombras
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1424);
     camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
@@ -307,6 +210,18 @@ export function createTerrainLab() {
     );
     scene.add(terrain);
 
+    // Paredes con estratos y base: el relieve se ve como un bloque recortado y no como una lámina
+    block = createTerrainBlock({ sizeKm: SIZE_KM, segments: SEGMENTS });
+    scene.add(block.group);
+
+    // Parche de detalle y modo conducción (el parche solo se ve con un rover desplegado)
+    tile = createDetailTile({ scene, detailHeight, coarseHeight: coarseHeightAt, coarseColor });
+    patchCoarseMaterial(terrain.material, tile.uTile);
+    drive = createRoverDrive({ scene, camera, controls, light: sun, tile, ground: groundHeight });
+
+    // Control circular de la cámara del rover (útil con touchpad); visible solo conduciendo
+    pad = createCameraPad({ parent: root, camera, controls, onReset: () => drive.snapBehind() });
+
     // Anillo que marca el punto bajo el mouse (verde = se puede aterrizar)
     marker = new THREE.Mesh(
       new THREE.RingGeometry(0.18, 0.26, 40),
@@ -335,6 +250,9 @@ export function createTerrainLab() {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     renderer.domElement.addEventListener('pointermove', (e) => {
+      // El canvas es compartido: cerrado, el laboratorio no lee el mouse.
+      // Conduciendo, la lectura sale en la telemetría.
+      if (root.hidden || drive.isActive()) return;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
       raycaster.setFromCamera(pointer, camera);
@@ -351,35 +269,44 @@ export function createTerrainLab() {
       readout.hidden = true;
     });
 
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', () => {
+      if (!root.hidden) resize();
+    });
   }
 
   // ---------- Cálculo del terreno ----------
-  let lastDetail = 0; // componente fina del último punto calculado (para la rugosidad)
-  let lastCrater = 0; // 1 si el último punto calculado cae dentro de un cráter
+  const field = createTerrainField(state);
+  const parts = { h: 0, detail: 0, crater: 0 };     // reutilizado por rebuild()
+  const tileParts = { h: 0, detail: 0, crater: 0 }; // y este por el parche de detalle
+  /** Altura analítica más microrrelieve (km), para el parche de detalle. */
+  const detailHeight = (x, z) => field.sample(x, z, tileParts).h + field.microKm(x, z);
 
-  function heightAt(x, z) {
-    // Forma general (colinas, valles)
-    const macro = (fbm(x * 0.22 + 11.3, z * 0.22 - 4.7, 4) - 0.35) * state.relief * 1.6;
-    // Detalle fino: aquí actúa la rugosidad
-    const detail = (fbm(x * 1.7 + 3.1, z * 1.7 + 8.2, 5) - 0.5) * state.rough * 0.45;
-    lastDetail = detail;
-    // Cráteres: cuenco + borde elevado
-    let crater = 0;
-    lastCrater = 0;
-    if (state.craters > 0) {
-      for (const [cx, cz, r] of CRATERS) {
-        const d = Math.hypot(x - cx, z - cz) / r;
-        // Interior y borde del cráter cuentan como obstáculo (más claro cuanto más marcado)
-        if (d < 1.15) lastCrater = Math.max(lastCrater, state.craters);
-        if (d < 1.6) {
-          if (d < 1) crater -= (1 - d * d) * 0.25 * r;
-          crater += 0.12 * r * Math.exp(-(((d - 1) / 0.18) ** 2));
-        }
-      }
-      crater *= state.craters;
-    }
-    return macro + detail + crater; // km respecto a la base
+  const W_GRID = SEGMENTS + 1;
+  const clampKm = (v) => Math.min(SIZE_KM / 2, Math.max(-SIZE_KM / 2, v));
+
+  /** Altura (km) de la malla gruesa tal como se ve ahora (incluido un morph en curso). */
+  function coarseHeightAt(x, z) {
+    const arr = terrain.geometry.attributes.position.array;
+    return sampleGrid((i) => arr[i * 3 + 1], W_GRID, CELL_KM, -SIZE_KM / 2, -SIZE_KM / 2, clampKm(x), clampKm(z));
+  }
+
+  /** Color actual de la malla gruesa en x, z (para pintar el parche con el mismo modo). */
+  function coarseColor(x, z, out) {
+    const arr = terrain.geometry.attributes.color.array;
+    const at = (ch) => sampleGrid((i) => arr[i * 3 + ch], W_GRID, CELL_KM, -SIZE_KM / 2, -SIZE_KM / 2, clampKm(x), clampKm(z));
+    return out.setRGB(at(0), at(1), at(2));
+  }
+
+  /** Suelo sobre el que apoya el rover: el parche si cubre el punto, si no la malla gruesa. */
+  function groundHeight(x, z) {
+    return tile.heightAt(x, z) ?? coarseHeightAt(x, z);
+  }
+
+  /** Índice del vértice de la malla gruesa más cercano a x, z. */
+  function nearestVertex(x, z) {
+    const c = Math.round((clampKm(x) + SIZE_KM / 2) / CELL_KM);
+    const r = Math.round((clampKm(z) + SIZE_KM / 2) / CELL_KM);
+    return r * W_GRID + c;
   }
 
   // Recalcula el terreno objetivo y anima la transición desde el actual
@@ -387,9 +314,10 @@ export function createTerrainLab() {
     const pos = terrain.geometry.attributes.position;
     for (let i = 0; i < n; i++) {
       morph.from[i] = pos.getY(i); // altura que se ve ahora
-      data.hKm[i] = heightAt(pos.getX(i), pos.getZ(i));
-      data.detail[i] = lastDetail;
-      data.crater[i] = lastCrater;
+      field.sample(pos.getX(i), pos.getZ(i), parts);
+      data.hKm[i] = parts.h;
+      data.detail[i] = parts.detail;
+      data.crater[i] = parts.crater;
     }
 
     // Pendiente con diferencias finitas sobre la grilla (no depende de la animación)
@@ -422,6 +350,13 @@ export function createTerrainLab() {
       }
     }
 
+    // La base queda un espesor fijo bajo el punto más bajo del relieve nuevo
+    let minH = Infinity;
+    for (let i = 0; i < n; i++) minH = Math.min(minH, data.hKm[i]);
+    bottom.from = built ? bottom.now : minH - block.depthKm;
+    bottom.to = minH - block.depthKm;
+    block.setTint(state.rust);
+
     // Primera vez: sin animación. Después: morph suave de alturas
     if (!built || duration === 0) {
       applyHeights(1);
@@ -432,6 +367,16 @@ export function createTerrainLab() {
 
     computeAttributes();
     paint('fade', duration || 0);
+
+    if (!terrainCreated) {
+      terrainCreated = true;
+      root.querySelectorAll('[data-rover]').forEach((b) => (b.disabled = false));
+    }
+    // Con un rover en el terreno, el parche se regenera cuando el morph termina
+    if (drive?.isActive()) {
+      if (morph.active) tileDirty = true;
+      else drive.onTerrainChanged();
+    }
   }
 
   // Mezcla alturas: t = 0 → anterior, t = 1 → nueva
@@ -439,6 +384,8 @@ export function createTerrainLab() {
     const pos = terrain.geometry.attributes.position;
     for (let i = 0; i < n; i++) pos.setY(i, morph.from[i] + (data.hKm[i] - morph.from[i]) * t);
     pos.needsUpdate = true;
+    bottom.now = bottom.from + (bottom.to - bottom.from) * t;
+    block.update(pos.array, 3, bottom.now);
     terrain.geometry.computeVertexNormals();
     if (t === 1) terrain.geometry.computeBoundingSphere();
   }
@@ -517,6 +464,7 @@ export function createTerrainLab() {
       col.array.set(fade.to);
       col.needsUpdate = true;
       fade.active = false;
+      if (drive?.isActive()) tile.repaint();
     }
     renderLegend();
   }
@@ -591,7 +539,7 @@ export function createTerrainLab() {
 
   // ---------- Ciclo de vida ----------
   function resize() {
-    if (!renderer) return;
+    if (!scene) return;
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -602,12 +550,21 @@ export function createTerrainLab() {
   function loop() {
     raf = requestAnimationFrame(loop);
     const now = performance.now();
+    // Tope de 50 ms: tras una pestaña en segundo plano, el rover no "salta" metros
+    const dt = Math.min(0.05, (now - (lastFrame || now)) / 1000);
+    lastFrame = now;
 
     // 1) Morph de alturas
     if (morph.active) {
       const t = Math.min(1, (now - morph.start) / morph.dur);
       applyHeights(easeInOut(t));
-      if (t === 1) morph.active = false;
+      if (t === 1) {
+        morph.active = false;
+        if (tileDirty) {
+          tileDirty = false;
+          drive.onTerrainChanged();
+        }
+      }
     }
 
     // 2) Transición de colores
@@ -636,17 +593,36 @@ export function createTerrainLab() {
       if (t === 1) {
         fade.active = false;
         scanBar.visible = false;
+        if (drive.isActive()) tile.repaint();
       }
     }
 
     // 3) Pulso del anillo de aterrizaje
     if (marker.visible) marker.scale.setScalar(1 + 0.15 * Math.sin(now / 180));
 
-    // 4) Vuelo inicial de la cámara
+    // 4) Vuelo de la cámara (entrada al laboratorio o regreso desde un rover)
     if (cameraGoal) {
       camera.position.lerp(cameraGoal, 0.045);
-      if (camera.position.distanceTo(cameraGoal) < 0.05) cameraGoal = null;
+      if (targetGoal) controls.target.lerp(targetGoal, 0.06);
+      if (camera.position.distanceTo(cameraGoal) < 0.05) finishFlight();
     }
+
+    // Si el usuario tomó la cámara durante el regreso, los límites se restauran
+    // cuando ya no la harían saltar
+    if (pendingRestore && !cameraGoal && !drive.isActive()
+      && camera.position.distanceTo(controls.target) >= pendingRestore.minDistance) finishFlight();
+
+    // 5) Rover
+    if (drive.isActive()) {
+      drive.update(dt);
+      if (now - lastTelemetry > 100) {
+        lastTelemetry = now;
+        renderTelemetry();
+      }
+    }
+
+    // 6) Control circular: después del rover, que mueve el objetivo de la cámara
+    if (drive.isActive()) pad.update(dt);
 
     controls.update();
     renderer.render(scene, camera);
@@ -654,7 +630,7 @@ export function createTerrainLab() {
 
   // La guía abre el laboratorio con el campo `lab` de cada parámetro ('elevation', 'slope', ...)
   function open(key = 'natural') {
-    if (!renderer) {
+    if (!scene) {
       initScene();
       syncSliders();
       root.querySelector('[data-preset="atacama"]').classList.add('active');
@@ -665,6 +641,12 @@ export function createTerrainLab() {
     }
     root.hidden = false;
     launcher.hidden = true;
+    // Tomar prestado el canvas de la app (se devuelve en close)
+    canvasHome = { parent: renderer.domElement.parentNode, next: renderer.domElement.nextSibling };
+    root.prepend(renderer.domElement);
+    savedExposure = renderer.toneMappingExposure;
+    renderer.toneMappingExposure = 1;
+    controls.enabled = true;
     resize();
 
     // Entrada: la cámara llega volando desde lo alto
@@ -676,11 +658,107 @@ export function createTerrainLab() {
   }
 
   function close() {
+    if (drive?.isActive()) exitRover(true);
     root.hidden = true;
     launcher.hidden = false;
     readout.hidden = true;
     cancelAnimationFrame(raf); // no gastar GPU mientras está cerrado
     raf = null;
+    // OrbitControls sigue escuchando el canvas compartido: deshabilitado no reacciona
+    controls.enabled = false;
+    renderer.toneMappingExposure = savedExposure;
+    canvasHome.parent.insertBefore(renderer.domElement, canvasHome.next);
+    onClose?.();
+  }
+
+  // ---------- Rovers ----------
+  /** Punto de despliegue: el más llano y libre cerca del centro de la vista. */
+  function spawnPoint() {
+    const tx = clampKm(controls.target.x), tz = clampKm(controls.target.z);
+    const c0 = Math.round((tx + SIZE_KM / 2) / CELL_KM), r0 = Math.round((tz + SIZE_KM / 2) / CELL_KM);
+    let best = { x: tx, z: tz }, bestScore = Infinity;
+    for (let dr = -6; dr <= 6; dr++) {
+      for (let dc = -6; dc <= 6; dc++) {
+        const r = r0 + dr, c = c0 + dc;
+        if (r < 2 || c < 2 || r > SEGMENTS - 2 || c > SEGMENTS - 2) continue;
+        const i = r * W_GRID + c;
+        // Se prefiere lo llano y sin obstáculos, sin alejarse mucho de lo que se está mirando
+        const score = data.slope[i] + data.hazard[i] * 30 + Math.hypot(dr, dc) * 0.8;
+        if (score < bestScore) {
+          bestScore = score;
+          best = { x: c * CELL_KM - SIZE_KM / 2, z: r * CELL_KM - SIZE_KM / 2 };
+        }
+      }
+    }
+    return best;
+  }
+
+  /** Despliega (o cambia) el rover `id` y muestra la telemetría. */
+  function deployRover(id) {
+    if (!terrainCreated) return;
+    if (drive.isActive()) {
+      const p = drive.position();
+      drive.deploy(id, p.x, p.z, p.psi);
+    } else {
+      cameraGoal = null;
+      targetGoal = null;
+      if (pendingRestore) finishFlight(); // se interrumpió un regreso: partir de ajustes limpios
+      const p = spawnPoint();
+      drive.deploy(id, p.x, p.z);
+      marker.visible = false;
+      readout.hidden = true;
+    }
+    root.classList.add('driving');
+    root.querySelectorAll('[data-rover]').forEach((b) => b.classList.toggle('active', b.dataset.rover === id));
+    driveBox.hidden = false;
+    renderTelemetry();
+  }
+
+  /**
+   * Retira el rover. La cámara vuelve volando a la vista general y recién al llegar
+   * se restauran sus límites (si se restauraran antes, OrbitControls la haría saltar).
+   * @param {boolean} [instant]  restaurar sin vuelo (al cerrar el laboratorio)
+   */
+  function exitRover(instant = false) {
+    const savedCam = drive.undeploy();
+    root.classList.remove('driving');
+    root.querySelectorAll('[data-rover]').forEach((b) => b.classList.remove('active'));
+    driveBox.hidden = true;
+    if (!savedCam) return;
+    pendingRestore = savedCam;
+    controls.minDistance = 0;
+    controls.maxDistance = Infinity;
+    if (instant) {
+      finishFlight();
+      return;
+    }
+    // Primero sube sobre el rover, así el vuelo no atraviesa el relieve
+    camera.position.y += 0.3;
+    cameraGoal = CAMERA_HOME.clone();
+    targetGoal = new THREE.Vector3(0, 0, 0);
+  }
+
+  /** Cierra el vuelo de cámara en curso y aplica los ajustes pendientes. */
+  function finishFlight() {
+    cameraGoal = null;
+    targetGoal = null;
+    if (!pendingRestore) return;
+    const { near, far, ...limits } = pendingRestore;
+    Object.assign(controls, limits);
+    camera.near = near;
+    camera.far = far;
+    camera.updateProjectionMatrix();
+    pendingRestore = null;
+  }
+
+  /** Refresca el panel de telemetría del rover (unas 10 veces por segundo). */
+  function renderTelemetry() {
+    const t = drive.telemetry();
+    if (!t) return;
+    const i = nearestVertex(t.x, t.z);
+    renderDriveTelemetry(driveBox, t, {
+      slope: data.slope[i], elev: data.elev[i], risky: data.slope[i] >= SLOPE_LIMIT || data.hazard[i] >= 0.5,
+    });
   }
 
   return { open, close, isOpen: () => !root.hidden };
