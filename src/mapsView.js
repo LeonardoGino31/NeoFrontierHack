@@ -59,12 +59,25 @@ export function createMapsView({ onClose } = {}) {
   let closeTimer = 0;
   let resolveLoaded = null;
 
+  // El iframe de Google es blanco hasta que pinta los mosaicos: se mantiene invisible sobre un
+  // fondo oscuro y se funde al estar listo, para que no aparezca un destello blanco.
+  let readyTimer = 0;
+  const markReady = (delay) => {
+    clearTimeout(readyTimer);
+    readyTimer = setTimeout(() => root.classList.add('ready'), delay);
+  };
+
   const setFrame = () => {
+    root.classList.remove('ready');
+    markReady(9000); // por si 'load' nunca llega
     frame.src = embedUrl(place, type);
     for (const b of root.querySelectorAll('[data-type]')) b.classList.toggle('active', b.dataset.type === type);
   };
   frame.addEventListener('load', () => {
-    if (frame.src && frame.src !== 'about:blank') resolveLoaded?.();
+    if (frame.src && frame.src !== 'about:blank') {
+      resolveLoaded?.();
+      markReady(700); // margen para que Google pinte los mosaicos tras 'load'
+    }
   });
 
   /**
@@ -120,6 +133,8 @@ export function createMapsView({ onClose } = {}) {
     onClose?.();
     closeTimer = setTimeout(() => {
       root.hidden = true;
+      root.classList.remove('ready');
+      clearTimeout(readyTimer);
       frame.src = 'about:blank'; // detiene la carga y libera memoria
     }, 900);
   }

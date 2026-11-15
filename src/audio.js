@@ -51,6 +51,7 @@ let wanted = null;       // escena pedida (puede llegar antes de desbloquear el 
 let active = null;       // { name, bus, timer }
 let muted = readMuted();
 const listeners = new Set();
+let suspendTimer = null;
 
 function readMuted() {
   try { return localStorage.getItem(MUTE_KEY) === '1'; } catch { return false; }
@@ -80,7 +81,7 @@ function ensureContext() {
   reverb = makeReverb(ctx);
   const wet = ctx.createGain();
   wet.gain.value = 0.55;
-  reverb.connect(wet).connect(compressor);
+  reverb.connect(wet).connect(master); // la reverberación también pasa por el master, para que el silencio la corte
   master.connect(compressor);
   compressor.connect(ctx.destination);
   return true;
@@ -230,7 +231,13 @@ export function setMuted(value) {
   muted = value;
   try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch { /* sin almacenamiento: no pasa nada */ }
   if (ctx && !muted && ctx.state === 'suspended' && !document.hidden) ctx.resume();
-  if (master) master.gain.setTargetAtTime(muted ? 0 : MASTER_VOLUME, ctx.currentTime, 0.15);
+  if (master) {
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setTargetAtTime(muted ? 0 : MASTER_VOLUME, ctx.currentTime, 0.15);
+  }
+  // Ya en silencio, se suspende el contexto para no gastar CPU ni batería
+  clearTimeout(suspendTimer);
+  if (ctx && muted) suspendTimer = setTimeout(() => { if (muted) ctx.suspend(); }, 800);
   for (const fn of listeners) fn(muted);
 }
 

@@ -186,3 +186,14 @@ backend/                # Proceso batch independiente para candidatos lunares y 
 - Imágenes de Marte y la Luna: [NASA Solar System Treks](https://trek.nasa.gov/) (NASA/JPL-Caltech). Capas: Viking MDIM 2.1, MGS MOLA, LRO WAC y LRO LOLA (incluida la de sombra permanente del polo sur).
 - Texturas de la Tierra y de respaldo: [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0), basadas en datos de la NASA.
 - Proyecto desarrollado para el hackathon Terra2Mars.
+
+## Imágenes de las parejas (NASA Trek y GIBS)
+
+Las imágenes del panel "Vista real" se descargan una vez y se sirven desde `public/trek/sites/`, para que la demo no dependa de que NASA responda. Hay un recorte de imagen y otro de relieve por cada lado de cada pareja del CSV:
+
+```bash
+python3 scripts/fetch_pair_images.py            # solo las que faltan (requiere numpy y Pillow)
+python3 scripts/fetch_pair_images.py --force    # las regenera todas
+```
+
+Si cambia el CSV (otras parejas), basta con volver a ejecutarlo. Las teselas crudas quedan en `.trek-cache/` (ignorado por git). `scripts/fetch-trek.sh` sigue generando las texturas globales de los globos.

@@ -1186,7 +1186,6 @@ canvas {
 .cmp-tabs {
   display: flex;
   gap: 6px;
-  margin-left: auto;
 }
 
 .cmp-tabs button {
@@ -1206,10 +1205,8 @@ canvas {
 }
 
 .cmp-side {
-  display: grid;
-  grid-template-columns: 150px 1fr;
-  gap: 12px;
-  width: min(460px, calc(50vw - 200px));
+  display: block;
+  width: 190px;
   max-height: 40vh;
   overflow-y: auto;
   padding: 10px 12px;
@@ -1247,6 +1244,10 @@ canvas {
 .cmp-text.has-corner strong,
 .cmp-text.has-corner .cmp-sub {
   padding-right: 30px;
+}
+
+.cmp-text {
+  margin-top: 8px;
 }
 
 .cmp-text strong {
@@ -1411,14 +1412,159 @@ canvas {
 /* Pantallas angostas: las tarjetas se apilan sobre la barra, a todo el ancho */
 @media (max-width: 1100px) {
   .cmp-side {
-    grid-template-columns: 100px 1fr;
-    width: 100%;
-    max-height: 22vh;
-    bottom: 46px;
+    width: 150px;
+  }
+}
+
+/* Botón "Datos" de la barra y ventana con dos marcos (Tierra | análogo) */
+.cmp-data {
+  padding: 2px 14px;
+  font: 700 12px 'Rajdhani', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #06202e;
+  background: rgb(var(--hud-cyan));
+  border: 1px solid rgb(var(--hud-cyan));
+  cursor: pointer;
+}
+
+.cmp-data:hover {
+  filter: brightness(1.15);
+}
+
+#cmp-modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 520px));
+  justify-content: center;
+  align-content: center;
+  align-items: stretch;
+  gap: 20px;
+  padding: 56px 20px 20px;
+  background: rgba(2, 6, 16, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 25;
+}
+
+#cmp-modal[hidden] {
+  display: none;
+}
+
+.cmp-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 110px; /* a la izquierda de los botones de sonido y pantalla completa (fijos arriba a la derecha) */
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 18px;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.8);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  cursor: pointer;
+}
+
+.cmp-modal-close:hover {
+  background: rgba(120, 220, 255, 0.25);
+}
+
+.dm-frame {
+  position: static;
+  width: auto; /* anula los 360 px de .hud: ocupa toda su columna */
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 0 0 14px;
+  user-select: text;
+}
+
+.dm-frame .hud-header {
+  cursor: default;
+  font-size: 17px;
+}
+
+.dm-fig {
+  margin: 0;
+}
+
+.dm-fig img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #000;
+}
+
+.dm-fig figcaption {
+  padding: 4px 14px 0;
+  font: 11px system-ui, sans-serif;
+  color: #94a3b8;
+}
+
+.dm-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 14px 0;
+  font: 14px/1.5 system-ui, sans-serif;
+}
+
+.cmp-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 6px 14px;
+  font: 700 13px 'Rajdhani', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.6);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cmp-explore:hover {
+  background: rgba(250, 204, 21, 0.2);
+}
+
+/* En la ventana el botón de Maps es un botón normal, no el pin de la esquina */
+.cmp-explore.cmp-gmap {
+  position: static;
+  width: auto;
+  height: auto;
+  filter: none;
+}
+
+.cmp-explore.cmp-gmap:hover {
+  transform: none;
+}
+
+.cmp-pin {
+  display: inline-block;
+  width: 14px;
+  height: 18px;
+}
+
+.cmp-pin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 860px) {
+  #cmp-modal {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    overflow-y: auto;
   }
 
-  .cmp-side[data-side='earth'] {
-    bottom: calc(46px + 22vh + 8px);
+  .dm-frame {
+    max-height: none;
   }
 }
 
@@ -1986,11 +2132,48 @@ canvas {
   border: 0;
 }
 
+/* Fondo oscuro con la identidad de la app mientras Google Maps termina de pintar */
+.mv-stage {
+  background:
+    radial-gradient(circle at var(--ox, 50%) var(--oy, 50%), rgba(120, 220, 255, 0.16), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(120, 220, 255, 0.05) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(120, 220, 255, 0.05) 0 1px, transparent 1px 48px),
+    #02040d;
+}
+
+.mv-stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border: 2px solid rgba(120, 220, 255, 0.2);
+  border-top-color: rgb(120, 220, 255);
+  border-radius: 50%;
+  animation: mv-spin 0.9s linear infinite;
+  transition: opacity 0.5s;
+}
+
+#maps-view.ready .mv-stage::after {
+  opacity: 0;
+}
+
+@keyframes mv-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Parte ampliada y se asienta: da la sensación de caer sobre el lugar */
 .mv-frame {
   transform: scale(2.6);
   transform-origin: var(--ox, 50%) var(--oy, 50%);
-  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+}
+
+#maps-view.ready .mv-frame {
+  opacity: 1;
 }
 
 #maps-view.entered .mv-frame {
@@ -2090,4 +2273,8 @@ body.diving #lab-launcher,
 body.diving #point-nav {
   opacity: 0;
   pointer-events: none;
+}
+
+.dm-text p:last-of-type {
+  margin-bottom: 12px;
 }
