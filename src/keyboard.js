@@ -3,7 +3,7 @@
 // Así Esc cierra únicamente lo que está arriba, sin depender del orden en que se
 // registraron los listeners ni de stopImmediatePropagation.
 
-export const KEY_PRIORITY = { globe: 0, guide: 10, lab: 20 };
+export const KEY_PRIORITY = { globe: 0, guide: 10, lab: 20, maps: 30 };
 
 const layers = [];
 

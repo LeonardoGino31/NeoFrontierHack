@@ -1731,3 +1731,189 @@ canvas {
   padding: 5px 8px;
   text-transform: uppercase;
 }
+
+/* ===== Pin de Google Maps en la tarjeta de la Tierra ===== */
+.cmp-gmap {
+  display: inline-block;
+  vertical-align: middle;
+  width: 22px;
+  height: 28px;
+  margin-left: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+  animation: gmap-bob 2.4s ease-in-out infinite;
+  transition: transform 0.15s;
+}
+
+.cmp-gmap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cmp-gmap:hover {
+  transform: scale(1.25) translateY(-2px);
+  animation-play-state: paused;
+}
+
+.cmp-gmap:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 2px;
+}
+
+@keyframes gmap-bob {
+  50% { transform: translateY(-3px); }
+}
+
+/* ===== Visor de Google Maps (zoom circular que nace en el pin) ===== */
+#maps-view {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: #02040d;
+  clip-path: circle(0 at var(--ox, 50%) var(--oy, 50%));
+  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+#maps-view[hidden] {
+  display: none;
+}
+
+#maps-view.entered {
+  clip-path: circle(150% at var(--ox, 50%) var(--oy, 50%));
+}
+
+.mv-stage,
+.mv-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Parte ampliada y se asienta: da la sensación de caer sobre el lugar */
+.mv-frame {
+  transform: scale(2.6);
+  transform-origin: var(--ox, 50%) var(--oy, 50%);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
+}
+
+#maps-view.entered .mv-frame {
+  transform: scale(1);
+}
+
+#maps-view.loading .mv-frame {
+  opacity: 0;
+}
+
+.mv-loading {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  font: 600 18px 'Rajdhani', sans-serif;
+  letter-spacing: 0.12em;
+  color: #e6f7ff;
+  background: radial-gradient(circle, #0b1b45, #02040d 70%);
+}
+
+#maps-view.loading .mv-loading {
+  display: grid;
+}
+
+.mv-spin {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(120, 220, 255, 0.25);
+  border-top-color: #7fd8ff;
+  border-radius: 50%;
+  animation: mv-spin 0.9s linear infinite;
+}
+
+@keyframes mv-spin {
+  to { transform: rotate(360deg); }
+}
+
+.mv-bar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 100px; /* sitio para los botones de sonido y pantalla completa */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  font-family: 'Rajdhani', 'Arial Narrow', sans-serif;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.88);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.mv-pin svg {
+  display: block;
+  width: 20px;
+  height: 26px;
+}
+
+.mv-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.mv-title strong {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+}
+
+.mv-title small {
+  font: 12px system-ui, sans-serif;
+  color: #94a3b8;
+}
+
+.mv-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.mv-tabs button,
+.mv-external,
+.mv-close {
+  padding: 6px 12px;
+  font: 600 13px 'Rajdhani', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #e6f7ff;
+  background: rgba(120, 220, 255, 0.1);
+  border: 1px solid rgba(120, 220, 255, 0.3);
+  cursor: pointer;
+}
+
+.mv-tabs button.active {
+  color: #06121c;
+  background: rgb(120, 220, 255);
+}
+
+.mv-close:hover,
+.mv-external:hover {
+  background: rgba(120, 220, 255, 0.3);
+}
+
+@media (max-width: 700px) {
+  .mv-external { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #maps-view,
+  .mv-frame { transition: none; }
+  .cmp-gmap { animation: none; }
+}

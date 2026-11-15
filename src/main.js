@@ -16,6 +16,7 @@ import { createStartScreen } from './startScreen.js';
 import { icon } from './icons.js';
 import { setMusicScene, unlockOnGesture } from './audio.js';
 import { createHudControls } from './hudControls.js';
+import { createMapsView } from './mapsView.js';
 import { addKeyLayer, isTyping, KEY_PRIORITY } from './keyboard.js';
 import { createStarfield, createSky } from './globe/background.js';
 import { BODIES, STARTUP_TEXTURE_COUNT, createBodies, loadBodyTextures, upgradeHiRes } from './globe/bodies.js';
@@ -102,6 +103,7 @@ function updateMusic() {
   else if (compareBody) setMusicScene('compare');
   else setMusicScene(currentBody ?? 'earth');
 }
+const mapsView = createMapsView();
 unlockOnGesture();
 createHudControls();
 setMusicScene('intro');
@@ -219,7 +221,13 @@ async function boot() {
 
 /** Paneles HUD, guía y selector de cuerpo (necesitan el modelo de parámetros). */
 function createPanels(model) {
-  comparePanel = createComparePanel({ formatLatLon });
+  comparePanel = createComparePanel({
+    formatLatLon,
+    onOpenMaps: (earth, origin) => mapsView.open(
+      { name: earth.name, subtitle: `${earth.region} · ${formatLatLon(earth)}`, lat: earth.lat, lon: earth.lon },
+      origin.x, origin.y,
+    ),
+  });
   paramGuide = createParamGuide({
     model,
     onOpenLab: (key) => {
