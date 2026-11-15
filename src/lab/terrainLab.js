@@ -79,8 +79,11 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
       <button class="lab-toggle" title="Ocultar/mostrar paneles (H)">◧</button>
       <button class="hud-close" title="Cerrar (Esc)">✕</button>
     </div>
-    <nav class="lab-modes hud">${Object.entries(MODES)
-      .map(([k, m]) => `<button data-mode="${k}">${icon(m.icon)}<span>${m.label}</span></button>`).join('')}</nav>
+    <div class="lab-left">
+      <nav class="lab-modes hud">${Object.entries(MODES)
+        .map(([k, m]) => `<button data-mode="${k}">${icon(m.icon)}<span>${m.label}</span></button>`).join('')}</nav>
+      ${roverMenuHtml()}
+    </div>
     <aside class="lab-panel hud">
       <h3 class="lab-mode-title"></h3>
       <p class="lab-caption"></p>
@@ -92,8 +95,7 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
           <input type="range" min="${s.min}" max="${s.max}" step="${s.step}">
         </label>`).join('')}</div>
     </aside>
-    <div class="lab-readout hud" hidden></div>
-    ${roverMenuHtml()}`;
+    <div class="lab-readout hud" hidden></div>`;
   document.body.appendChild(root);
 
 

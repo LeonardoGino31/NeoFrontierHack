@@ -1,10 +1,43 @@
-// Pantalla de inicio de NeoFrontier: una superficie lunar animada con la Tierra en el
-// horizonte. Reacciona al mouse (paralaje entre capas, linterna sobre el terreno, clic
-// que lanza una onda) y muestra el progreso de carga. El botón EMPEZAR se habilita solo
+// Pantalla de inicio de NeoFrontier: el emblema de la marca (contornos y órbita) sobre un
+// cielo estrellado y una superficie lunar con el astronauta y la nave. Reacciona al mouse
+// (paralaje entre capas, linterna sobre el terreno; cada clic lanza un meteoro y una onda
+// desde el emblema) y la órbita del emblema muestra el progreso de carga. El botón EMPEZAR se habilita solo
 // cuando la escena está lista: antes, pulsarlo mientras se subían las texturas dejaba la
 // página congelada varios segundos.
 
+import { createEmblem } from './startEmblem.js';
+import { isMuted } from './audio.js';
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const SIGNAL_TRAVEL = 1.1; // segundos que tarda la señal del satélite en llegar a la nave
+const SIGNAL_GLOW = 1.8;   // segundos que la nave queda "recibiendo" al llegar la señal
+
+let audioCtx = null;
+/**
+ * Pitidos cortos sintetizados (sin archivos de audio). Respetan el botón de silencio.
+ * @param {number[]} freqs  frecuencias (Hz) que suenan una tras otra
+ */
+function beep(freqs, gap = 0.12) {
+  if (isMuted()) return;
+  try {
+    audioCtx ??= new AudioContext();
+    const now = audioCtx.currentTime;
+    freqs.forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const vol = audioCtx.createGain();
+      const t0 = now + i * gap;
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      vol.gain.setValueAtTime(0, t0);
+      vol.gain.linearRampToValueAtTime(0.07, t0 + 0.01);
+      vol.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
+      osc.connect(vol).connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.12);
+    });
+  } catch { /* sin Web Audio la señal se ve igual, solo no suena */ }
+}
 
 /** Ruido 1D suave y repetible (suma de senos) para las siluetas del terreno. */
 function ridge(x, seed, amp) {
@@ -16,15 +49,21 @@ function ridge(x, seed, amp) {
 }
 
 /**
- * Dibuja y anima el fondo en un canvas 2D. Devuelve { stop, pulse }.
+ * Dibuja y anima el fondo en un canvas 2D, y mueve el emblema en el mismo cuadro.
  * @param {HTMLCanvasElement} canvas
+ * @param {ReturnType<typeof createEmblem>} emblem
+ * @returns {{ stop: () => void }}
  */
-function startBackdrop(canvas) {
+function startBackdrop(canvas, emblem) {
   const g = canvas.getContext('2d');
   let w = 0, h = 0, dpr = 1;
   const mouse = { x: 0, y: 0, tx: 0, ty: 0, px: 0.5, py: 0.5 }; // x,y: -1..1 suavizado; px,py: 0..1
-  const ripples = [];
   const meteors = [];
+  // Satélite (posición en pantalla del último cuadro, para el clic) y sus señales en vuelo
+  const sat = { x: -999, y: -999, s: 1 };
+  const signals = [];
+  const dish = { x: 0, y: 0 }; // antena de la nave, destino de la señal
+  let received = 0;            // tiempo restante del destello de "señal recibida"
   let raf = 0;
   let last = performance.now();
   let t = 0;
@@ -53,16 +92,27 @@ function startBackdrop(canvas) {
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  /** ¿El puntero está sobre el satélite? (radio generoso: es pequeño y se mueve) */
+  const onSatellite = (e) => Math.hypot(e.clientX - sat.x, e.clientY - sat.y) < 36 * sat.s;
+
   function onMove(e) {
     mouse.px = e.clientX / window.innerWidth;
     mouse.py = e.clientY / window.innerHeight;
     mouse.tx = mouse.px * 2 - 1;
     mouse.ty = mouse.py * 2 - 1;
+    canvas.style.cursor = onSatellite(e) ? 'pointer' : '';
   }
   function onDown(e) {
     if (e.target.closest('.start-btn')) return;
-    ripples.push({ x: e.clientX, y: e.clientY, age: 0 });
-    spawnMeteor(); // cada clic también lanza un meteoro
+    // El satélite manda una señal a la nave en vez de lanzar un meteoro
+    if (onSatellite(e)) {
+      signals.push({ age: 0, x: sat.x, y: sat.y });
+      beep([1320, 1760]);
+      return;
+    }
+    // Cada clic lanza un meteoro y una onda de contorno desde el emblema
+    spawnMeteor();
+    if (!reducedMotion) emblem.ripple();
   }
 
   /** Silueta del terreno de una capa: un polígono con relieve que se desplaza con el mouse. */
@@ -106,9 +156,9 @@ function startBackdrop(canvas) {
   /** Brillo de nebulosa detrás de las estrellas. */
   function drawNebula() {
     const blobs = [
-      [0.2, 0.22, 0.38, 'rgba(120,60,200,0.16)'],
-      [0.78, 0.12, 0.34, 'rgba(40,120,220,0.14)'],
-      [0.5, 0.45, 0.45, 'rgba(200,70,140,0.07)'],
+      [0.5, 0.35, 0.55, 'rgba(40,58,150,0.30)'],  // resplandor azul de la marca tras el emblema
+      [0.15, 0.18, 0.36, 'rgba(70,60,170,0.16)'],
+      [0.85, 0.2, 0.32, 'rgba(255,107,53,0.06)'], // un toque del naranja de la marca
     ];
     for (const [bx, by, br, color] of blobs) {
       const x = bx * w + mouse.x * -10, y = by * h + mouse.y * -6, r = br * Math.max(w, h) * 0.6;
@@ -120,10 +170,15 @@ function startBackdrop(canvas) {
     }
   }
 
-  /** Marte pequeño y lejano, con casquete polar. */
+  /** Marte pequeño y lejano, con casquete polar y una mancha oscura que gira despacio. */
   function drawMars() {
     const r = Math.min(w, h) * 0.035;
-    const x = w * 0.14 + mouse.x * -8, y = h * 0.2 + mouse.y * -5;
+    const x = w * 0.13 + mouse.x * -8, y = h * 0.2 + mouse.y * -5;
+    const halo = g.createRadialGradient(x, y, r * 0.9, x, y, r * 2.4);
+    halo.addColorStop(0, 'rgba(255,120,60,0.18)');
+    halo.addColorStop(1, 'rgba(255,120,60,0)');
+    g.fillStyle = halo;
+    g.fillRect(x - r * 2.5, y - r * 2.5, r * 5, r * 5);
     const body = g.createRadialGradient(x - r * 0.4, y - r * 0.4, r * 0.1, x, y, r);
     body.addColorStop(0, '#ffb07a');
     body.addColorStop(0.6, '#c4552d');
@@ -142,22 +197,68 @@ function startBackdrop(canvas) {
     g.fill();
   }
 
-  /** Satélite que cruza el cielo con una luz que parpadea. */
-  function drawSatellite() {
+  /** Luna creciente al fondo, con mares oscuros y el lado de sombra hacia la derecha. */
+  function drawMoon() {
+    const r = Math.min(w, h) * 0.05;
+    const x = w * 0.86 + mouse.x * -10, y = h * 0.15 + mouse.y * -6;
+    const halo = g.createRadialGradient(x, y, r * 0.9, x, y, r * 2.6);
+    halo.addColorStop(0, 'rgba(220,228,255,0.16)');
+    halo.addColorStop(1, 'rgba(220,228,255,0)');
+    g.fillStyle = halo;
+    g.fillRect(x - r * 2.7, y - r * 2.7, r * 5.4, r * 5.4);
+    g.save();
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.clip();
+    const body = g.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+    body.addColorStop(0, '#f1f3f8');
+    body.addColorStop(1, '#a9b0c4');
+    g.fillStyle = body;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+    g.fillStyle = 'rgba(110,118,145,0.45)'; // mares
+    for (const [mx, my, mr] of [[-0.3, -0.2, 0.28], [0.15, 0.25, 0.22], [0.3, -0.35, 0.14], [-0.15, 0.45, 0.12]]) {
+      g.beginPath();
+      g.arc(x + mx * r, y + my * r, mr * r, 0, Math.PI * 2);
+      g.fill();
+    }
+    const shade = g.createLinearGradient(x - r, y, x + r, y);
+    shade.addColorStop(0.45, 'rgba(7,11,34,0)');
+    shade.addColorStop(1, 'rgba(7,11,34,0.75)');
+    g.fillStyle = shade;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+    g.restore();
+  }
+
+  /** Satélite que cruza el cielo; al hacerle clic emite una señal hacia la nave. */
+  function drawSatellite(u) {
+    const s = 1.3 * u;
     const x = ((t * 22) % (w + 200)) - 100 + mouse.x * -12;
     const y = h * 0.1 + Math.sin(t * 0.2) * 6 + mouse.y * -6;
+    Object.assign(sat, { x, y, s });
+    const sending = signals.length > 0;
     g.save();
     g.translate(x, y);
+    g.scale(s, s);
     g.rotate(-0.2);
     g.fillStyle = '#9fb0cf';
     g.fillRect(-5, -4, 10, 8);
     g.fillStyle = '#3566c9';
     g.fillRect(-26, -3, 18, 6);
     g.fillRect(8, -3, 18, 6);
+    g.strokeStyle = 'rgba(160,200,255,0.5)'; // celdas de los paneles
+    g.lineWidth = 0.6;
+    g.beginPath();
+    for (const px of [-20, -14, 14, 20]) { g.moveTo(px, -3); g.lineTo(px, 3); }
+    g.stroke();
     g.fillStyle = '#c7d2e8';
     g.fillRect(-1, -9, 2, 5);
-    if (Math.sin(t * 5) > 0.3) {
-      g.fillStyle = 'rgba(255,80,80,0.95)';
+    // Antena parabólica hacia abajo: de ahí sale la señal
+    g.fillStyle = sending ? '#ffd8c4' : '#e6e9f2';
+    g.beginPath();
+    g.ellipse(0, 7, 6, 2.2, 0, 0, Math.PI);
+    g.fill();
+    if (Math.sin(t * 5) > 0.3 || sending) {
+      g.fillStyle = sending ? 'rgba(255,107,53,1)' : 'rgba(255,80,80,0.95)';
       g.beginPath();
       g.arc(0, -10, 2, 0, Math.PI * 2);
       g.fill();
@@ -165,10 +266,72 @@ function startBackdrop(canvas) {
     g.restore();
   }
 
+  /**
+   * Señales en vuelo: ondas que salen del satélite y un pulso naranja que baja hasta la
+   * antena de la nave. Al llegar, la nave "responde" con su propio pitido y un destello.
+   */
+  function drawSignals(dt) {
+    for (let i = signals.length - 1; i >= 0; i--) {
+      const sg = signals[i];
+      sg.age += dt;
+      const k = Math.min(1, sg.age / SIGNAL_TRAVEL);
+      // Tres frentes de onda, escalonados, que se abren y se apagan
+      for (let j = 0; j < 3; j++) {
+        const a = sg.age - j * 0.18;
+        if (a <= 0 || a > 1) continue;
+        g.strokeStyle = `rgba(255,140,90,${(1 - a) * 0.8})`;
+        g.lineWidth = 2;
+        g.beginPath();
+        g.arc(sg.x, sg.y, 8 + a * 70 * sat.s, 0, Math.PI * 2);
+        g.stroke();
+      }
+      // El pulso viaja por una línea punteada hacia la antena (que se mueve con el paralaje)
+      if (k < 1) {
+        const px = sg.x + (dish.x - sg.x) * k, py = sg.y + (dish.y - sg.y) * k;
+        g.strokeStyle = 'rgba(255,107,53,0.35)';
+        g.setLineDash([4, 8]);
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(sg.x, sg.y);
+        g.lineTo(px, py);
+        g.stroke();
+        g.setLineDash([]);
+        const glow = g.createRadialGradient(px, py, 0, px, py, 14);
+        glow.addColorStop(0, 'rgba(255,240,220,1)');
+        glow.addColorStop(0.3, 'rgba(255,107,53,0.8)');
+        glow.addColorStop(1, 'rgba(255,107,53,0)');
+        g.fillStyle = glow;
+        g.fillRect(px - 14, py - 14, 28, 28);
+      } else if (!sg.arrived) {
+        sg.arrived = true;
+        received = SIGNAL_GLOW;
+        beep([880, 1175, 1568], 0.09); // la nave contesta
+      }
+      if (sg.age > Math.max(SIGNAL_TRAVEL, 1.4)) signals.splice(i, 1);
+    }
+    // Destello en la antena mientras la nave "recibe"
+    if (received > 0) {
+      received = Math.max(0, received - dt);
+      const a = received / SIGNAL_GLOW;
+      const r = 18 + (1 - a) * 40;
+      g.strokeStyle = `rgba(255,140,90,${a})`;
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(dish.x, dish.y, r, 0, Math.PI * 2);
+      g.stroke();
+      const glow = g.createRadialGradient(dish.x, dish.y, 0, dish.x, dish.y, 22);
+      glow.addColorStop(0, `rgba(255,230,200,${a})`);
+      glow.addColorStop(1, 'rgba(255,107,53,0)');
+      g.fillStyle = glow;
+      g.fillRect(dish.x - 22, dish.y - 22, 44, 44);
+    }
+  }
+
   /** Astronauta de pie: saluda, mira al cursor y se anima más si el mouse se acerca. */
   function drawAstronaut(x, y, s) {
     const dx = mouse.px * w - x, dy = mouse.py * h - (y - 80 * s);
-    const near = Math.hypot(dx, dy) < w * 0.22;
+    // Saluda con ganas si el mouse se acerca o si la nave acaba de recibir una señal
+    const near = Math.hypot(dx, dy) < w * 0.22 || received > 0;
     const look = Math.max(-1, Math.min(1, dx / (w * 0.4)));
     const lookY = Math.max(-1, Math.min(1, dy / (h * 0.4)));
     const bob = Math.sin(t * 1.6) * 1.2;
@@ -192,11 +355,34 @@ function startBackdrop(canvas) {
     suit.addColorStop(1, '#8fa3d4'); // reflejo azul de la Tierra a la derecha
     const shade = '#aab5cf';
 
-    // Mochila de soporte vital
-    g.fillStyle = '#c3cbdd';
+    // Mochila de soporte vital: más oscura que el traje y más alta que el hombro, para que
+    // se lea como un equipo a la espalda y no como parte del torso
+    const pack = g.createLinearGradient(-30, 0, -12, 0);
+    pack.addColorStop(0, '#7f8bab');
+    pack.addColorStop(1, '#aeb8d0');
+    g.fillStyle = pack;
+    g.strokeStyle = '#5d6889';
+    g.lineWidth = 1.5;
     g.beginPath();
-    g.roundRect(-24, -70, 14, 34, 4);
+    g.roundRect(-30, -82, 20, 46, 6);
     g.fill();
+    g.stroke();
+    g.fillStyle = '#c9d0e2'; // tapa superior
+    g.beginPath();
+    g.roundRect(-31, -85, 22, 7, 3);
+    g.fill();
+    g.strokeStyle = '#5d6889'; // rejillas de ventilación
+    g.lineWidth = 1.2;
+    g.beginPath();
+    for (const vy of [-52, -47, -42]) { g.moveTo(-27, vy); g.lineTo(-20, vy); }
+    g.stroke();
+    // Manguera de la mochila al casco
+    g.strokeStyle = '#8c97b4';
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(-24, -78);
+    g.quadraticCurveTo(-22, -96, -10, -96);
+    g.stroke();
 
     // Piernas y botas
     g.strokeStyle = shade;
@@ -211,17 +397,24 @@ function startBackdrop(canvas) {
     g.roundRect(1, -8, 17, 9, 4);
     g.fill();
 
-    // Brazo izquierdo (saluda)
+    // Brazo izquierdo (saluda). El brazo sale hacia el costado y el antebrazo pivota
+    // sobre el codo: si la mano se moviera por su cuenta, el codo se doblaría al revés.
+    const elbowX = -33, elbowY = -76 + Math.sin(wave) * 1.5;
+    const handX = elbowX + Math.sin(wave) * 21, handY = elbowY - Math.cos(wave) * 21;
     g.strokeStyle = shade;
     g.lineWidth = 9;
     g.beginPath();
-    g.moveTo(-14, -62);
-    g.lineTo(-24 - Math.sin(wave) * 4, -78 - Math.cos(wave) * 10);
-    g.lineTo(-30 + wave * 16, -98 - Math.abs(wave) * 6);
+    g.moveTo(-13, -64);
+    g.lineTo(elbowX, elbowY);
+    g.lineTo(handX, handY);
     g.stroke();
+    g.fillStyle = '#c3cbdd'; // codera: marca la articulación
+    g.beginPath();
+    g.arc(elbowX, elbowY, 5, 0, Math.PI * 2);
+    g.fill();
     g.fillStyle = '#e8ecf6';
     g.beginPath();
-    g.arc(-30 + wave * 16, -100 - Math.abs(wave) * 6, 5.5, 0, Math.PI * 2);
+    g.arc(handX, handY - 2, 5.5, 0, Math.PI * 2);
     g.fill();
 
     // Torso con panel de control
@@ -290,43 +483,6 @@ function startBackdrop(canvas) {
     g.arc(-16, -115, 1.8, 0, Math.PI * 2);
     g.fill();
     g.restore();
-  }
-
-  /** Bandera de NeoFrontier plantada, con la tela ondeando. */
-  function drawFlag(x, y, s) {
-    const poleH = 120 * s;
-    g.fillStyle = 'rgba(0,0,0,0.3)';
-    g.beginPath();
-    g.ellipse(x + 8 * s, y, 26 * s, 4 * s, 0, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = '#cfd6e6';
-    g.lineWidth = 2.5 * s;
-    g.beginPath();
-    g.moveTo(x, y);
-    g.lineTo(x, y - poleH);
-    g.stroke();
-    const fw = 70 * s, fh = 44 * s, top = y - poleH + 4 * s;
-    const cloth = (dx) => Math.sin(t * 2.4 + dx / (9 * s)) * 4 * s * (dx / fw);
-    g.beginPath();
-    g.moveTo(x, top);
-    for (let i = 0; i <= 14; i++) g.lineTo(x + (fw * i) / 14, top + cloth((fw * i) / 14));
-    for (let i = 14; i >= 0; i--) g.lineTo(x + (fw * i) / 14, top + fh + cloth((fw * i) / 14));
-    g.closePath();
-    const grad = g.createLinearGradient(x, top, x + fw, top + fh);
-    grad.addColorStop(0, '#16336e');
-    grad.addColorStop(1, '#0b1b45');
-    g.fillStyle = grad;
-    g.fill();
-    // Emblema: planeta con anillo
-    const ex = x + fw * 0.5, ey = top + fh * 0.5 + cloth(fw * 0.5);
-    g.strokeStyle = '#facc15';
-    g.lineWidth = 2 * s;
-    g.beginPath();
-    g.arc(ex, ey, 9 * s, 0, Math.PI * 2);
-    g.stroke();
-    g.beginPath();
-    g.ellipse(ex, ey, 15 * s, 4 * s, -0.4, 0, Math.PI * 2);
-    g.stroke();
   }
 
   /** Nave de exploración aterrizada: fuselaje con paneles, aletas, patas, escalera y luces. */
@@ -418,7 +574,7 @@ function startBackdrop(canvas) {
     // Escudo térmico oscuro en la base y banda naranja
     g.fillStyle = '#2f364d';
     g.fillRect(-26, -42, 52, 12);
-    g.fillStyle = '#e0572a';
+    g.fillStyle = '#ff6b35';
     g.fillRect(-26, -50, 52, 6);
 
     // Líneas de paneles y remaches
@@ -440,14 +596,19 @@ function startBackdrop(canvas) {
       }
     }
 
-    // Emblema NeoFrontier: planeta con anillo
-    g.strokeStyle = '#16336e';
-    g.lineWidth = 2;
+    // Emblema NeoFrontier: estrella de la marca con su órbita naranja
+    g.fillStyle = '#0d1433';
     g.beginPath();
-    g.arc(0, -82, 8, 0, Math.PI * 2);
-    g.stroke();
+    g.moveTo(0, -90);
+    g.quadraticCurveTo(1, -83, 8, -82);
+    g.quadraticCurveTo(1, -81, 0, -74);
+    g.quadraticCurveTo(-1, -81, -8, -82);
+    g.quadraticCurveTo(-1, -83, 0, -90);
+    g.fill();
+    g.strokeStyle = '#ff6b35';
+    g.lineWidth = 1.6;
     g.beginPath();
-    g.ellipse(0, -82, 14, 3.5, -0.4, 0, Math.PI * 2);
+    g.ellipse(0, -82, 15, 4, -0.25, 0, Math.PI * 2);
     g.stroke();
 
     // Ventanillas con luz interior
@@ -533,52 +694,6 @@ function startBackdrop(canvas) {
     }
   }
 
-  function drawEarth() {
-    const r = Math.min(w, h) * 0.075;
-    const x = w * 0.64 + mouse.x * -14;
-    const y = h * 0.3 + mouse.y * -9;
-    const halo = g.createRadialGradient(x, y, r * 0.8, x, y, r * 3.2);
-    halo.addColorStop(0, 'rgba(90,160,255,0.28)');
-    halo.addColorStop(1, 'rgba(90,160,255,0)');
-    g.fillStyle = halo;
-    g.fillRect(x - r * 3.3, y - r * 3.3, r * 6.6, r * 6.6);
-
-    g.save();
-    g.beginPath();
-    g.arc(x, y, r, 0, Math.PI * 2);
-    g.clip();
-    const body = g.createRadialGradient(x - r * 0.4, y - r * 0.4, r * 0.1, x, y, r);
-    body.addColorStop(0, '#6fb4ff');
-    body.addColorStop(0.55, '#2a63c4');
-    body.addColorStop(1, '#0a1f55');
-    g.fillStyle = body;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    // Continentes y nubes que giran despacio
-    const spin = t * 0.04;
-    g.fillStyle = 'rgba(70,160,110,0.75)';
-    for (let i = 0; i < 4; i++) {
-      const a = spin + i * 1.7;
-      g.beginPath();
-      g.ellipse(x + Math.sin(a) * r * 0.55, y + Math.cos(a * 1.3 + i) * r * 0.4,
-        r * (0.18 + 0.05 * i % 3 * 0.5), r * 0.26, a, 0, Math.PI * 2);
-      g.fill();
-    }
-    g.fillStyle = 'rgba(255,255,255,0.35)';
-    for (let i = 0; i < 5; i++) {
-      const a = spin * 1.6 + i * 1.3;
-      g.beginPath();
-      g.ellipse(x + Math.sin(a) * r * 0.6, y + Math.cos(a * 0.8 + i * 2) * r * 0.5, r * 0.3, r * 0.06, a * 0.3, 0, Math.PI * 2);
-      g.fill();
-    }
-    // Sombra del terminador (el sol viene de la izquierda)
-    const shade = g.createLinearGradient(x - r, y, x + r, y);
-    shade.addColorStop(0.4, 'rgba(0,0,10,0)');
-    shade.addColorStop(1, 'rgba(0,0,10,0.7)');
-    g.fillStyle = shade;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    g.restore();
-  }
-
   function frame(now) {
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
@@ -588,9 +703,9 @@ function startBackdrop(canvas) {
 
     // Cielo
     const sky = g.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, '#02040d');
-    sky.addColorStop(0.7, '#070d24');
-    sky.addColorStop(1, '#101a38');
+    sky.addColorStop(0, '#070b22'); // azul noche de la marca
+    sky.addColorStop(0.7, '#0d1440');
+    sky.addColorStop(1, '#141c4f');
     g.fillStyle = sky;
     g.fillRect(0, 0, w, h);
 
@@ -640,23 +755,15 @@ function startBackdrop(canvas) {
     }
 
     drawNebula();
+    const u = Math.min(w, h) / 720; // escala según el tamaño de la ventana
     drawMars();
-    drawSatellite();
-
-    drawEarth();
+    drawMoon();
+    drawSatellite(u);
 
     // Capas del terreno, de la más lejana a la más cercana
     drawRidge(0.74, 0.035, 1.3, '#1a2036', 6, false);
     drawRidge(0.82, 0.05, 4.1, '#252c47', 14, true);
-    // Escenografía entre la capa media y la cercana: módulo, bandera y astronauta
-    const u = Math.min(w, h) / 720; // escala según el tamaño de la ventana
-    drawLander(w * 0.85 + mouse.x * -22, h * 0.9, 1.9 * u);
-    drawFlag(w * 0.31 + mouse.x * -26, h * 0.905, 1.0 * u);
-    drawAstronaut(w * 0.17 + mouse.x * -30, h * 0.915, 1.7 * u);
-    drawRidge(0.92, 0.04, 7.7, '#323a5a', 30, true);
-    drawRocks();
-
-    // Cráteres de la capa cercana
+    // Cráteres antes de la escenografía: si no, quedan pintados encima del astronauta y la nave
     g.fillStyle = 'rgba(10,14,30,0.45)';
     for (const c of craters) {
       const x = c.x * w + mouse.x * -34;
@@ -664,6 +771,16 @@ function startBackdrop(canvas) {
       g.ellipse(x, c.y * h, c.r * w, c.r * w * 0.22, 0, 0, Math.PI * 2);
       g.fill();
     }
+
+    // Escenografía entre la capa media y la cercana: nave y astronauta
+    const landerX = w * 0.85 + mouse.x * -22, landerY = h * 0.9, landerS = 1.9 * u;
+    drawLander(landerX, landerY, landerS);
+    // Antena parabólica de la nave (coordenadas locales -42, -134): destino de las señales
+    dish.x = landerX - 42 * landerS;
+    dish.y = landerY - 134 * landerS;
+    drawAstronaut(w * 0.17 + mouse.x * -30, h * 0.915, 1.7 * u);
+    drawRidge(0.92, 0.04, 7.7, '#323a5a', 30, true);
+    drawRocks();
 
     // Polvo
     for (const d of dust) {
@@ -674,18 +791,8 @@ function startBackdrop(canvas) {
       g.fill();
     }
 
-    // Ondas de los clics
-    for (let i = ripples.length - 1; i >= 0; i--) {
-      const r = ripples[i];
-      r.age += dt;
-      const k = r.age / 1.4;
-      g.strokeStyle = `rgba(120,220,255,${(1 - k).toFixed(3)})`;
-      g.lineWidth = 2;
-      g.beginPath();
-      g.arc(r.x, r.y, 10 + k * 180, 0, Math.PI * 2);
-      g.stroke();
-      if (k >= 1) ripples.splice(i, 1);
-    }
+    drawSignals(dt);
+    emblem.update(t, dt, mouse.x, mouse.y);
 
     if (!reducedMotion) raf = requestAnimationFrame(frame);
   }
@@ -715,22 +822,25 @@ function startBackdrop(canvas) {
 export function createStartScreen({ onStart }) {
   const screen = document.createElement('div');
   screen.id = 'start-screen';
-  const title = 'NeoFrontier';
   screen.innerHTML = `
     <canvas class="start-canvas" aria-hidden="true"></canvas>
     <div class="start-card">
-      <p class="start-kicker">NASA Space Apps · 2026</p>
-      <h1 aria-label="${title}">${[...title].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
+      <svg class="start-emblem" role="progressbar" aria-label="Carga de la escena"
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></svg>
+      <h1>NEO FRONTIER</h1>
+      <p class="start-tagline">nasa space apps challenge</p>
       <p class="start-sub">Lugares de la Tierra que se parecen a la Luna y a Marte.</p>
       <button class="start-btn" disabled>Cargando…</button>
-      <div class="start-progress" role="progressbar" aria-label="Carga" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div>
-      <p class="start-hint">Te llevamos a un análogo al azar · usa ‹ › para recorrer el resto<br>Con sonido: la música se activa al empezar</p>
+      <p class="start-hint">Te llevamos a un análogo al azar; usa ‹ › para recorrer el resto.<br>La música se activa al empezar.</p>
     </div>`;
   document.body.appendChild(screen);
 
-  const backdrop = startBackdrop(screen.querySelector('.start-canvas'));
+  const svg = screen.querySelector('.start-emblem');
+  const emblem = createEmblem(svg);
+  const backdrop = startBackdrop(screen.querySelector('.start-canvas'), emblem);
   const button = screen.querySelector('.start-btn');
-  const bar = screen.querySelector('.start-progress');
+  // Sin animación no hay bucle de cuadros: el emblema se redibuja en cada cambio
+  const redraw = () => { if (reducedMotion) emblem.update(0, 0, 0, 0); };
 
   button.addEventListener('click', () => {
     screen.classList.add('leaving');
@@ -743,22 +853,23 @@ export function createStartScreen({ onStart }) {
   }, { once: true });
 
   return {
-    /** Avance de la carga, de 0 a 1. */
+    /** Avance de la carga, de 0 a 1: dibuja esa parte de la órbita. */
     setProgress(f) {
-      const pct = Math.round(Math.min(1, Math.max(0, f)) * 100);
-      bar.firstElementChild.style.width = `${pct}%`;
-      bar.setAttribute('aria-valuenow', String(pct));
+      emblem.setProgress(f);
+      svg.setAttribute('aria-valuenow', String(Math.round(Math.min(1, Math.max(0, f)) * 100)));
+      redraw();
     },
-    /** La escena está lista: habilita el botón. */
+    /** La escena está lista: cierra la órbita y habilita el botón. */
     ready() {
-      bar.classList.add('done');
+      emblem.ready();
+      redraw();
       button.disabled = false;
       button.textContent = 'Empezar';
       button.focus();
     },
-    /** Error irrecuperable de carga. */
+    /** Error irrecuperable de carga: la órbita se pone roja. */
     fail(message) {
-      bar.classList.add('failed');
+      svg.classList.add('failed');
       button.textContent = 'Error';
       screen.querySelector('.start-hint').textContent = message;
     },
