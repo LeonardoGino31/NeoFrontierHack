@@ -60,30 +60,41 @@ function sectorTexture(color, strength = 1) {
 /** Geometría de gota (pin de mapa): punta abajo en y = 0, cabeza redonda arriba. */
 function pinGeometry(R, H) {
   const alpha = Math.asin(R / H);
-  const pts = [new THREE.Vector2(0, 0)];
-  const steps = 18;
+  const right = [];
+  const steps = 24;
   for (let i = 0; i <= steps; i++) {
     const phi = -alpha + (i / steps) * (Math.PI / 2 + alpha);
-    pts.push(new THREE.Vector2(R * Math.cos(phi), H + R * Math.sin(phi)));
+    right.push([R * Math.cos(phi), H + R * Math.sin(phi)]);
   }
-  return new THREE.LatheGeometry(pts, 28);
+  // Contorno completo: punta, lado derecho hasta arriba y lado izquierdo de vuelta
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  for (const [x, y] of right) shape.lineTo(x, y);
+  for (const [x, y] of right.slice(0, -1).reverse()) shape.lineTo(-x, y);
+  shape.closePath();
+  // Agujero real (se ve a través de él), como en el pin de Google Maps
+  const hole = new THREE.Path();
+  hole.absarc(0, H, R * 0.45, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+
+  const depth = R * 0.5;
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth, curveSegments: 32, bevelEnabled: true,
+    bevelThickness: R * 0.25, bevelSize: R * 0.12, bevelSegments: 4,
+  });
+  geometry.translate(0, 0, -depth / 2);
+  return geometry;
 }
 
 /**
- * Pin rojo con agujero blanco. El pivote gira sobre la normal de la superficie (eje Z
- * local del sector) para que el agujero mire a la cámara.
+ * Pin rojo en 3D con agujero hueco. El pivote gira sobre la normal de la superficie (eje Z
+ * local del sector) para que la cara del pin mire a la cámara.
  */
-function createPin({ geometry, redMaterial, holeMaterial, holeGeometry, R, H, scale = 1 }) {
+function createPin({ geometry, redMaterial, scale = 1 }) {
   const pivot = new THREE.Group();
   const pin = new THREE.Group();
   pin.rotation.x = Math.PI / 2; // el eje Y del pin pasa a ser la normal (Z del sector)
   pin.add(new THREE.Mesh(geometry, redMaterial));
-  for (const side of [1, -1]) {
-    const hole = new THREE.Mesh(holeGeometry, holeMaterial);
-    hole.position.set(0, H, side * R * 0.93);
-    if (side < 0) hole.rotation.y = Math.PI;
-    pin.add(hole);
-  }
   pivot.add(pin);
   pivot.scale.setScalar(scale);
   return { pivot, pin };
@@ -110,9 +121,6 @@ export function createMarkers({ meshes, pairs, model }) {
     geometry: pinGeometry(R, H),
     // Emisivo: el pin se distingue también en la cara nocturna del planeta
     redMaterial: new THREE.MeshStandardMaterial({ color: 0xe11d24, emissive: 0x5a0508, roughness: 0.35, metalness: 0.1 }),
-    holeMaterial: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    holeGeometry: new THREE.CircleGeometry(R * 0.42, 20),
-    R, H,
   };
 
   const earthMarkers = new THREE.Group();
