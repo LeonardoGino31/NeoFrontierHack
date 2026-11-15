@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "description": "Escalas heurísticas iniciales para priorización exploratoria; no son umbrales certificados de misión.",
+  "site_footprint_km": 30,
+  "safe_slope_limit_degrees": 15,
+  "candidate_defaults": {
+    "grid_km": 10,
+    "limit": 200,
+    "minimum_separation_km": 30
+  },
+  "bodies": {
+    "moon": {
+      "mission": "Base lunar aproximada",
+      "criteria": {
+        "sunlight": { "direction": "higher", "scale": 100 },
+        "relief": { "direction": "lower", "scale": 2000 },
+        "safeSlope": { "direction": "higher", "scale": 100 },
+        "craterFree": { "direction": "higher", "scale": 100 },
+        "soilStability": { "direction": "higher", "scale": 100 },
+        "ice": { "direction": "higher", "scale": 100 }
+      },
+      "not_scored": {
+        "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece una base."
+      },
+      "requirement_method": {
+        "earth_view_analog": "Aproximación geométrica: 100% en el hemisferio lunar visible desde la Tierra y 0% en el hemisferio lejano; no modela relieve local, libración ni relés."
+      }
+    },
+    "mars": {
+      "mission": "Aterrizaje y recorridos de rover aproximados",
+      "criteria": {
+        "sunlight": { "direction": "higher", "scale": 100 },
+        "relief": { "direction": "lower", "scale": 2000 },
+        "safeSlope": { "direction": "higher", "scale": 100 },
+        "craterFree": { "direction": "higher", "scale": 100 },
+        "soilStability": { "direction": "higher", "scale": 100 },
+        "ice": { "direction": "higher", "scale": 100 }
+      },
+      "not_scored": {
+        "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece la misión."
+      },
+      "requirement_method": {
+        "descent_density_analog": "Estimación atmosférica simplificada del README: 0.020 * exp(-elevación_km / 11.1); no incluye estación, clima ni perfil vertical."
+      }
+    }
+  }
+}

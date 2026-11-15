@@ -14,6 +14,7 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 - **Sombra permanente del polo sur lunar**: capa de LRO LOLA con las regiones donde nunca da el sol (posible hielo), activable al ver la Luna.
 - **Laboratorio 3D**: terreno procedural de 20 × 20 km donde cada parámetro se visualiza sobre el relieve y se puede modificar en vivo.
 - **Rovers en el laboratorio**: Perseverance, Sojourner (Marte), Apollo LRV y Yutu-2 (Luna) modelados en 3D a escala real, con ruedas que giran y se orientan y suspensión que copia el suelo; se conducen sobre el terreno que se haya ajustado.
+- **Backend experimental de sitios**: proceso Python separado para priorizar ubicaciones aproximadas en Luna y Marte desde DEM científicos y capas raster opcionales. Exporta candidatos con coordenadas y métricas a GeoJSON, sin intervenir en el CSV Tierra–análogo.
 
 > ⚠️ Estado actual: los sitios, sus pares en la Tierra y las imágenes son reales; los valores de similitud, la confianza del potencial de hielo y los índices del laboratorio siguen siendo **de demostración**. La metodología de abajo es una propuesta; debe definirse y validarse antes de sustituir los valores de demostración.
 
@@ -82,6 +83,24 @@ FORCE=1 ./scripts/fetch-trek.sh  # vuelve a descargar todo
 
 Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (solo para la vista polar). Las tiles crudas quedan en `.trek-cache/`, que no se versiona. Usa los servicios WMTS públicos de Trek (`https://trek.nasa.gov/tiles/...`) y GIBS (`https://gibs.earthdata.nasa.gov/wmts/...`).
 
+### Backend de ubicaciones lunares y marcianas
+
+El backend está aislado en `backend/` y funciona por lotes. Trek conserva su papel de catálogo y visualización: sus tiles WMTS son imágenes renderizadas. Para medir relieve y pendiente, el backend usa DEM numéricos LOLA/MOLA descargados desde USGS/PDS. Puedes descargar el DEM global de referencia (varios GB) de forma explícita:
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -e backend
+backend/.venv/bin/planetary-backend sources
+backend/.venv/bin/planetary-backend download-dem --body moon --accept-large-download
+backend/.venv/bin/planetary-backend download-dem --body mars --accept-large-download
+backend/.venv/bin/planetary-backend analyze --body moon
+backend/.venv/bin/planetary-backend analyze --body mars
+```
+
+Los comandos `analyze` escriben `backend/data/outputs/moon_candidates.geojson`, `mars_candidates.geojson` y sus manifiestos de procedencia. Los GeoJSON contienen puntos candidatos separados espacialmente, valores de parámetros, puntuaciones de grupos, filtros aplicados y cobertura de datos. Las entradas opcionales se declaran en `backend/examples/moon_manifest.json` y `mars_manifest.json`; se aceptan GeoTIFF geográficos o equirectangulares del mismo cuerpo y CRS planetario que el DEM. `sunlight`, `albedo`, `craterFree`, `soilStability`, `ice` e `iceConfidence` quedan nulos mientras no se proporcione una capa correspondiente.
+
+La pendiente y el desnivel se derivan del DEM remuestreado a una malla aproximada. La visibilidad lunar de la Tierra usa una aproximación geométrica del hemisferio visible; la densidad atmosférica de Marte usa la fórmula simplificada que ya se documenta en la guía. El puntaje solo usa parámetros con dato y criterio configurado, por eso el resultado incluye cobertura y puede ser parcial. No es una evaluación de ingeniería ni una recomendación de misión. Las reglas y escalas heurísticas están en `backend/config/site_selection.json`; las fuentes y productos base están en `backend/config/source_catalog.json`.
+
 ### Datos de ubicaciones y similitud
 
 - `public/data/planetary_candidates.csv` es la fuente de ambas ubicaciones y de los valores usados para calcular la similitud. Cada fila representa una pareja completa Tierra–análogo.
@@ -131,6 +150,7 @@ public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA T
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
 public/data/            # Modelo de parámetros (JSON) y parejas Tierra–análogo con sus valores (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
+backend/                # Proceso batch independiente para candidatos lunares y marcianos
 ```
 
 ## Controles
@@ -150,7 +170,6 @@ scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y 
 
 ## Próximos pasos
 
-- Backend con FastAPI, Pandas y scikit-learn para calcular la similitud con datos reales.
 - Recortes de DEM reales (MOLA, LOLA, Copernicus) en el laboratorio.
 - Asistente de IA que explique los resultados a partir de los valores calculados.
 

@@ -1,0 +1,68 @@
+{
+  "description": "Fuentes para análisis aproximado. Las capas WMTS de Trek son imágenes renderizadas; el cálculo métrico usa DEM numéricos.",
+  "bodies": {
+    "moon": {
+      "name": "Luna",
+      "dem": {
+        "id": "usgs-lola-global-118m",
+        "title": "LRO LOLA Global Lunar Digital Elevation Model, 118 m",
+        "provider": "USGS Astrogeology / NASA LRO LOLA",
+        "url": "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif",
+        "format": "GeoTIFF",
+        "scale": 0.5,
+        "offset": 0,
+        "units": "m",
+        "notes": "La etiqueta del producto define un factor de escala de 0.5 para los valores enteros almacenados. Producto global; ocupa varios GB."
+      },
+      "trek_visual_layers": [
+        "LRO WAC Mosaic Global",
+        "LRO LOLA Shaded Relief Global",
+        "LRO LOLA South Pole Illumination / PSR"
+      ],
+      "additional_data": {
+        "illumination": "Moon Trek / LRO LOLA illumination products or a time-series illumination raster",
+        "albedo": "LRO Diviner reflectance or another documented lunar reflectance product",
+        "craterFree": "LROC crater/rock hazard product at a stated spatial resolution",
+        "soilStability": "A documented geotechnical proxy raster; do not infer it from the DEM alone",
+        "ice": "A documented ice-potential raster derived from relevant LRO observations",
+        "iceConfidence": "A separate confidence raster for the ice-potential estimate"
+      }
+    },
+    "mars": {
+      "name": "Marte",
+      "dem": {
+        "id": "usgs-mola-global-463m",
+        "title": "MGS MOLA Global DEM, 463 m",
+        "provider": "USGS Astrogeology / NASA MGS MOLA",
+        "url": "https://planetarymaps.usgs.gov/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif",
+        "format": "GeoTIFF",
+        "scale": 1,
+        "offset": 0,
+        "units": "m",
+        "notes": "DEM global referido al areoide; el producto completo ocupa aproximadamente 2 GB."
+      },
+      "trek_visual_layers": [
+        "Mars Viking MDIM 2.1 Color Mosaic",
+        "MGS MOLA Color Shaded Relief"
+      ],
+      "additional_data": {
+        "illumination": "A documented solar-illumination raster for the selected season and mission duration",
+        "albedo": "A documented TES or other calibrated reflectance product",
+        "craterFree": "CTX/HiRISE crater, rock and hazard information at a stated spatial resolution",
+        "soilStability": "A documented thermal-inertia or geotechnical proxy raster",
+        "ice": "A documented subsurface-ice potential raster",
+        "iceConfidence": "A separate confidence raster for the ice-potential estimate"
+      }
+    }
+  },
+  "trek": {
+    "moon": "https://trek.nasa.gov/moon/",
+    "mars": "https://trek.nasa.gov/mars/",
+    "wmts_documentation": "https://trek.nasa.gov/tiles/apidoc/"
+  },
+  "pds_ode": {
+    "moon": "https://ode.rsl.wustl.edu/moon/",
+    "mars": "https://ode.rsl.wustl.edu/mars/",
+    "api_documentation": "https://oderest.rsl.wustl.edu/"
+  }
+}

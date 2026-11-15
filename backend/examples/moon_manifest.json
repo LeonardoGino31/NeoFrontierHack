@@ -1,0 +1,14 @@
+{
+  "body": "moon",
+  "dem": {
+    "path": "../data/raw/moon_dem.tif",
+    "band": 1,
+    "scale": 0.5,
+    "offset": 0,
+    "units": "m",
+    "source_id": "usgs-lola-global-118m",
+    "source_url": "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+  },
+  "layers": {},
+  "notes": "Añade capas GeoTIFF opcionales en 'layers'. Deben representar el mismo cuerpo y usar coordenadas geográficas compatibles con el DEM."
+}

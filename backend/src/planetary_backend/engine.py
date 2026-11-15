@@ -1,0 +1,713 @@
+"""Raster preparation, approximate metric derivation, scoring and GeoJSON export."""
+
+from __future__ import annotations
+
+import json
+import math
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import rasterio
+from affine import Affine
+from rasterio.enums import Resampling
+from rasterio.warp import reproject
+
+
+BODY_RADII_KM = {"moon": 1737.4, "mars": 3389.5}
+LAYER_KEYS = (
+    "sunlight",
+    "albedo",
+    "craterFree",
+    "soilStability",
+    "ice",
+    "iceConfidence",
+)
+
+
+class AnalysisError(RuntimeError):
+    """Raised when an input raster or manifest cannot be analyzed safely."""
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise AnalysisError(f"No se encontró el archivo: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise AnalysisError(f"JSON inválido en {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise AnalysisError(f"Se esperaba un objeto JSON en {path}.")
+    return data
+
+
+def _read_resampled_dem(
+    dem_config: dict[str, Any], manifest_path: Path, radius_km: float, grid_km: float
+) -> tuple[np.ndarray, Any, Any, dict[str, Any]]:
+    dem_path = _resolve_path(manifest_path.parent, dem_config.get("path"))
+    if not dem_path.is_file():
+        raise AnalysisError(
+            f"No se encontró el DEM {dem_path}. Descárgalo con `planetary-backend download-dem --body ... --accept-large-download`."
+        )
+
+    band = int(dem_config.get("band", 1))
+    scale = float(dem_config.get("scale", 1))
+    offset = float(dem_config.get("offset", 0))
+    with rasterio.open(dem_path) as dataset:
+        if band < 1 or band > dataset.count:
+            raise AnalysisError(f"La banda {band} no existe en {dem_path}.")
+        grid_info = _validate_planetary_grid(dataset, dem_path, radius_km)
+        if abs(dataset.transform.b) > 1e-12 or abs(dataset.transform.d) > 1e-12:
+            raise AnalysisError("El DEM debe usar una cuadrícula planetaria sin rotación.")
+
+        if grid_info["kind"] == "equirectangular":
+            pixel_km = abs(dataset.transform.a) / (
+                1000 * math.cos(math.radians(grid_info["lat_ts"]))
+            )
+        else:
+            pixel_km = math.radians(abs(dataset.transform.a)) * radius_km
+        if pixel_km <= 0:
+            raise AnalysisError("No se pudo determinar el tamaño de píxel del DEM.")
+        factor = max(1, int(round(grid_km / pixel_km)))
+        out_width = max(1, int(math.ceil(dataset.width / factor)))
+        out_height = max(1, int(math.ceil(dataset.height / factor)))
+        masked = dataset.read(
+            band,
+            out_shape=(out_height, out_width),
+            masked=True,
+            resampling=Resampling.average,
+        ).astype(np.float32)
+        dem = np.asarray(masked.filled(np.nan), dtype=np.float32)
+        dem = dem * scale + offset
+        transform = dataset.transform * Affine.scale(
+            dataset.width / out_width, dataset.height / out_height
+        )
+        crs = dataset.crs
+        nodata = dataset.nodata
+        bounds = tuple(float(value) for value in dataset.bounds)
+        profile = {
+            "path": str(dem_path),
+            "band": band,
+            "scale": scale,
+            "offset": offset,
+            "units": dem_config.get("units", "m"),
+            "source_id": dem_config.get("source_id", "unspecified-dem"),
+            "source_url": dem_config.get("source_url"),
+            "native_size": [dataset.width, dataset.height],
+            "analysis_size": [out_width, out_height],
+            "native_pixel_km_at_equator": round(pixel_km, 4),
+            "effective_grid_km_at_equator": round(
+                pixel_km * factor, 4
+            ),
+            "nodata": nodata,
+            "bounds": bounds,
+            "crs": str(crs),
+            "grid_kind": grid_info["kind"],
+            "projection_parameters": grid_info.get("parameters"),
+        }
+    if dem_config.get("units", "m").lower() in {"km", "kilometer", "kilometers"}:
+        dem = dem * 1000.0
+        profile["units"] = "m (converted from km)"
+    elif dem_config.get("units", "m").lower() not in {"m", "meter", "meters"}:
+        raise AnalysisError("La elevación del DEM debe estar expresada en metros o kilómetros.")
+    return dem, transform, crs, profile
+
+
+def _validate_planetary_grid(
+    dataset: rasterio.DatasetReader, path: Path, body_radius_km: float
+) -> dict[str, Any]:
+    if dataset.crs is None:
+        raise AnalysisError(f"{path} no tiene un CRS o proyección planetaria definida.")
+    if dataset.width < 3 or dataset.height < 3:
+        raise AnalysisError(f"La cuadrícula de {path} debe tener al menos 3 x 3 píxeles.")
+    return _grid_info(dataset.crs, body_radius_km, path)
+
+
+def _grid_info(crs: Any, body_radius_km: float, path: Path | None = None) -> dict[str, Any]:
+    if crs.is_geographic:
+        return {"kind": "geographic", "radius_km": body_radius_km}
+
+    parameters = crs.to_dict()
+    if crs.is_projected and parameters.get("proj") == "eqc":
+        units = parameters.get("units", "m")
+        if units not in {"m", "metre", "meter"}:
+            label = f"{path} " if path else ""
+            raise AnalysisError(f"{label}usa una proyección equirectangular que no está expresada en metros.")
+        projected_radius_km = float(parameters.get("R", parameters.get("a", 0))) / 1000
+        if projected_radius_km <= 0:
+            label = f"{path} " if path else ""
+            raise AnalysisError(f"{label}no declara el radio del cuerpo en su CRS equirectangular.")
+        if abs(projected_radius_km - body_radius_km) / body_radius_km > 0.05:
+            label = f"{path} " if path else ""
+            raise AnalysisError(f"{label}declara un radio incompatible con el cuerpo seleccionado.")
+        lat_ts = float(parameters.get("lat_ts", 0))
+        if abs(math.cos(math.radians(lat_ts))) < 0.1:
+            label = f"{path} " if path else ""
+            raise AnalysisError(f"{label}usa un paralelo estándar inadecuado para esta malla global.")
+        return {
+            "kind": "equirectangular",
+            "radius_km": projected_radius_km,
+            "lat_ts": lat_ts,
+            "parameters": parameters,
+        }
+
+    label = f"{path} " if path else "El raster "
+    raise AnalysisError(
+        f"{label}debe usar coordenadas geográficas o una proyección equirectangular simple del cuerpo."
+    )
+
+
+def _resolve_path(base: Path, value: Any) -> Path:
+    if not isinstance(value, str) or not value.strip():
+        raise AnalysisError("Falta la ruta del archivo raster en el manifiesto.")
+    path = Path(value).expanduser()
+    return path.resolve() if path.is_absolute() else (base / path).resolve()
+
+
+def _read_metric_layer(
+    key: str,
+    config: dict[str, Any],
+    manifest_path: Path,
+    shape: tuple[int, int],
+    transform: Any,
+    crs: Any,
+    radius_km: float,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    path = _resolve_path(manifest_path.parent, config.get("path"))
+    if not path.is_file():
+        raise AnalysisError(f"No se encontró la capa {key}: {path}")
+    band = int(config.get("band", 1))
+    scale = float(config.get("scale", 1))
+    offset = float(config.get("offset", 0))
+
+    with rasterio.open(path) as dataset:
+        if band < 1 or band > dataset.count:
+            raise AnalysisError(f"La banda {band} no existe en la capa {key} ({path}).")
+        _validate_planetary_grid(dataset, path, radius_km)
+        if dataset.crs != crs:
+            raise AnalysisError(
+                f"La capa {key} usa un CRS distinto al DEM. Reproyéctala al mismo marco geográfico planetario antes del análisis."
+            )
+        destination = np.full(shape, np.nan, dtype=np.float32)
+        reproject(
+            source=rasterio.band(dataset, band),
+            destination=destination,
+            src_transform=dataset.transform,
+            src_crs=dataset.crs,
+            src_nodata=dataset.nodata,
+            dst_transform=transform,
+            dst_crs=crs,
+            dst_nodata=np.nan,
+            resampling=Resampling.bilinear,
+        )
+        destination = destination * scale + offset
+        details = {
+            "path": str(path),
+            "source_id": config.get("source_id", key),
+            "source_url": config.get("source_url"),
+            "units": config.get("units"),
+            "band": band,
+            "scale": scale,
+            "offset": offset,
+            "native_size": [dataset.width, dataset.height],
+            "crs": str(dataset.crs),
+        }
+    return destination, details
+
+
+def _window_statistics(values: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return 3x3 local min, max and valid-sample count without wrapping at edges."""
+    padded = np.pad(values, 1, mode="constant", constant_values=np.nan)
+    height, width = values.shape
+    local_min = np.full(values.shape, np.inf, dtype=np.float32)
+    local_max = np.full(values.shape, -np.inf, dtype=np.float32)
+    valid_count = np.zeros(values.shape, dtype=np.uint8)
+    for row_offset in range(3):
+        for col_offset in range(3):
+            window = padded[row_offset : row_offset + height, col_offset : col_offset + width]
+            valid = np.isfinite(window)
+            local_min = np.minimum(local_min, np.where(valid, window, np.inf))
+            local_max = np.maximum(local_max, np.where(valid, window, -np.inf))
+            valid_count += valid
+    local_min[valid_count == 0] = np.nan
+    local_max[valid_count == 0] = np.nan
+    return local_min, local_max, valid_count
+
+
+def _derive_terrain(
+    dem_m: np.ndarray,
+    transform: Any,
+    crs: Any,
+    radius_km: float,
+    safe_limit_deg: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Derive approximate local relief and safe-slope area percent."""
+    info = _grid_info(crs, radius_km)
+    latitudes = _latitude_vector(dem_m.shape[0], transform, info)
+    if info["kind"] == "equirectangular":
+        dy_m = abs(float(transform.e))
+        dx_m = abs(float(transform.a)) * np.abs(np.cos(np.radians(latitudes))) / math.cos(
+            math.radians(info["lat_ts"])
+        )
+    else:
+        dy_m = math.radians(abs(float(transform.e))) * radius_km * 1000
+        dx_m = (
+            math.radians(abs(float(transform.a)))
+            * radius_km
+            * 1000
+            * np.abs(np.cos(np.radians(latitudes)))
+        )
+    dx_m = np.maximum(dx_m, 1.0)
+
+    safe_dem = np.where(np.isfinite(dem_m), dem_m, np.nan)
+    dz_dy = np.gradient(safe_dem, dy_m, axis=0)
+    dz_dx = np.gradient(safe_dem, axis=1) / dx_m[:, None]
+    slope_deg = np.degrees(np.arctan(np.hypot(dz_dx, dz_dy))).astype(np.float32)
+
+    min_elevation, max_elevation, relief_count = _window_statistics(safe_dem)
+    relief = max_elevation - min_elevation
+    relief[relief_count < 5] = np.nan
+
+    padded_slope = np.pad(slope_deg, 1, mode="constant", constant_values=np.nan)
+    height, width = slope_deg.shape
+    safe_count = np.zeros((height, width), dtype=np.uint8)
+    valid_count = np.zeros((height, width), dtype=np.uint8)
+    for row_offset in range(3):
+        for col_offset in range(3):
+            window = padded_slope[
+                row_offset : row_offset + height, col_offset : col_offset + width
+            ]
+            valid = np.isfinite(window)
+            valid_count += valid
+            safe_count += valid & (window <= safe_limit_deg)
+    safe_slope = np.divide(
+        safe_count * 100.0,
+        valid_count,
+        out=np.full((height, width), np.nan, dtype=np.float32),
+        where=valid_count >= 5,
+    )
+    safe_slope[~np.isfinite(dem_m)] = np.nan
+    return relief.astype(np.float32), safe_slope.astype(np.float32)
+
+
+def _requirement_grid(
+    body: str, dem_m: np.ndarray, transform: Any, crs: Any, radius_km: float
+) -> tuple[np.ndarray, str, str]:
+    if body == "mars":
+        # Approximation documented in the project's parameter guide; elevation is above areoid.
+        density = 0.020 * np.exp(-((dem_m / 1000.0) / 11.1))
+        return density.astype(np.float32), "descent_density_analog", "kg/m³"
+    info = _grid_info(crs, radius_km)
+    lat, lon = _latitude_longitude_arrays(dem_m.shape, transform, info)
+    lon = ((lon + 180.0) % 360.0) - 180.0
+    visible = np.cos(np.radians(lat)) * np.cos(np.radians(lon)) > 0
+    earth_view = np.where(visible, 100.0, 0.0).astype(np.float32)
+    earth_view[~np.isfinite(dem_m)] = np.nan
+    return earth_view, "earth_view_analog", "%"
+
+
+def _latitude_vector(height: int, transform: Any, info: dict[str, Any]) -> np.ndarray:
+    rows = np.arange(height, dtype=np.float64) + 0.5
+    y = float(transform.f) + rows * float(transform.e)
+    if info["kind"] == "geographic":
+        return y
+    params = info["parameters"]
+    radius_m = info["radius_km"] * 1000
+    y0 = float(params.get("y_0", 0))
+    lat0 = float(params.get("lat_0", 0))
+    return lat0 + np.degrees((y - y0) / radius_m)
+
+
+def _latitude_longitude_arrays(
+    shape: tuple[int, int], transform: Any, info: dict[str, Any]
+) -> tuple[np.ndarray, np.ndarray]:
+    height, width = shape
+    latitudes = _latitude_vector(height, transform, info)[:, None]
+    cols = np.arange(width, dtype=np.float64) + 0.5
+    x = float(transform.c) + cols * float(transform.a)
+    if info["kind"] == "geographic":
+        return latitudes, x[None, :]
+    params = info["parameters"]
+    radius_m = info["radius_km"] * 1000
+    x0 = float(params.get("x_0", 0))
+    lon0 = float(params.get("lon_0", 0))
+    scale = radius_m * math.cos(math.radians(info["lat_ts"]))
+    longitudes = lon0 + np.degrees((x - x0) / scale)
+    return latitudes, longitudes[None, :]
+
+
+def _cell_coordinates(row: int, col: int, transform: Any, crs: Any, radius_km: float) -> tuple[float, float]:
+    info = _grid_info(crs, radius_km)
+    x = float(transform.c + (col + 0.5) * transform.a)
+    y = float(transform.f + (row + 0.5) * transform.e)
+    if info["kind"] == "geographic":
+        lon, lat = x, y
+    else:
+        params = info["parameters"]
+        coord_radius_m = info["radius_km"] * 1000
+        lat = float(params.get("lat_0", 0)) + math.degrees(
+            (y - float(params.get("y_0", 0))) / coord_radius_m
+        )
+        lon = float(params.get("lon_0", 0)) + math.degrees(
+            (x - float(params.get("x_0", 0)))
+            / (coord_radius_m * math.cos(math.radians(info["lat_ts"])))
+        )
+    return ((lon + 180.0) % 360.0) - 180.0, lat
+
+
+def _cell_size_km(lat: float, transform: Any, crs: Any, radius_km: float) -> tuple[float, float]:
+    info = _grid_info(crs, radius_km)
+    if info["kind"] == "geographic":
+        width = math.radians(abs(float(transform.a))) * radius_km * abs(
+            math.cos(math.radians(lat))
+        )
+        height = math.radians(abs(float(transform.e))) * radius_km
+        return width, height
+    width = (
+        abs(float(transform.a))
+        * abs(math.cos(math.radians(lat)))
+        / math.cos(math.radians(info["lat_ts"]))
+        / 1000
+    )
+    height = abs(float(transform.e)) / 1000
+    return width, height
+
+
+def _haversine_km(
+    lat1: float, lon1: float, lat2: float, lon2: float, radius_km: float
+) -> float:
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    d_phi = phi2 - phi1
+    d_lambda = math.radians(((lon2 - lon1 + 180) % 360) - 180)
+    term = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(
+        d_lambda / 2
+    ) ** 2
+    return 2 * radius_km * math.asin(min(1.0, math.sqrt(term)))
+
+
+def _json_number(value: Any) -> float | None:
+    if value is None:
+        return None
+    number = float(value)
+    return round(number, 5) if math.isfinite(number) else None
+
+
+def analyze(
+    *,
+    body: str,
+    manifest_path: Path,
+    output_dir: Path,
+    model_path: Path,
+    selection_path: Path,
+    grid_km: float | None = None,
+    limit: int | None = None,
+    minimum_separation_km: float | None = None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    if body not in BODY_RADII_KM:
+        raise AnalysisError("El cuerpo debe ser 'moon' o 'mars'.")
+    manifest_path = manifest_path.resolve()
+    manifest = load_json(manifest_path)
+    if manifest.get("body") != body:
+        raise AnalysisError(
+            f"El manifiesto es para {manifest.get('body')!r}, pero se solicitó {body!r}."
+        )
+    model = load_json(model_path)
+    selection = load_json(selection_path)
+    profile = selection.get("bodies", {}).get(body)
+    if not profile:
+        raise AnalysisError(f"No existe el perfil de selección para {body}.")
+
+    defaults = selection.get("candidate_defaults", {})
+    grid_km = float(defaults.get("grid_km", 10) if grid_km is None else grid_km)
+    limit = int(defaults.get("limit", 200) if limit is None else limit)
+    minimum_separation_km = float(
+        minimum_separation_km
+        if minimum_separation_km is not None
+        else defaults.get("minimum_separation_km", 30)
+    )
+    if grid_km <= 0 or limit <= 0 or minimum_separation_km < 0:
+        raise AnalysisError("grid-km y limit deben ser positivos; separación no puede ser negativa.")
+
+    dem_config = manifest.get("dem")
+    if not isinstance(dem_config, dict):
+        raise AnalysisError("El manifiesto necesita un objeto 'dem'.")
+    radius_km = BODY_RADII_KM[body]
+    dem_m, transform, crs, dem_source = _read_resampled_dem(
+        dem_config, manifest_path, radius_km, grid_km
+    )
+    terrain = np.isfinite(dem_m)
+    if not terrain.any():
+        raise AnalysisError("El DEM no contiene píxeles válidos.")
+
+    relief, safe_slope = _derive_terrain(
+        dem_m,
+        transform,
+        crs,
+        radius_km,
+        float(selection.get("safe_slope_limit_degrees", 15)),
+    )
+    metric_values: dict[str, np.ndarray] = {
+        "sunlight": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "albedo": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "relief": relief,
+        "safeSlope": safe_slope,
+        "craterFree": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "soilStability": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "ice": np.full(dem_m.shape, np.nan, dtype=np.float32),
+        "iceConfidence": np.full(dem_m.shape, np.nan, dtype=np.float32),
+    }
+    layer_sources: dict[str, Any] = {}
+    layers = manifest.get("layers", {})
+    if not isinstance(layers, dict):
+        raise AnalysisError("'layers' debe ser un objeto en el manifiesto.")
+    for key in LAYER_KEYS:
+        config = layers.get(key)
+        if config is None:
+            continue
+        if not isinstance(config, dict):
+            raise AnalysisError(f"La configuración de la capa {key} debe ser un objeto.")
+        array, details = _read_metric_layer(
+            key, config, manifest_path, dem_m.shape, transform, crs, radius_km
+        )
+        metric_values[key] = array
+        layer_sources[key] = details
+
+    requirement_grid, requirement_key, requirement_units = _requirement_grid(
+        body, dem_m, transform, crs, radius_km
+    )
+    requirement = model["bodies"][body]["requirement"]
+    if requirement["column"] != requirement_key:
+        raise AnalysisError(
+            f"El requisito actual para {body} usa {requirement['column']}, pero el backend deriva {requirement_key}."
+        )
+    min_requirement = float(requirement["min"])
+    eligible = terrain & np.isfinite(requirement_grid) & (requirement_grid >= min_requirement)
+    if not eligible.any():
+        raise AnalysisError(
+            f"Ninguna celda cumple el requisito {requirement['short']} >= {min_requirement} {requirement_units}."
+        )
+
+    parameter_model = {item["key"]: item for item in model["parameters"]}
+    metric_scores: dict[str, np.ndarray] = {}
+    for key, rule in profile.get("criteria", {}).items():
+        if key not in parameter_model:
+            raise AnalysisError(f"El criterio {key} no existe en parameter_model.json.")
+        values = metric_values.get(key)
+        if values is None:
+            continue
+        scale = float(rule.get("scale", 0))
+        if scale <= 0:
+            continue
+        if rule.get("direction") not in {"higher", "lower"}:
+            raise AnalysisError(f"Dirección inválida para el criterio {key}.")
+        scores = 100.0 * values / scale
+        if rule.get("direction") == "lower":
+            scores = 100.0 - scores
+        scores = np.clip(scores, 0, 100).astype(np.float32)
+        scores[~np.isfinite(values)] = np.nan
+        metric_scores[key] = scores
+
+    weights = model["bodies"][body]["weights"]
+    group_score_grids: dict[str, np.ndarray] = {}
+    for group in model["groups"]:
+        group_key = group["key"]
+        parameter_keys = [
+            key
+            for key in metric_scores
+            if parameter_model[key]["group"] == group_key
+        ]
+        if not parameter_keys:
+            continue
+        stack = np.stack([metric_scores[key] for key in parameter_keys])
+        count = np.sum(np.isfinite(stack), axis=0)
+        group_grid = np.divide(
+            np.nansum(stack, axis=0),
+            count,
+            out=np.full(dem_m.shape, np.nan, dtype=np.float32),
+            where=count > 0,
+        )
+        if np.isfinite(group_grid).any():
+            group_score_grids[group_key] = group_grid
+
+    present_group_weights = {
+        key: float(value)
+        for key, value in weights.items()
+        if key in group_score_grids and value > 0
+    }
+    if not present_group_weights:
+        raise AnalysisError("No hay parámetros con capas y reglas de puntuación disponibles.")
+    weighted_sum = np.zeros(dem_m.shape, dtype=np.float32)
+    weight_sum = np.zeros(dem_m.shape, dtype=np.float32)
+    for key, weight in present_group_weights.items():
+        grid = group_score_grids[key]
+        valid = np.isfinite(grid)
+        weighted_sum[valid] += grid[valid] * weight
+        weight_sum[valid] += weight
+    overall = np.divide(
+        weighted_sum,
+        weight_sum,
+        out=np.full(dem_m.shape, np.nan, dtype=np.float32),
+        where=weight_sum > 0,
+    )
+    candidates = eligible & np.isfinite(overall)
+    candidate_indices = np.flatnonzero(candidates)
+    if not candidate_indices.size:
+        raise AnalysisError("No hay celdas candidatas con suficientes métricas para puntuar.")
+
+    pool_size = min(candidate_indices.size, max(limit * 100, limit))
+    if candidate_indices.size > pool_size:
+        candidate_scores = overall.ravel()[candidate_indices]
+        top = np.argpartition(candidate_scores, -pool_size)[-pool_size:]
+        candidate_indices = candidate_indices[top]
+    candidate_indices = candidate_indices[
+        np.argsort(overall.ravel()[candidate_indices])[::-1]
+    ]
+
+    chosen: list[tuple[int, int, float, float, float]] = []
+    width = dem_m.shape[1]
+    for flat_index in candidate_indices:
+        row, col = divmod(int(flat_index), width)
+        lon, lat = _cell_coordinates(row, col, transform, crs, radius_km)
+        score = float(overall[row, col])
+        if any(
+            _haversine_km(lat, lon, old_lat, old_lon, radius_km)
+            < minimum_separation_km
+            for _, _, old_lat, old_lon, _ in chosen
+        ):
+            continue
+        chosen.append((row, col, lat, lon, score))
+        if len(chosen) >= limit:
+            break
+
+    if not chosen:
+        raise AnalysisError("No se pudieron separar ubicaciones candidatas con la configuración actual.")
+
+    all_parameters = [item["key"] for item in model["parameters"]]
+    all_group_weight = sum(float(value) for value in weights.values())
+    available_score_weight = sum(present_group_weights.values())
+    score_coverage = 100 * available_score_weight / all_group_weight if all_group_weight else 0
+    features = []
+    for index, (row, col, lat, lon, score) in enumerate(chosen, start=1):
+        raw_metrics = {
+            key: _json_number(values[row, col])
+            for key, values in metric_values.items()
+        }
+        requirement_value = _json_number(requirement_grid[row, col])
+        present_parameters = sum(raw_metrics.get(key) is not None for key in all_parameters)
+        feature_groups = {
+            key: _json_number(grid[row, col])
+            for key, grid in group_score_grids.items()
+        }
+        feature_scores = {
+            key: _json_number(grid[row, col]) if key in grid else None
+            for key, grid in metric_scores.items()
+        }
+        cell_width_km, cell_height_km = _cell_size_km(lat, transform, crs, radius_km)
+        features.append(
+            {
+                "type": "Feature",
+                "id": f"{body}-approx-{index:04d}",
+                "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
+                "properties": {
+                    "candidate_id": f"{body}-approx-{index:04d}",
+                    "body": body,
+                    "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+                    "mission": profile["mission"],
+                    "footprint_km_at_equator": round(
+                        float(selection.get("site_footprint_km", grid_km)), 2
+                    ),
+                    "grid_cell_width_km_at_latitude": round(cell_width_km, 3),
+                    "grid_cell_height_km": round(cell_height_km, 3),
+                    "polar_scale_warning": abs(lat) >= 75,
+                    "overall_score": round(score, 2),
+                    "score_is_partial": len(metric_scores) < len(all_parameters),
+                    "scoring_coverage_percent": round(
+                        100 * float(weight_sum[row, col]) / all_group_weight, 1
+                    )
+                    if all_group_weight
+                    else 0,
+                    "parameter_data_coverage_percent": round(
+                        100 * present_parameters / len(all_parameters), 1
+                    ),
+                    "eligible": True,
+                    "requirement": {
+                        "key": requirement["key"],
+                        "label": requirement["label"],
+                        "value": requirement_value,
+                        "unit": requirement_units,
+                        "minimum": min_requirement,
+                        "passed": requirement_value is not None
+                        and requirement_value >= min_requirement,
+                    },
+                    "metrics": raw_metrics,
+                    "parameter_scores": feature_scores,
+                    "group_scores": feature_groups,
+                    "ice_confidence": raw_metrics.get("iceConfidence"),
+                    "data_status": "partial" if present_parameters < len(all_parameters) else "available",
+                },
+            }
+        )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    geojson_path = output_dir / f"{body}_candidates.geojson"
+    manifest_out_path = output_dir / f"{body}_run_manifest.json"
+    feature_collection = {"type": "FeatureCollection", "features": features}
+    geojson_path.write_text(
+        json.dumps(feature_collection, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+    missing_layers = [key for key in LAYER_KEYS if key not in layer_sources]
+    run_info = {
+        "body": body,
+        "mission": profile["mission"],
+        "generated_utc": datetime.now(timezone.utc).isoformat(),
+        "result": geojson_path.name,
+        "candidate_count": len(features),
+        "eligible_cell_count_before_spatial_separation": int(np.count_nonzero(candidates)),
+        "grid_km_at_equator": round(grid_km, 3),
+        "coordinate_crs": str(crs),
+        "coordinate_convention": "Native geographic convention recorded by the DEM; verify its PDS/USGS label before cross-source overlays.",
+        "minimum_separation_km": minimum_separation_km,
+        "site_footprint_km": selection.get("site_footprint_km"),
+        "safe_slope_limit_degrees": selection.get("safe_slope_limit_degrees"),
+        "requirement": {
+            "key": requirement["key"],
+            "description": requirement["label"],
+            "minimum": min_requirement,
+            "unit": requirement_units,
+            "method": profile.get("requirement_method", {}).get(requirement["column"]),
+        },
+        "model_weights": weights,
+        "scoring_coverage_percent": round(
+            float(
+                np.mean(
+                    [100 * float(weight_sum[row, col]) / all_group_weight for row, col, *_ in chosen]
+                )
+            ),
+            1,
+        )
+        if all_group_weight
+        else round(score_coverage, 1),
+        "missing_optional_layers": missing_layers,
+        "scored_parameters": sorted(
+            key for key, grid in metric_scores.items() if np.isfinite(grid).any()
+        ),
+        "not_scored": profile.get("not_scored", {}),
+        "sources": {"dem": dem_source, "layers": layer_sources},
+        "heuristic_criteria": profile.get("criteria", {}),
+        "limitations": [
+            "Resultado exploratorio aproximado; no es recomendación de aterrizaje ni certificación de seguridad.",
+            "La pendiente y el desnivel se derivan del DEM remuestreado a la resolución de análisis.",
+            "Cráteres/rocas, estabilidad del suelo, albedo, iluminación e hielo requieren capas de entrada documentadas.",
+            "La similitud con la Tierra y el CSV planetary_candidates.csv no participan en este proceso.",
+            "La puntuación se calcula solo con los parámetros disponibles; consultar data_coverage y scoring_coverage.",
+            "La cuadrícula geográfica se estrecha hacia los polos; revisar la advertencia polar y usar productos polares para análisis de detalle.",
+        ],
+    }
+    manifest_out_path.write_text(
+        json.dumps(run_info, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return geojson_path, manifest_out_path, run_info
