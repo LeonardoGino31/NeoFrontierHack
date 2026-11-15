@@ -58,12 +58,15 @@ export async function createDiscoveryPanel({ model, earthMesh, latLonToVector3, 
       <button class="hud-close" title="Cerrar">✕</button>
     </div>
     <label class="disc-pick">Objetivo
-      <select>${['moon', 'mars'].map((body) => `
-        <optgroup label="${BODY_NAMES[body]}">${data.targets
+      <select>${['moon', 'mars'].flatMap((body) => [true, false].map((fromBackend) => {
+        // Los candidatos del backend (cientos en Marte) van aparte de los sitios conocidos
+        const options = data.targets
           .map((t, i) => ({ t, i }))
-          .filter(({ t }) => t.body === body)
-          .map(({ t, i }) => `<option value="${i}">${t.name}</option>`).join('')}
-        </optgroup>`).join('')}
+          .filter(({ t }) => t.body === body && Boolean(t.backend) === fromBackend)
+          .map(({ t, i }) => `<option value="${i}">${t.name}</option>`).join('');
+        const label = `${BODY_NAMES[body]} · ${fromBackend ? 'candidatos del backend' : 'sitios conocidos y propuestas'}`;
+        return options ? `<optgroup label="${label}">${options}</optgroup>` : '';
+      })).join('')}
       </select>
     </label>
     <div class="disc-body"></div>`;

@@ -1,7 +1,8 @@
 """Arma la lista de objetivos de la búsqueda (pipeline/targets.json).
 
 Une cuatro orígenes, sin repetir ids:
-  1. los análogos de Marte y la Luna del CSV de la app (incluye regiones Artemis III);
+  1. los sitios con análogo elegido a mano (known_analogs.json, incluye regiones Artemis III)
+     y los análogos del CSV de la app;
   2. los candidatos del backend de selección de sitios (`backend/data/outputs/*.geojson`
      y las filas `candidate_only` del CSV), que aún no tienen contraparte en la Tierra;
   3. objetivos oficiales fijos (pipeline/targets_official.json: Exploration Zones, aterrizajes);
@@ -44,12 +45,30 @@ def _from_csv(csv_path: Path) -> list[dict]:
                     "eligible": row.get("candidate_eligible") == "true",
                     "overall_score": float(score) if score else None,
                     "filter_status": row.get("candidate_filter_status")})}
-            out.setdefault(row["candidate_id"], target)
+                # Su pareja generada (pairs.py) aparece antes en el CSV; manda la fila del backend
+                out[row["candidate_id"]] = target
+            else:
+                out.setdefault(row["candidate_id"], target)
+    return list(out.values())
+
+
+def _from_known(path: Path) -> list[dict]:
+    """Análogos de las parejas elegidas a mano (Jezero, Shackleton…), que ya no están en el CSV."""
+    if not path.exists():
+        return []
+    out: dict[str, dict] = {}
+    for p in json.loads(path.read_text(encoding="utf-8"))["pairs"]:
+        out.setdefault(p["analogId"], {
+            "id": p["analogId"], "body": p["body"], "name": p["analogName"],
+            "lat": p["analogLat"], "lon": p["analogLon"],
+            "origin": ("NASA Artemis III: región candidata" if p["analogId"] in ARTEMIS_III
+                       else "Sitio conocido con análogo terrestre elegido a mano"),
+        })
     return list(out.values())
 
 
 def _from_backend(rules: dict) -> list[dict]:
-    """Candidatos de las salidas GeoJSON del backend, los mejores `maxPerBody` por cuerpo.
+    """Candidatos de las salidas GeoJSON del backend, los mejores `maxPerBody` por cuerpo (null = todos).
 
     El CSV solo trae las alternativas; los candidatos principales viven en los GeoJSON.
     Si el backend no se ha ejecutado (o no está en esta rama), no aporta objetivos.
@@ -82,7 +101,8 @@ def build(cfg: dict, cache_dir: Path, model: dict, official_path: Path, out_path
     targets: dict[str, dict] = {}
     official = json.loads(official_path.read_text(encoding="utf-8"))["targets"]
     backend = _from_backend(cfg["backendCandidates"])
-    for t in [*_from_csv(Path(cfg["sitesCsv"])), *backend, *official, *propose(cfg, cache_dir, model)]:
+    known = _from_known(Path(__file__).parent / "known_analogs.json")
+    for t in [*known, *_from_csv(Path(cfg["sitesCsv"])), *backend, *official, *propose(cfg, cache_dir, model)]:
         targets.setdefault(t["id"], t)
     out_path.write_text(json.dumps({"targets": list(targets.values())}, ensure_ascii=False, indent=1) + "\n",
                         encoding="utf-8")

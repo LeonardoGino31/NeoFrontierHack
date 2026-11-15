@@ -9,6 +9,7 @@
     python -m pipeline earth-permafrost # permafrost (Obu et al.); se suma al índice de hielo
     python -m pipeline targets          # objetivos: CSV + backend + oficiales + propuestas propias
     python -m pipeline search           # candidatos en la Tierra -> public/data/earth_candidates.json
+    python -m pipeline pairs            # cada candidato del backend + su mejor análogo -> parejas del CSV
 """
 
 import argparse
@@ -19,6 +20,7 @@ from .collect import collect
 from .earth import permafrost, topography
 from .earth.modis import run as modis_run
 from .output import apply_to_csv, write_values
+from .pairs import build as build_pairs
 from .search import run as search_run
 from .sites import load_sites
 from .targets import build as build_targets
@@ -42,6 +44,9 @@ def main() -> None:
     modis.add_argument("--year", type=int, default=2024)
     sub.add_parser("earth-permafrost", help="probabilidad de permafrost en la malla (hemisferio norte y Antártida)")
     sub.add_parser("targets", help="arma pipeline/targets.json")
+    pairs_cmd = sub.add_parser("pairs", help="crea una pareja por candidato del backend con su mejor análogo")
+    pairs_cmd.add_argument("--min-km", type=float, default=150,
+                           help="separación mínima entre los puntos terrestres elegidos")
     search = sub.add_parser("search", help="busca análogos en la Tierra para cada objetivo")
     search.add_argument("--targets", help="ids separados por comas (por defecto, todos)")
     search.add_argument("--top", type=int, default=25, help="candidatos por objetivo")
@@ -76,6 +81,13 @@ def main() -> None:
         out = search_run(cfg, cache_dir, HERE / "targets.json", model_path,
                          Path(args.out), only, args.top, body=args.body)
         print(f"Escrito {out}")
+        return
+
+    if args.command == "pairs":
+        model = json.loads(model_path.read_text(encoding="utf-8"))
+        count = build_pairs(cfg, cache_dir, csv_path, Path("public/data/earth_candidates.json"), output,
+                            HERE / "known_analogs.json", model, args.min_km)
+        print(f"{count} parejas escritas en {csv_path}; valores en {output}")
         return
 
     if args.command == "apply":

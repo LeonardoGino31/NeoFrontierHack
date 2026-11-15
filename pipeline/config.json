@@ -199,7 +199,7 @@
       "backend/data/outputs/mars_candidates.geojson",
       "backend/data/outputs/mars_candidate_alternatives.geojson"
     ],
-    "maxPerBody": 25,
-    "_note": "Cada objetivo se mide en la red (ventanas de LOLA/MOLA y la MCD); el tope limita el tiempo de `search`."
+    "maxPerBody": null,
+    "_note": "null = todos los candidatos del backend. Cada objetivo se mide en la red (ventanas de LOLA/MOLA, MCD, TES); un número limita el tiempo de `search`."
   }
 }

@@ -6,7 +6,7 @@
    "name": "Cráter Jezero",
    "lat": 18.38,
    "lon": 77.58,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "gale",
@@ -14,7 +14,7 @@
    "name": "Cráter Gale",
    "lat": -5.4,
    "lon": 137.8,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "meridiani",
@@ -22,7 +22,7 @@
    "name": "Meridiani Planum",
    "lat": -1.95,
    "lon": -5.53,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "arsia",
@@ -30,7 +30,7 @@
    "name": "Arsia Mons",
    "lat": -8.26,
    "lon": -120.1,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "utopia",
@@ -38,7 +38,7 @@
    "name": "Utopia Planitia",
    "lat": 46.7,
    "lon": 117.5,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "marius",
@@ -46,7 +46,7 @@
    "name": "Colinas de Marius",
    "lat": 14.09,
    "lon": -56.8,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "aristarchus",
@@ -54,7 +54,7 @@
    "name": "Meseta de Aristarco",
    "lat": 23.7,
    "lon": -47.4,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "tranquillitatis",
@@ -62,7 +62,7 @@
    "name": "Pozo de Tranquilidad",
    "lat": 8.34,
    "lon": 33.22,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "shackleton",
@@ -70,7 +70,7 @@
    "name": "Polo sur · Shackleton",
    "lat": -89.67,
    "lon": 129.78,
-   "origin": "Sitio objetivo de la app (CSV)"
+   "origin": "Sitio conocido con análogo terrestre elegido a mano"
   },
   {
    "id": "nobile_rim_1",
@@ -807,6 +807,2456 @@
     "status": "selected",
     "eligible": true,
     "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0026",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0026",
+   "lat": 31.0026,
+   "lon": -148.471,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0027",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0027",
+   "lat": 28.2544,
+   "lon": -164.1085,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0028",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0028",
+   "lat": 29.1132,
+   "lon": -150.3612,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0029",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0029",
+   "lat": 6.2692,
+   "lon": 151.0486,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0030",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0030",
+   "lat": 28.9415,
+   "lon": -159.8125,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0031",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0031",
+   "lat": 5.5822,
+   "lon": 149.3302,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0032",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0032",
+   "lat": 26.5368,
+   "lon": -152.0796,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0033",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0033",
+   "lat": 29.8003,
+   "lon": -152.4233,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0034",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0034",
+   "lat": 27.7391,
+   "lon": -160.4999,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0035",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0035",
+   "lat": 32.5484,
+   "lon": -159.6407,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0036",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0036",
+   "lat": 23.9604,
+   "lon": -162.9057,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0037",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0037",
+   "lat": 7.6433,
+   "lon": 149.8457,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0038",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0038",
+   "lat": 4.8951,
+   "lon": 152.2515,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0039",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0039",
+   "lat": 28.0827,
+   "lon": -149.3302,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0040",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0040",
+   "lat": 1.46,
+   "lon": 157.9223,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0041",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0041",
+   "lat": 33.9225,
+   "lon": -161.0154,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0042",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0042",
+   "lat": 22.9299,
+   "lon": -153.9699,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0043",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0043",
+   "lat": 89.4008,
+   "lon": 108.2601,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0044",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0044",
+   "lat": 22.5864,
+   "lon": -156.3757,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0045",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0045",
+   "lat": 30.8308,
+   "lon": -150.7049,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0046",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0046",
+   "lat": 1.8035,
+   "lon": 164.6241,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0047",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0047",
+   "lat": 2.4905,
+   "lon": 147.0962,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0048",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0048",
+   "lat": 31.0026,
+   "lon": -174.2472,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0049",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0049",
+   "lat": 1.2882,
+   "lon": 158.6096,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0050",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0050",
+   "lat": 22.9299,
+   "lon": -158.4378,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0051",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0051",
+   "lat": 33.4072,
+   "lon": -170.2948,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0052",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0052",
+   "lat": 26.8803,
+   "lon": -160.4999,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.97,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0053",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0053",
+   "lat": 22.4146,
+   "lon": -158.2659,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0054",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0054",
+   "lat": 30.8308,
+   "lon": -154.3136,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0055",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0055",
+   "lat": 26.5368,
+   "lon": -159.297,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0056",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0056",
+   "lat": 22.5864,
+   "lon": -161.7028,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0057",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0057",
+   "lat": 23.2734,
+   "lon": -164.6241,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0058",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0058",
+   "lat": 23.6169,
+   "lon": -155.0009,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0059",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0059",
+   "lat": 8.3303,
+   "lon": 149.8457,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0060",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0060",
+   "lat": 48.8656,
+   "lon": 179.918,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0061",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0061",
+   "lat": 23.4452,
+   "lon": -158.6096,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0062",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0062",
+   "lat": 26.7086,
+   "lon": -151.3923,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0063",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0063",
+   "lat": 7.9868,
+   "lon": 148.9865,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0064",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0064",
+   "lat": 26.5368,
+   "lon": -158.6096,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0065",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0065",
+   "lat": 23.4452,
+   "lon": -162.2183,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0066",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0066",
+   "lat": 46.8044,
+   "lon": -179.918,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0067",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0067",
+   "lat": 6.0975,
+   "lon": 150.0175,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0068",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0068",
+   "lat": -0.6012,
+   "lon": 163.7649,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0069",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0069",
+   "lat": 28.5979,
+   "lon": -158.9533,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0070",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0070",
+   "lat": 26.5368,
+   "lon": -154.3136,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0071",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0071",
+   "lat": 30.8308,
+   "lon": -157.063,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0072",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0072",
+   "lat": 30.8308,
+   "lon": -156.3757,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0073",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0073",
+   "lat": 26.8803,
+   "lon": -155.1728,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0074",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0074",
+   "lat": 5.7539,
+   "lon": 151.2204,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0075",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0075",
+   "lat": 25.3345,
+   "lon": -159.6407,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0076",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0076",
+   "lat": 23.7887,
+   "lon": -153.6262,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0077",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0077",
+   "lat": 25.5063,
+   "lon": -150.7049,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0078",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0078",
+   "lat": 32.0331,
+   "lon": -164.6241,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0079",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0079",
+   "lat": 7.128,
+   "lon": 150.1894,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0080",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0080",
+   "lat": 77.2059,
+   "lon": -29.3849,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0081",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0081",
+   "lat": -0.7729,
+   "lon": 168.4046,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0082",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0082",
+   "lat": 6.6127,
+   "lon": 176.3093,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0083",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0083",
+   "lat": 32.5484,
+   "lon": -166.858,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0084",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0084",
+   "lat": 6.7845,
+   "lon": 175.6219,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0085",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0085",
+   "lat": 21.5558,
+   "lon": -152.767,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0086",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0086",
+   "lat": 55.2207,
+   "lon": -177.684,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0087",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0087",
+   "lat": 57.2818,
+   "lon": -177.1685,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0088",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0088",
+   "lat": 22.9299,
+   "lon": -153.2825,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0089",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0089",
+   "lat": 21.5558,
+   "lon": -153.6262,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0090",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0090",
+   "lat": 27.2239,
+   "lon": -152.5952,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0091",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0091",
+   "lat": -0.9447,
+   "lon": 169.2638,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0092",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0092",
+   "lat": 21.384,
+   "lon": -155.8602,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0093",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0093",
+   "lat": 22.9299,
+   "lon": -162.2183,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0094",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0094",
+   "lat": 22.9299,
+   "lon": -154.8291,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0095",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0095",
+   "lat": 22.0711,
+   "lon": -153.1107,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0096",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0096",
+   "lat": 32.0331,
+   "lon": 112.728,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0097",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0097",
+   "lat": 49.7244,
+   "lon": -179.0587,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0098",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0098",
+   "lat": 50.2396,
+   "lon": 114.2745,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0099",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0099",
+   "lat": 50.0679,
+   "lon": -178.3714,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0100",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0100",
+   "lat": 27.3956,
+   "lon": -161.1872,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0101",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0101",
+   "lat": 20.1817,
+   "lon": -150.3612,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0102",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0102",
+   "lat": 53.1595,
+   "lon": -174.9346,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0103",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0103",
+   "lat": 27.2239,
+   "lon": -153.2825,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0104",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0104",
+   "lat": 52.816,
+   "lon": -172.7006,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0105",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0105",
+   "lat": 50.9267,
+   "lon": -172.0132,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0106",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0106",
+   "lat": 33.4072,
+   "lon": -154.3136,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0107",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0107",
+   "lat": 0.9447,
+   "lon": 173.2161,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0108",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0108",
+   "lat": 34.7813,
+   "lon": -166.858,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0109",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0109",
+   "lat": 82.8739,
+   "lon": 179.918,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0110",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0110",
+   "lat": 3.1775,
+   "lon": 168.7483,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0111",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0111",
+   "lat": 30.1438,
+   "lon": -159.6407,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0112",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0112",
+   "lat": 3.3493,
+   "lon": 173.5598,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0113",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0113",
+   "lat": 33.2354,
+   "lon": -172.5288,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0114",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0114",
+   "lat": 33.2354,
+   "lon": -171.6696,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0115",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0115",
+   "lat": 24.6475,
+   "lon": -152.4233,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0116",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0116",
+   "lat": 34.6095,
+   "lon": -164.1085,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0117",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0117",
+   "lat": 34.6095,
+   "lon": -161.1872,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0118",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0118",
+   "lat": 2.834,
+   "lon": 146.5807,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0119",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0119",
+   "lat": 34.7813,
+   "lon": -155.8602,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0120",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0120",
+   "lat": 35.6401,
+   "lon": -155.0009,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0121",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0121",
+   "lat": 35.6401,
+   "lon": -167.5454,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0122",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0122",
+   "lat": 24.4757,
+   "lon": -158.7815,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0123",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0123",
+   "lat": 35.4683,
+   "lon": -164.2804,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0124",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0124",
+   "lat": 34.0942,
+   "lon": -156.5475,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0125",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0125",
+   "lat": 34.0942,
+   "lon": -165.1396,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0126",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0126",
+   "lat": 1.9752,
+   "lon": 175.2782,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0127",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0127",
+   "lat": 25.8498,
+   "lon": -153.9699,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0128",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0128",
+   "lat": -30.6591,
+   "lon": -148.8147,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0129",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0129",
+   "lat": 25.8498,
+   "lon": -151.9078,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0130",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0130",
+   "lat": 34.266,
+   "lon": -154.3136,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0131",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0131",
+   "lat": 34.266,
+   "lon": -169.4356,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0132",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0132",
+   "lat": 1.46,
+   "lon": 163.4212,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0133",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0133",
+   "lat": 30.4873,
+   "lon": -149.1583,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0134",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0134",
+   "lat": 1.6317,
+   "lon": 164.1085,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0135",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0135",
+   "lat": 24.991,
+   "lon": -157.7504,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0136",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0136",
+   "lat": 24.6475,
+   "lon": -162.2183,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0137",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0137",
+   "lat": 83.9045,
+   "lon": 38.4925,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0138",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0138",
+   "lat": 38.3882,
+   "lon": 179.918,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0139",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0139",
+   "lat": 23.9604,
+   "lon": -157.063,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0140",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0140",
+   "lat": 29.4567,
+   "lon": -158.0941,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0141",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0141",
+   "lat": 32.8919,
+   "lon": -168.9201,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0142",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0142",
+   "lat": 37.873,
+   "lon": 178.3714,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0143",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0143",
+   "lat": 23.9604,
+   "lon": -159.1251,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0144",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0144",
+   "lat": 5.5822,
+   "lon": 173.9035,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0145",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0145",
+   "lat": 5.5822,
+   "lon": 146.4089,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0146",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0146",
+   "lat": -0.4294,
+   "lon": 163.0775,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0147",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0147",
+   "lat": 23.7887,
+   "lon": -156.2038,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0148",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0148",
+   "lat": 29.4567,
+   "lon": -159.1251,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0149",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0149",
+   "lat": 24.304,
+   "lon": -154.1417,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0150",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0150",
+   "lat": 29.972,
+   "lon": -148.471,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0151",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0151",
+   "lat": 29.8003,
+   "lon": -169.6075,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0152",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0152",
+   "lat": 37.0142,
+   "lon": -162.9057,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0153",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0153",
+   "lat": 23.9604,
+   "lon": -162.2183,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0154",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0154",
+   "lat": 4.7234,
+   "lon": 167.8891,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0155",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0155",
+   "lat": 30.4873,
+   "lon": -174.5909,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0156",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0156",
+   "lat": 29.8003,
+   "lon": -149.1583,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.95,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0157",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0157",
+   "lat": 25.3345,
+   "lon": -158.2659,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0158",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0158",
+   "lat": 33.7507,
+   "lon": -167.2017,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0159",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0159",
+   "lat": 25.5063,
+   "lon": -156.3757,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0160",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0160",
+   "lat": 68.4461,
+   "lon": -37.2896,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0161",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0161",
+   "lat": 24.8192,
+   "lon": -159.6407,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0162",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0162",
+   "lat": 32.0331,
+   "lon": -163.9367,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0163",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0163",
+   "lat": -1.46,
+   "lon": 168.4046,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0164",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0164",
+   "lat": 56.9382,
+   "lon": -179.5743,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0165",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0165",
+   "lat": 56.423,
+   "lon": -177.684,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0166",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0166",
+   "lat": 32.0331,
+   "lon": -162.562,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0167",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0167",
+   "lat": 32.0331,
+   "lon": -167.2017,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0168",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0168",
+   "lat": -1.46,
+   "lon": 163.7649,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0169",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0169",
+   "lat": 26.8803,
+   "lon": -156.8912,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0170",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0170",
+   "lat": 26.8803,
+   "lon": -156.2038,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0171",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0171",
+   "lat": 73.9424,
+   "lon": -96.7467,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0172",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0172",
+   "lat": 32.0331,
+   "lon": -159.9844,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0173",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0173",
+   "lat": 30.8308,
+   "lon": -150.0175,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0174",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0174",
+   "lat": 32.2049,
+   "lon": -159.1251,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0175",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0175",
+   "lat": 22.2428,
+   "lon": -155.8602,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0176",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0176",
+   "lat": -1.8035,
+   "lon": 162.7338,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0177",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0177",
+   "lat": 74.8012,
+   "lon": -39.008,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0178",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0178",
+   "lat": 26.7086,
+   "lon": -157.9223,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0179",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0179",
+   "lat": 74.973,
+   "lon": -66.5026,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0180",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0180",
+   "lat": 54.1901,
+   "lon": -173.5598,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0181",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0181",
+   "lat": -1.1164,
+   "lon": 164.2804,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0182",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0182",
+   "lat": 27.2239,
+   "lon": -151.3923,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0183",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0183",
+   "lat": 21.384,
+   "lon": -170.2948,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0184",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0184",
+   "lat": 21.384,
+   "lon": -155.1728,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0185",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0185",
+   "lat": 23.1016,
+   "lon": -157.2349,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0186",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0186",
+   "lat": 51.0984,
+   "lon": 114.9619,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0187",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0187",
+   "lat": 27.3956,
+   "lon": -159.8125,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0188",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0188",
+   "lat": 16.7465,
+   "lon": -160.8436,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0189",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0189",
+   "lat": 17.0901,
+   "lon": -177.5122,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0190",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0190",
+   "lat": -0.9447,
+   "lon": 167.8891,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0191",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0191",
+   "lat": 76.1753,
+   "lon": 13.5755,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0192",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0192",
+   "lat": 49.7244,
+   "lon": 137.1294,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0193",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0193",
+   "lat": 49.5526,
+   "lon": -177.5122,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0194",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0194",
+   "lat": 49.8961,
+   "lon": -179.918,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0195",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0195",
+   "lat": 49.8961,
+   "lon": 105.1669,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0196",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0196",
+   "lat": 23.4452,
+   "lon": -154.3136,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0197",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0197",
+   "lat": 9.7044,
+   "lon": 162.0464,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0198",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0198",
+   "lat": 49.3808,
+   "lon": 104.9951,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0199",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0199",
+   "lat": 76.1753,
+   "lon": -0.1718,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
+    "filterStatus": "partial"
+   }
+  },
+  {
+   "id": "mars-approx-0200",
+   "body": "mars",
+   "name": "Candidato marciano · mars-approx-0200",
+   "lat": 32.5484,
+   "lon": 114.4464,
+   "origin": "Candidato del backend de selección de sitios",
+   "backend": {
+    "status": "selected",
+    "eligible": true,
+    "overallScore": 99.93,
     "filterStatus": "partial"
    }
   },

@@ -47,7 +47,13 @@ class BackendRowsTest(unittest.TestCase):
         self.assertEqual([s.id for s in load_sites(self.csv)], ["salda", "jezero"])
 
     def test_known_analogs_skip_candidate_rows(self):
-        self.assertEqual(list(_known_analogs(self.csv)), ["jezero"])
+        self.assertEqual(list(_known_analogs(self.csv, self.tmp / "sin_archivo.json")), ["jezero"])
+
+    def test_known_analogs_file_wins_over_csv(self):
+        known = self.tmp / "known.json"
+        known.write_text(json.dumps({"pairs": [{"earthId": "devon", "earthName": "Devon", "earthLat": 75.0,
+                                                "earthLon": -89.0, "analogId": "utopia"}]}), encoding="utf-8")
+        self.assertEqual(list(_known_analogs(self.csv, known)), ["utopia"])
 
     def test_apply_keeps_backend_values(self):
         values = self.tmp / "values.json"

@@ -146,9 +146,18 @@ def _target_vector(metrics: dict) -> dict:
     return {k: v["value"] for k, v in metrics.items() if not k.startswith("_") and isinstance(v.get("value"), (int, float))}
 
 
-def _known_analogs(csv_path: Path) -> dict[str, list[dict]]:
-    """Puntos de la Tierra del CSV agrupados por el análogo con que se emparejaron."""
+def _known_analogs(csv_path: Path, known: Path = Path(__file__).parent / "known_analogs.json") -> dict[str, list[dict]]:
+    """Puntos de la Tierra conocidos, agrupados por el análogo con que se emparejaron.
+
+    Si existe `known_analogs.json` (parejas elegidas a mano), se usa ese archivo: las
+    parejas del CSV ya salen de esta misma búsqueda y validarla con ellas sería circular.
+    """
     out: dict[str, list[dict]] = {}
+    if known.exists():
+        for p in json.loads(known.read_text(encoding="utf-8"))["pairs"]:
+            out.setdefault(p["analogId"], []).append({
+                "id": p["earthId"], "name": p["earthName"], "lat": p["earthLat"], "lon": p["earthLon"]})
+        return out
     with csv_path.open(encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
             if is_candidate_only(row):
