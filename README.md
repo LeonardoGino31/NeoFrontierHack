@@ -2,6 +2,10 @@
 
 Plataforma interactiva para encontrar y comparar **análogos terrestres** de regiones de Marte y la Luna, construida con Three.js.
 
+# Presentacion
+
+https://canva.link/gyehlvjmgihqeb0
+
 ## Funcionalidades
 
 - **Globo 3D** de la Tierra, Marte y la Luna con texturas reales, atmósfera, nubes y luces nocturnas.
