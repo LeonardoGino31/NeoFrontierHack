@@ -286,6 +286,23 @@ canvas {
   white-space: nowrap;
 }
 
+.hud-factor-note {
+  display: block;
+  max-width: 320px;
+  margin-top: 4px;
+  color: rgba(230, 247, 255, 0.68);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+
+.hud-factor-note a {
+  color: #ffd21a;
+  text-decoration: underline;
+}
+
 .hud-big {
   font-size: 22px;
   font-weight: 700;

@@ -172,6 +172,7 @@ export async function loadPlanetaryData(model) {
         parameterScores: jsonObjectFrom(row, 'candidate_parameter_scores_json', candidateId),
         hardFilters: jsonObjectFrom(row, 'candidate_hard_filters_json', candidateId),
         selectionDetail: jsonObjectFrom(row, 'candidate_selection_detail_json', candidateId),
+        factorMetadata: jsonObjectFrom(row, 'candidate_factor_metadata_json', candidateId),
         row,
       });
       continue;
@@ -242,6 +243,7 @@ export function candidateAnalysisDataFromCsv(model, candidate) {
           analog: optionalNumberFrom(row, param.confidenceColumns.analog, candidate.id),
         }
       : null,
+    factorMetadata: candidate.factorMetadata?.[param.key] ?? null,
     score: candidate.parameterScores[param.key] == null
       ? null
       : Number(candidate.parameterScores[param.key]),
@@ -249,10 +251,22 @@ export function candidateAnalysisDataFromCsv(model, candidate) {
   const groups = model.groups.map((group) => ({
     group,
     items: results.filter((result) => result.param.group === group.key),
-    similarity: candidate.groupScores[group.key] != null
-      && Number.isFinite(Number(candidate.groupScores[group.key]))
-      ? Number(candidate.groupScores[group.key]) / 100
-      : null,
+    similarity: (() => {
+      const storedScore = candidate.groupScores[group.key];
+      const fallbackParameter = group.key === 'ice'
+        ? 'ice'
+        : group.key === 'illumination'
+          ? 'sunlight'
+          : null;
+      const fallbackScore = fallbackParameter
+        ? candidate.factorMetadata?.[fallbackParameter]?.score_0_100
+          ?? results.find((result) => result.param.key === fallbackParameter)?.analog
+        : null;
+      const score = storedScore ?? fallbackScore;
+      return score != null && Number.isFinite(Number(score))
+        ? Math.max(0, Math.min(100, Number(score))) / 100
+        : null;
+    })(),
   }));
   const profile = model.bodies[body];
   const req = profile.requirement;
