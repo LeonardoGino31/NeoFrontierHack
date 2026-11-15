@@ -37,7 +37,9 @@ GLOBAL_Z=3   # 4096 × 2048 px en Trek: límite seguro para GPUs integradas
 # Radios en km, para pasar del ancho del recorte en km a grados
 declare -A RADIUS_KM=([earth]=6371 [mars]=3389.5 [moon]=1737.4)
 
-# Recortes para la vista de imágenes: id|cuerpo|lat|lon (°E, −180..180)|ancho km.
+# Recortes para la vista de imágenes: id|cuerpo|lat|lon (°E, −180..180)|ancho km[|plano].
+# `plano` desactiva el estiramiento de contraste: en una meseta de hielo uniforme solo
+# amplificaría el ruido del JPEG.
 # La aplicación lee las ubicaciones desde planetary_candidates.csv; añade entradas aquí solo
 # cuando quieras generar también las imágenes locales de un sitio nuevo para el panel NASA.
 SITES=$(cat <<'EOF'
@@ -59,6 +61,18 @@ earth_lanzarote|earth|29.16|-13.44|128
 earth_spcrater|earth|35.58|-111.63|128
 earth_cratersmoon|earth|43.42|-113.52|128
 earth_mcmurdo|earth|-77.50|162.00|120
+earth_domec|earth|-75.10|123.39|128|plano
+earth_chajnantor|earth|-23.02|-67.75|128
+earth_maunakea|earth|19.82|-155.47|128
+EOF
+)
+
+# Sitios cerca del polo sur lunar (solo relieve, en vista polar centrada en el sitio):
+# id|lat|lon|ancho km. Shackleton usa la vista centrada en el polo (build_south_pole).
+POLAR_SITES=$(cat <<'EOF'
+nobile_rim_1|-85.4381|37.3667|128
+malapert_massif|-85.9948|-0.2358|128
+mons_mouton|-84.7906|29.1957|128
 EOF
 )
 
@@ -138,9 +152,9 @@ build_global() {
 # En equirectangular un grado de longitud mide cos(lat) veces uno de latitud, así que se toman
 # más grados de longitud y se reescala a cuadrado: el resultado no sale estirado.
 # El zoom se elige solo: el menor que da ≥ 768 px de alto, sin pasar del máximo de la capa.
-# Args: capa cuerpo lat lon ancho_km salida
+# Args: capa cuerpo lat lon ancho_km salida [plano]
 build_patch() {
-  local layer="$1" body="$2" lat="$3" lon="$4" km="$5" out="$6"
+  local layer="$1" body="$2" lat="$3" lon="$4" km="$5" out="$6" flat="${7:-}"
   local grid url ext zmax
   read -r grid url ext zmax < <(layer_fields "$layer")
   local z x0 y0 w h
@@ -159,9 +173,11 @@ build_patch() {
   stitch_block "$layer" "$z" "$r0" "$r1" "$c0" "$c1" "$CACHE/tmp_patch.png"
   # Se estira el contraste porque mares lunares y llanuras salen casi uniformes; es solo para
   # verlos mejor, no se usa para medir nada.
+  local stretch=(-channel RGB -contrast-stretch 0.5%x0.5% +channel)
+  [[ -n "$flat" ]] && stretch=()
   magick "$CACHE/tmp_patch.png" -crop "${w}x${h}+$((x0 - c0 * tile))+$((y0 - r0 * tile))" +repage \
     -background black -flatten -resize "${SITE_PX}x${SITE_PX}!" \
-    -channel RGB -contrast-stretch 0.5%x0.5% +channel -strip -quality 85 "$out"
+    "${stretch[@]}" -strip -quality 85 "$out"
 }
 
 # Vista polar del polo sur lunar (Shackleton y la región de Artemis III).
@@ -176,6 +192,25 @@ build_south_pole() {
   stitch_block "$MOON_LOLA" "$z" "$row" "$row" 0 $((cols - 1)) "$CACHE/tmp_pole.png"
   # La última fila de tiles cubre de −87.1875° a −90°; se muestran los 2° más cercanos al polo (~60 km)
   python3 -I "$ROOT/scripts/polar_reproject.py" "$CACHE/tmp_pole.png" -87.1875 2 "$SITE_PX" "$out"
+}
+
+# Recorte de un sitio cercano al polo sur lunar, sin la deformación de la proyección ecuatorial.
+# Se bajan las filas de tiles de LOLA (z6, 2.8125° cada una) que cubren desde el borde norte
+# del recorte hasta el polo y se reproyectan a una vista azimutal centrada en el sitio.
+# Args: id lat lon ancho_km
+build_polar_patch() {
+  local id="$1" lat="$2" lon="$3" km="$4" z=6 out="$OUT_SITES/${1}_relief.jpg"
+  [[ -s "$out" && -z "${FORCE:-}" ]] && { log "ya existe $id"; return; }
+  log "recorte polar $id ($lat, $lon, $km km)"
+  local cols=$((2 ** (z + 1))) last=$((2 ** z - 1)) row0 top
+  read -r row0 top < <(awk -v lat="$lat" -v km="$km" -v R="${RADIUS_KM[moon]}" -v n="$((2 ** z))" 'BEGIN {
+    pi = atan2(0, -1); deg = 180 / n
+    north = lat + km / (2 * pi * R / 360)   # el borde norte del recorte, con margen
+    r = int((90 - north) / deg); printf "%d %.6f\n", r, 90 - r * deg }')
+  fetch_block "$MOON_LOLA" "$z" "$row0" "$last" 0 $((cols - 1))
+  stitch_block "$MOON_LOLA" "$z" "$row0" "$last" 0 $((cols - 1)) "$CACHE/tmp_polar_patch.png"
+  python3 -I "$ROOT/scripts/polar_reproject.py" "$CACHE/tmp_polar_patch.png" "$top" \
+    --site "$lat" "$lon" "$km" "${RADIUS_KM[moon]}" "$SITE_PX" "$out"
 }
 
 # Banda de sombra permanente (PSR) del polo sur lunar, de −78.75° a −90°.
@@ -201,8 +236,8 @@ main() {
   build_global "$MARS_MDIM" "$GLOBAL_Z" "$OUT_TEX/mars_viking_mdim.jpg" -quality 88
   build_psr_band
 
-  local id body lat lon km vis rel
-  while IFS='|' read -r id body lat lon km; do
+  local id body lat lon km flat vis rel
+  while IFS='|' read -r id body lat lon km flat; do
     [[ -z "$id" ]] && continue
     case "$body" in
       mars)  vis="$MARS_MDIM";  rel="$MARS_MOLA" ;;
@@ -211,11 +246,14 @@ main() {
     esac
     if [[ -s "$OUT_SITES/${id}_relief.jpg" && -z "${FORCE:-}" ]]; then log "ya existe $id"; continue; fi
     log "recorte $id ($body $lat, $lon, $km km)"
-    build_patch "$vis" "$body" "$lat" "$lon" "$km" "$OUT_SITES/${id}_visible.jpg"
-    build_patch "$rel" "$body" "$lat" "$lon" "$km" "$OUT_SITES/${id}_relief.jpg"
+    build_patch "$vis" "$body" "$lat" "$lon" "$km" "$OUT_SITES/${id}_visible.jpg" "$flat"
+    build_patch "$rel" "$body" "$lat" "$lon" "$km" "$OUT_SITES/${id}_relief.jpg" "$flat"
   done <<< "$SITES"
 
   build_south_pole
+  while IFS='|' read -r id lat lon km; do
+    [[ -n "$id" ]] && build_polar_patch "$id" "$lat" "$lon" "$km"
+  done <<< "$POLAR_SITES"
 
   log "listo:"
   du -sh "$OUT_TEX" "$OUT_SITES"

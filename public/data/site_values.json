@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T19:37:22+00:00",
+  "generatedAt": "2026-11-15T06:35:41+00:00",
   "windows": {
     "mars": {
       "sizeKm": 20,
@@ -22,7 +22,20 @@
       }
     ],
     "moonPolarBelowLatDeg": -75,
-    "earthSnowDaysForIce": 180
+    "earthSnowDaysForIce": 180,
+    "obstacleLocalReliefM": [
+      {
+        "maxResolutionM": 120,
+        "limitM": 60
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitM": 80
+      }
+    ],
+    "_obstacleNote": "Desnivel local 3x3 equivalente a la pendiente límite: 2 × res × tan(límite) ≈ 64 m a 120 m (15°) y 81 m a 463 m (5°).",
+    "marsIceWehPct": 10,
+    "_marsIceNote": "Agua equivalente de GRS a partir de la cual se asume hielo en el primer metro; los minerales hidratados llegan a ~7 %."
   },
   "sites": {
     "earth:salda": {
@@ -53,6 +66,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E029_00_DEM/Copernicus_DSM_COG_10_N37_00_E029_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 39.9,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E029_00_DEM/Copernicus_DSM_COG_10_N37_00_E029_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 30.8,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 18.1,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -85,6 +144,25 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
+        "craterFree": {
+          "value": 99.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cielo despejado; no descuenta el polvo"
+        },
         "descent": {
           "value": 0.01352,
           "unit": "kg/m³",
@@ -94,6 +172,22 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "ice": {
+          "value": 0,
+          "unit": "pts",
+          "status": "derived",
+          "note": "odysseyHydrogen=no (agua equivalente 3.5 % en peso)",
+          "source": {
+            "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+          }
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -125,6 +219,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N38_00_W111_00_DEM/Copernicus_DSM_COG_10_N38_00_W111_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 92.2,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N38_00_W111_00_DEM/Copernicus_DSM_COG_10_N38_00_W111_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 32.7,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 0.2,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -157,6 +297,25 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
+        "craterFree": {
+          "value": 9.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cielo despejado; no descuenta el polvo"
+        },
         "descent": {
           "value": 0.0114,
           "unit": "kg/m³",
@@ -166,6 +325,22 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "ice": {
+          "value": 0,
+          "unit": "pts",
+          "status": "derived",
+          "note": "odysseyHydrogen=no (agua equivalente 5.4 % en peso)",
+          "source": {
+            "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+          }
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -197,6 +372,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S17_00_W072_00_DEM/Copernicus_DSM_COG_10_S17_00_W072_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S17_00_W072_00_DEM/Copernicus_DSM_COG_10_S17_00_W072_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 36.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -228,6 +449,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_W007_00_DEM/Copernicus_DSM_COG_10_N37_00_W007_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 54.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_W007_00_DEM/Copernicus_DSM_COG_10_N37_00_W007_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 29.2,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 22.4,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -260,6 +527,25 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
+        "craterFree": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cielo despejado; no descuenta el polvo"
+        },
         "descent": {
           "value": 0.01156,
           "unit": "kg/m³",
@@ -269,6 +555,22 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "ice": {
+          "value": 0,
+          "unit": "pts",
+          "status": "derived",
+          "note": "odysseyHydrogen=no (agua equivalente 5.3 % en peso)",
+          "source": {
+            "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+          }
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -300,6 +602,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N41_00_W122_00_DEM/Copernicus_DSM_COG_10_N41_00_W122_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 71.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N41_00_W122_00_DEM/Copernicus_DSM_COG_10_N41_00_W122_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 27.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 25.2,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 10.3,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -332,6 +680,25 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
+        "craterFree": {
+          "value": 98.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cielo despejado; no descuenta el polvo"
+        },
         "descent": {
           "value": 0.00271,
           "unit": "kg/m³",
@@ -341,6 +708,22 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "ice": {
+          "value": 0,
+          "unit": "pts",
+          "status": "derived",
+          "note": "odysseyHydrogen=no (agua equivalente 3.4 % en peso)",
+          "source": {
+            "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+          }
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -378,6 +761,55 @@
             ]
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
+        },
+        "craterFree": {
+          "value": 82.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W091_00_DEM/Copernicus_DSM_COG_10_N75_00_W091_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N75_00_W090_00_DEM/Copernicus_DSM_COG_10_N75_00_W090_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 13.7,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 89.2,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "soilStability": {
+          "value": 97.3,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -410,6 +842,25 @@
           },
           "note": "% de píxeles con pendiente < 5° a 463 m/px"
         },
+        "craterFree": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 80 m a 463 m/px"
+        },
+        "sunlight": {
+          "value": 50.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
+          },
+          "note": "cielo despejado; no descuenta el polvo"
+        },
         "descent": {
           "value": 0.01886,
           "unit": "kg/m³",
@@ -419,6 +870,22 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 90° a las 15 h, 10 m sobre el suelo"
+        },
+        "ice": {
+          "value": 0,
+          "unit": "pts",
+          "status": "derived",
+          "note": "odysseyHydrogen=no (agua equivalente 4.2 % en peso)",
+          "source": {
+            "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+          }
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -450,6 +917,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N29_00_W014_00_DEM/Copernicus_DSM_COG_10_N29_00_W014_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 99.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N29_00_W014_00_DEM/Copernicus_DSM_COG_10_N29_00_W014_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 18.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 20.3,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -481,6 +994,16 @@
             "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 97.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 50.0,
@@ -529,6 +1052,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 80.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 32.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 1.2,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -560,6 +1129,16 @@
             "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 93.1,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 50.0,
@@ -608,6 +1187,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N43_00_W114_00_DEM/Copernicus_DSM_COG_10_N43_00_W114_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 94.7,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N43_00_W114_00_DEM/Copernicus_DSM_COG_10_N43_00_W114_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 26.8,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 81.4,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 7.1,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -639,6 +1264,16 @@
             "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 99.3,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 50.0,
@@ -693,6 +1328,55 @@
             ]
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 33.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E161_00_DEM/Copernicus_DSM_COG_10_S78_00_E161_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S78_00_E162_00_DEM/Copernicus_DSM_COG_10_S78_00_E162_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 24.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 100.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 100.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -724,6 +1408,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 81.7,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 0.0,
@@ -791,6 +1485,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S76_00_E123_00_DEM/Copernicus_DSM_COG_10_S76_00_E123_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 100.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S76_00_E123_00_DEM/Copernicus_DSM_COG_10_S76_00_E123_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 44.9,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 100.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 16.3,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -822,6 +1562,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 24.9,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 53.7,
@@ -895,6 +1645,55 @@
             ]
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 89.6,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": [
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S24_00_W068_00_DEM/Copernicus_DSM_COG_10_S24_00_W068_00_DEM.tif",
+              "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S23_00_W068_00_DEM/Copernicus_DSM_COG_10_S23_00_W068_00_DEM.tif"
+            ]
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 43.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -926,6 +1725,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 55.0,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 66.2,
@@ -993,6 +1802,52 @@
             "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N19_00_W156_00_DEM/Copernicus_DSM_COG_10_N19_00_W156_00_DEM.tif"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 73.5,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Copernicus DEM GLO-30 (ESA)",
+            "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N19_00_W156_00_DEM/Copernicus_DSM_COG_10_N19_00_W156_00_DEM.tif"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
+        },
+        "sunlight": {
+          "value": 23.4,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "Día × cielo despejado (MODIS MOD08_M3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "ice": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "soilStability": {
+          "value": 0.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
+        "iceConfidence": {
+          "value": 50,
+          "unit": "%",
+          "status": "derived",
+          "note": "indicadores medidos ÷ indicadores esperados"
         }
       }
     },
@@ -1024,6 +1879,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
           },
           "note": "% de píxeles con pendiente < 15° a 120 m/px"
+        },
+        "craterFree": {
+          "value": 96.8,
+          "unit": "%",
+          "status": "derived",
+          "source": {
+            "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+          },
+          "note": "% de píxeles con desnivel local ≤ 60 m a 120 m/px"
         },
         "sunlight": {
           "value": 53.7,
