@@ -545,7 +545,7 @@ function animate(timestamp) {
     mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, mesh.userData.targetRotationX ?? 0, t);
   }
 
-  markers.pulse(timer.getElapsed());
+  markers.pulse(timer.getElapsed(), camera);
 
   // Regreso suave de la cámara a su posición inicial
   if (cameraGoal) {
