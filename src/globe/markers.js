@@ -10,7 +10,7 @@ const MARKER_COLORS = { mars: '#f97316', moon: '#cbd5e1' }; // naranja / gris cl
 const ACTIVE_COLOR = '#facc15'; // amarillo
 export const ANALOG_TARGETS = ['mars', 'moon'];
 
-const SECTOR_RADIUS = 0.06;
+const SECTOR_RADIUS = 0.08;
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
 
 /**
@@ -105,7 +105,7 @@ export function createMarkers({ meshes, pairs, model }) {
   const activeMaterial = sectorMaterial(ACTIVE_COLOR, 1.5);
   const sectorGeometry = new THREE.CircleGeometry(SECTOR_RADIUS, 48);
 
-  const R = 0.018, H = 0.052;
+  const R = 0.036, H = 0.105;
   const pinParts = {
     geometry: pinGeometry(R, H),
     // Emisivo: el pin se distingue también en la cara nocturna del planeta
@@ -139,7 +139,7 @@ export function createMarkers({ meshes, pairs, model }) {
     const group = new THREE.Group();
     const sector = new THREE.Mesh(sectorGeometry, activeMaterial);
     sector.scale.setScalar(1.3);
-    const { pivot, pin } = createPin({ ...pinParts, scale: 1.4 });
+    const { pivot, pin } = createPin({ ...pinParts, scale: 1.3 });
     group.add(sector, pivot);
     group.userData = { sector, pivot, pin };
     group.visible = false;
@@ -172,7 +172,7 @@ export function createMarkers({ meshes, pairs, model }) {
       if (earthMarkers.visible) {
         for (const m of earthMarkers.children) {
           const { pivot, phase } = m.userData;
-          pivot.position.z = 0.008 + 0.006 * Math.sin(time * 2 + phase);
+          pivot.position.z = 0.012 + 0.01 * Math.sin(time * 2 + phase);
           faceCamera(m, pivot, camera);
         }
         if (selected) selected.scale.setScalar(1.5 + 0.1 * Math.sin(time * 4));
@@ -181,7 +181,7 @@ export function createMarkers({ meshes, pairs, model }) {
         if (!group.visible) continue;
         const { sector, pivot } = group.userData;
         group.quaternion.setFromUnitVectors(Z_AXIS, group.position.clone().normalize());
-        pivot.position.z = 0.01 + 0.008 * Math.sin(time * 3);
+        pivot.position.z = 0.015 + 0.012 * Math.sin(time * 3);
         sector.scale.setScalar(1.3 + 0.12 * Math.sin(time * 4));
         faceCamera(group, pivot, camera);
       }
