@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from .metrics import annual_sunlit_pct, ice_index, moon_near_side_earth_view_pct
-from .sources import appeears, dem, mcd, moon_maps
+from .sources import appeears, dem, mars_ice, mcd, moon_maps
 
 DERIVED_GEOMETRY = {"dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"}
 
@@ -16,13 +16,18 @@ def _is_moon_polar(site, cfg: dict) -> bool:
 def _illumination(site, cfg: dict, cache_dir: Path) -> dict:
     """Luz solar (y Tierra visible en la Luna).
 
-    Polos lunares: mapas de LOLA, que incluyen las sombras del relieve. Resto de la Luna:
-    geometría (día y noche de ~14 días, 50 %). En la Tierra y Marte la geometría con
-    horizonte plano da ~50 % en cualquier latitud, así que no distingue sitios: queda
-    pendiente hasta calcular el horizonte con el DEM.
+    Polos lunares: mapas de LOLA, que incluyen las sombras del relieve. Resto de la Luna y
+    Marte: geometría con horizonte plano. En Marte se toma el cielo como despejado (casi no
+    hay nubes fuera de los casquetes) para compararlo con "día × cielo despejado" de la
+    Tierra. En la Tierra el valor de cada sitio sale de la malla de MODIS, no de aquí.
     """
     if _is_moon_polar(site, cfg):
         return moon_maps.polar_illumination(site, cfg, cache_dir)
+    if site.body == "mars":
+        sunlight = annual_sunlit_pct(site.lat, cfg["bodies"]["mars"]["obliquityDeg"])
+        return {"sunlight": {"value": round(sunlight, 1), "unit": "%", "status": "derived",
+                             "source": DERIVED_GEOMETRY,
+                             "note": "cielo despejado; no descuenta el polvo"}}
     if site.body != "moon":
         return {}
     sunlight = annual_sunlit_pct(site.lat, cfg["bodies"]["moon"]["obliquityDeg"])
@@ -40,6 +45,9 @@ def _ice(site, cfg: dict, metrics: dict, snow: dict) -> dict:
     shadow = metrics.pop("_permanentShadow", None)
     if shadow:
         indicators["permanentShadow"] = shadow["value"]
+    hydrogen = metrics.pop("_marsHydrogen", None)
+    if hydrogen:
+        indicators["odysseyHydrogen"] = hydrogen["value"]
     if site.body == "earth" and site.id in snow:
         days, _ = snow[site.id]
         indicators["snowDays"] = days >= cfg["thresholds"]["earthSnowDaysForIce"]
@@ -49,9 +57,12 @@ def _ice(site, cfg: dict, metrics: dict, snow: dict) -> dict:
         return {}
     index, confidence = result
     note = ", ".join(f"{k}={'sí' if v else 'no'}" for k, v in indicators.items())
+    if hydrogen:
+        note += f" ({hydrogen['note']})"
+    source = (shadow or hydrogen)["source"] if (shadow or hydrogen) else snow[site.id][1]
     return {
         "ice": {"value": round(index), "unit": "pts", "status": "derived", "note": note,
-                "source": shadow["source"] if shadow else snow[site.id][1]},
+                "source": source},
         "iceConfidence": {"value": round(confidence), "unit": "%", "status": "derived",
                           "note": "indicadores medidos ÷ indicadores esperados"},
     }
@@ -64,6 +75,7 @@ def collect_site(site, cfg: dict, cache_dir: Path, snow: dict) -> dict:
              ("illumination", lambda: _illumination(site, cfg, cache_dir))]
     if site.body == "mars":
         steps.append(("descent", lambda: mcd.descent_density(site, cfg, cache_dir)))
+        steps.append(("ice", lambda: mars_ice.hydrogen_indicator(site, cfg, cache_dir)))
 
     for name, step in steps:
         try:

@@ -81,17 +81,18 @@ machine urs.earthdata.nasa.gov login TU_USUARIO password TU_CONTRASEÑA
 | Métrica | Tierra | Marte | Luna (cara visible) | Luna (polo sur) |
 |---|---|---|---|---|
 | Desnivel, pendiente segura | COP-DEM | MOLA 463 m | LOLA 118 m | LOLA 120 m |
-| Luz solar | — | — | 50 % (geometría) | Mapas LOLA (PGDA) |
+| Luz solar | Día × cielo despejado (MODIS, malla) | Geometría, cielo despejado | 50 % (geometría) | Mapas LOLA (PGDA) |
 | Tierra visible | — | — | 100 % (geometría) | Mapas LOLA (PGDA) |
-| Hielo | Días de nieve (MODIS) | — | — | Sombra permanente (LOLA) |
+| Hielo | Días de nieve (MODIS) | Hidrógeno de Mars Odyssey GRS | — | Sombra permanente (LOLA) |
 | Densidad del aire | — | Mars Climate Database | — | — |
 
 Pendiente (las columnas siguen con datos demo):
 
-- **Luz solar en la Tierra y Marte.** Con horizonte plano da ~50 % en cualquier latitud, así que no distingue sitios. Hay que calcular el horizonte con el DEM o pasar a insolación.
+- **Luz solar en Marte.** Es geometría con horizonte plano y cielo despejado: ~50 % en casi cualquier latitud. No distingue sitios de Marte entre sí, pero sí las celdas de la Tierra (prefiere desiertos despejados). Falta descontar el polvo (opacidad de la MCD).
 - **Cráteres y rocas.** Catálogos de Robbins y abundancia de rocas de Diviner y TES.
 - **Estabilidad del suelo.** Inercia térmica.
-- **Más indicadores de hielo:** Diviner, LEND, Mars Odyssey, SWIM y permafrost. Hoy la confianza del hielo lunar es 33 %, porque solo se mide 1 de 3 indicadores.
+- **Más indicadores de hielo:** Diviner, LEND, SWIM y permafrost. Hoy la confianza del hielo lunar es 33 % (1 de 3 indicadores) y la de Marte 50 % (1 de 2).
+- **Hielo de Marte.** GRS mide los primeros ~50 cm en celdas de 5° y solo cubre de ~55° S a ~55° N; dentro de esa franja el agua es de minerales hidratados (máximo en el ecuador), así que el indicador solo es positivo en la región polar que GRS excluye por exceso de hielo, o con ≥ 10 % de agua. Por eso todos los objetivos actuales de Marte salen sin hielo. El hielo enterrado de latitudes medias (Arcadia, Utopia, Deuteronilus) necesita los mapas de SWIM.
 
 ## Estructura
 

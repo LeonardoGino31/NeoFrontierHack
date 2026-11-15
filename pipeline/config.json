@@ -49,7 +49,9 @@
         "limitM": 80
       }
     ],
-    "_obstacleNote": "Desnivel local 3x3 equivalente a la pendiente límite: 2 × res × tan(límite) ≈ 64 m a 120 m (15°) y 81 m a 463 m (5°)."
+    "_obstacleNote": "Desnivel local 3x3 equivalente a la pendiente límite: 2 × res × tan(límite) ≈ 64 m a 120 m (15°) y 81 m a 463 m (5°).",
+    "marsIceWehPct": 10,
+    "_marsIceNote": "Agua equivalente de GRS a partir de la cual se asume hielo en el primer metro; los minerales hidratados llegan a ~7 %."
   },
   "ice": {
     "indicators": {
@@ -115,6 +117,10 @@
       ],
       "localTimeH": 15,
       "altitudeM": 10
+    },
+    "marsGrsWater": {
+      "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+      "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
     },
     "appeears": {
       "dataset": "MODIS/Terra Snow Cover 8-Day 500 m (MOD10A2.061) via AppEEARS",
