@@ -3,8 +3,10 @@
 Se usan solo los productos globales de baja resolución (0.05° y 1°): son 12 archivos
 pequeños por año y producto, en lugar de miles de teselas de 500 m.
 
-  - ice:           meses con nieve ≥ 50 % de la celda (MOD10CM), escalado a 0–100
-                   (100 = nieve al menos `earthSnowDaysForIce` días al año)
+  - snow:          meses con nieve ≥ 50 % de la celda (MOD10CM), escalado a 0–100
+                   (100 = nieve al menos `earthSnowDaysForIce` días al año); el índice
+                   `ice` combina esta capa con el permafrost (grid.combine_ice)
+  - albedo:        albedo de onda corta de cielo blanco, promedio anual (MCD43C3)
   - sunlight:      % del año con el Sol sobre el horizonte y cielo despejado
                    (geometría × (1 − nubosidad de MOD08_M3))
   - soilStability: inercia térmica aparente (1 − albedo) / (T día − T noche), de MOD11C3
@@ -114,13 +116,18 @@ def sunlight_layer(year: int, cache_dir: Path) -> np.ndarray:
     return 100 * total / len(files)
 
 
-def soil_layer(year: int, cache_dir: Path) -> np.ndarray:
+def albedo_mean(year: int, cache_dir: Path) -> np.ndarray:
+    """Albedo de onda corta promedio del año (un día por mes de MCD43C3), en su malla de 0.05°."""
+    days = [f"{year}-{m:02d}-15" for m in range(1, 13)]
+    files = _download("albedo", year, cache_dir, days)
+    with np.errstate(all="ignore"):
+        return np.nanmean(np.stack([_read(p, PRODUCTS["albedo"]["sds"]) for p in files]), axis=0)
+
+
+def soil_layer(year: int, cache_dir: Path, albedo: np.ndarray) -> np.ndarray:
     """Inercia térmica aparente escalada a 0–100 (estimación: compacto alto, suelto bajo)."""
     lst_files = _download("lst", year, cache_dir)
-    days = [f"{year}-{m:02d}-15" for m in range(1, 13)]
-    albedo_files = _download("albedo", year, cache_dir, days)
     amplitude = np.nanmean(np.stack([_read(p, "LST_Day_CMG") - _read(p, "LST_Night_CMG") for p in lst_files]), axis=0)
-    albedo = np.nanmean(np.stack([_read(p, PRODUCTS["albedo"]["sds"]) for p in albedo_files]), axis=0)
     with np.errstate(all="ignore"):
         ati = (1 - _to_grid(albedo)) / np.where(_to_grid(amplitude) > 1, _to_grid(amplitude), np.nan)
     lo, hi = np.nanpercentile(ati, [5, 95])
@@ -128,14 +135,17 @@ def soil_layer(year: int, cache_dir: Path) -> np.ndarray:
 
 
 def run(cfg: dict, cache_dir: Path, year: int = 2024) -> Path:
-    """Calcula las tres capas y las agrega a la malla de la Tierra."""
+    """Calcula las capas de MODIS y las agrega a la malla de la Tierra."""
     target = Path(cfg["earthGrid"]["file"])
     earth = grid.load(target) if target.exists() else {}
-    print("  · hielo (MOD10CM)")
-    earth["ice"] = ice_layer(year, cache_dir, cfg["thresholds"]["earthSnowDaysForIce"]).astype("float32")
+    print("  · nieve (MOD10CM)")
+    earth["snow"] = ice_layer(year, cache_dir, cfg["thresholds"]["earthSnowDaysForIce"]).astype("float32")
+    grid.combine_ice(earth)
     print("  · luz solar con cielo despejado (MOD08_M3)")
     earth["sunlight"] = sunlight_layer(year, cache_dir).astype("float32")
-    print("  · estabilidad del suelo (MOD11C3 + MCD43C3)")
-    earth["soilStability"] = soil_layer(year, cache_dir).astype("float32")
+    print("  · albedo y estabilidad del suelo (MCD43C3 + MOD11C3)")
+    albedo = albedo_mean(year, cache_dir)
+    earth["albedo"] = _to_grid(albedo).astype("float32")
+    earth["soilStability"] = soil_layer(year, cache_dir, albedo).astype("float32")
     grid.save(target, earth)
     return target

@@ -122,6 +122,47 @@
       "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
       "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
     },
+    "moonAlbedo": {
+      "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+      "polarFromLatDeg": 60,
+      "global": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.img",
+        "imageName": "LDAM_10_FLOAT.IMG"
+      },
+      "south": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img",
+        "imageName": "LDAM_50S_1000M_FLOAT.IMG"
+      },
+      "north": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50n_1000m_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50n_1000m_float.img",
+        "imageName": "LDAM_50N_1000M_FLOAT.IMG"
+      }
+    },
+    "moonRockAbundance": {
+      "dataset": "LRO Diviner rock abundance, global high-resolution mosaic 128 px/° (Bandfield et al. 2011, PDS Geosciences)",
+      "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_ghrm/geotiff/dghrm_ra_sam_70s70n_tif.tif",
+      "maxAbsLatDeg": 70
+    },
+    "marsAlbedo": {
+      "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+      "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+    },
+    "earthPermafrost": {
+      "dataset": "Permafrost probability 1 km (Obu et al. 2019 y 2020, ESA GlobPermafrost, PANGAEA)",
+      "regions": [
+        {
+          "name": "hemisferio norte (2000–2016)",
+          "url": "https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERPROB_5.0_20181128_2000_2016_NH.zip"
+        },
+        {
+          "name": "Antártida (2000–2017)",
+          "url": "https://store.pangaea.de/Publications/ObuJ-etal_2019/UiO_PEX_PERPROB_5.0_20181205_2000_2017_ANT.zip"
+        }
+      ]
+    },
     "appeears": {
       "dataset": "MODIS/Terra Snow Cover 8-Day 500 m (MOD10A2.061) via AppEEARS",
       "api": "https://appeears.earthdatacloud.nasa.gov/api",

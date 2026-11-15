@@ -5,7 +5,8 @@
     python -m pipeline apply            # copia los valores medidos al CSV de la app
     python -m pipeline earth-topo       # topografía global de la Tierra (horas; reanudable)
     python -m pipeline earth-topo --bbox -70,-25,-66,-21   # solo una región (oeste,sur,este,norte)
-    python -m pipeline earth-modis      # hielo, luz solar y suelo globales (requiere Earthdata)
+    python -m pipeline earth-modis      # nieve, luz solar, albedo y suelo globales (requiere Earthdata)
+    python -m pipeline earth-permafrost # permafrost (Obu et al.); se suma al índice de hielo
     python -m pipeline targets          # objetivos: CSV + backend + oficiales + propuestas propias
     python -m pipeline search           # candidatos en la Tierra -> public/data/earth_candidates.json
 """
@@ -15,7 +16,7 @@ import json
 from pathlib import Path
 
 from .collect import collect
-from .earth import topography
+from .earth import permafrost, topography
 from .earth.modis import run as modis_run
 from .output import apply_to_csv, write_values
 from .search import run as search_run
@@ -39,10 +40,14 @@ def main() -> None:
     topo.add_argument("--bbox", help="oeste,sur,este,norte en grados (por defecto, todo el planeta)")
     modis = sub.add_parser("earth-modis", help="capas globales de MODIS (requiere cuenta de Earthdata)")
     modis.add_argument("--year", type=int, default=2024)
+    sub.add_parser("earth-permafrost", help="probabilidad de permafrost en la malla (hemisferio norte y Antártida)")
     sub.add_parser("targets", help="arma pipeline/targets.json")
     search = sub.add_parser("search", help="busca análogos en la Tierra para cada objetivo")
     search.add_argument("--targets", help="ids separados por comas (por defecto, todos)")
     search.add_argument("--top", type=int, default=25, help="candidatos por objetivo")
+    search.add_argument("--body", choices=["moon", "mars"], help="solo los objetivos de ese cuerpo")
+    search.add_argument("--out", default="public/data/earth_candidates.json",
+                        help="archivo de salida (para repartir la búsqueda en varias ejecuciones)")
     args = parser.parse_args()
 
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
@@ -57,6 +62,10 @@ def main() -> None:
         print(f"Malla escrita en {modis_run(cfg, cache_dir, args.year)}")
         return
 
+    if args.command == "earth-permafrost":
+        print(f"Malla escrita en {permafrost.run(cfg, cache_dir)}")
+        return
+
     model_path = Path("public/data/parameter_model.json")
     if args.command == "targets":
         model = json.loads(model_path.read_text(encoding="utf-8"))
@@ -65,7 +74,7 @@ def main() -> None:
     if args.command == "search":
         only = set(args.targets.split(",")) if args.targets else None
         out = search_run(cfg, cache_dir, HERE / "targets.json", model_path,
-                         Path("public/data/earth_candidates.json"), only, args.top)
+                         Path(args.out), only, args.top, body=args.body)
         print(f"Escrito {out}")
         return
 

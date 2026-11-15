@@ -10,9 +10,11 @@ from .sites import is_candidate_only
 # Métrica del pipeline → prefijo de columna del CSV (se completa con _earth o _analog)
 CSV_COLUMNS = {
     "sunlight": "sunlight",
+    "albedo": "albedo",
     "relief": "relief",
     "safeSlope": "safe_slope",
     "craterFree": "crater_free",
+    "soilStability": "soil_stability",
     "ice": "ice",
     "iceConfidence": "ice_confidence",
 }

@@ -13,10 +13,14 @@ import numpy as np
 
 from ..earth import grid
 
+MODIS_URL = "https://ladsweb.modaps.eosdis.nasa.gov/"
+PERMAFROST_URL = "https://doi.org/10.1594/PANGAEA.888600"
+# métrica -> (unidad, dataset, url, decimales)
 LAYERS = {
-    "sunlight": ("%", "Día × cielo despejado (MODIS MOD08_M3, 2024)"),
-    "ice": ("pts", "Meses con nieve (MODIS MOD10CM, 2024)"),
-    "soilStability": ("pts", "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)"),
+    "sunlight": ("%", "Día × cielo despejado (MODIS MOD08_M3, 2024)", MODIS_URL, 1),
+    "albedo": ("", "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)", MODIS_URL, 3),
+    "ice": ("pts", "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)", MODIS_URL, 1),
+    "soilStability": ("pts", "Inercia térmica aparente (MODIS MOD11C3 + MCD43C3, 2024)", MODIS_URL, 1),
 }
 
 
@@ -38,14 +42,26 @@ def grid_values(site, cfg: dict) -> dict:
     r0, c0 = grid.cell_index(site.lat + dlat, site.lon - dlon)
     r1, c1 = grid.cell_index(site.lat - dlat, site.lon + dlon)
 
-    out = {}
-    for key, (unit, dataset) in LAYERS.items():
-        if key not in earth:
-            continue
+    def window_mean(key: str) -> float:
+        """Promedio de una capa en la ventana; NaN si no hay dato."""
         with np.errstate(all="ignore"):
-            value = float(np.nanmean(earth[key][r0:r1 + 1, c0:c1 + 1]))
+            return float(np.nanmean(earth[key][r0:r1 + 1, c0:c1 + 1]))
+
+    out = {}
+    for key, (unit, dataset, url, decimals) in LAYERS.items():
+        value = window_mean(key) if key in earth else math.nan
         if math.isfinite(value):
-            out[key] = {"value": round(value, 1), "unit": unit, "status": "derived",
-                        "source": {"dataset": dataset, "url": "https://ladsweb.modaps.eosdis.nasa.gov/"},
+            out[key] = {"value": round(value, decimals), "unit": unit, "status": "derived",
+                        "source": {"dataset": dataset, "url": url},
                         "note": f"promedio de la ventana de {2 * half_km:g} km"}
+    if "ice" in out:
+        snow = window_mean("snow") if "snow" in earth else out["ice"]["value"]
+        permafrost = window_mean("permafrost") if "permafrost" in earth else math.nan
+        has_permafrost = math.isfinite(permafrost)
+        out["ice"]["note"] = (f"nieve {snow:.0f} pts" + (f", permafrost {permafrost:.0f} %" if has_permafrost else
+                              ", sin mapa de permafrost") + f"; ventana de {2 * half_km:g} km")
+        if has_permafrost:
+            out["ice"]["source"]["url"] = [MODIS_URL, PERMAFROST_URL]
+        # Indicadores medidos de los esperados (nieve, permafrost): da la confianza del hielo
+        out["_iceIndicatorsMeasured"] = 1 + has_permafrost
     return out

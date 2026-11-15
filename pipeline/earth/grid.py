@@ -45,3 +45,21 @@ def load(path: Path) -> dict[str, np.ndarray]:
     """Lee una malla guardada con `save`."""
     with np.load(path) as data:
         return {name: data[name] for name in data.files}
+
+
+def combine_ice(earth: dict[str, np.ndarray]) -> None:
+    """Índice de hielo de cada celda: el mayor entre nieve y permafrost (0–100).
+
+    Basta una de las dos formas de hielo; el máximo, y no el promedio, hace que un desierto
+    frío con permafrost y sin nieve cuente como helado, que es el análogo del hielo
+    enterrado de Marte y la Luna. Las mallas viejas guardaban la nieve en `ice`.
+    """
+    if "snow" not in earth and "ice" in earth:
+        earth["snow"] = earth["ice"]
+    if "snow" not in earth:
+        return
+    if "permafrost" in earth:
+        with np.errstate(all="ignore"):
+            earth["ice"] = np.fmax(earth["snow"], earth["permafrost"]).astype("float32")
+    else:
+        earth["ice"] = earth["snow"]

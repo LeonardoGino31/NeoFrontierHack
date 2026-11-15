@@ -83,6 +83,9 @@ export async function createDiscoveryPanel({ model, earthMesh, latLonToVector3, 
 
     body.innerHTML = `
       <p class="disc-origin">${target.origin}</p>
+      ${target.backend ? `<p class="disc-note">Backend: ${target.backend.eligible ? 'pasa los filtros' : 'no pasa los filtros'}${
+        target.backend.overallScore != null ? ` · puntaje del sitio ${Number(target.backend.overallScore).toFixed(1)} %` : ''}${
+        target.backend.filterStatus === 'partial' ? ' (cobertura parcial)' : ''}</p>` : ''}
       <p class="disc-coords">${BODY_NAMES[target.body]} · ${formatLatLon(target)}
         ${req?.value != null ? `· <b class="${req.pass ? 'lvl-high' : 'lvl-low'}">${req.pass ? 'cumple' : 'no cumple'} el requisito</b>` : ''}</p>
       <div class="disc-values">${values}</div>

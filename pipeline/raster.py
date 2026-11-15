@@ -6,6 +6,7 @@ a una malla local de igual área centrada en el sitio, para medir en metros real
 
 import hashlib
 import json
+import os
 import time
 from pathlib import Path
 
@@ -70,13 +71,18 @@ def read_window(urls: list[str], lat: float, lon: float, size_km: float, resolut
             # Las teselas no se solapan: cada una aporta los píxeles que la otra no tiene
             raw = part if raw is None else np.where(np.isnan(raw), part, raw)
         cached.parent.mkdir(parents=True, exist_ok=True)
-        np.save(cached, raw)
+        # Escribir aparte y renombrar: dos ejecuciones en paralelo nunca leen un archivo a medias
+        partial = cached.with_name(f"{cached.stem}.{os.getpid()}.part.npy")
+        np.save(partial, raw)
+        partial.replace(cached)
     return raw * scale + offset
 
 
 def _read_remote(url: str, lat: float, lon: float, size_km: float, resolution_m: float,
                  resampling: Resampling, cache_dir: Path) -> np.ndarray:
     """Ventana leída por HTTP; si el servidor falla siempre, usa una copia local del archivo."""
+    if Path(url).exists():  # mapas que GDAL solo abre desde disco (etiquetas PDS3)
+        return _read_one(url, lat, lon, size_km, resolution_m, resampling)
     local = cache_dir / "files" / url.rsplit("/", 1)[-1]
     if local.exists():
         return _read_one(str(local), lat, lon, size_km, resolution_m, resampling)

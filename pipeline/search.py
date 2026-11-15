@@ -23,6 +23,8 @@ from .sites import Site, is_candidate_only
 MARS_BLOCK = 4          # 4 × 4 celdas de 0.05° ≈ ventana de 20 km
 MIN_LAND_PCT = 90       # una celda medio en el mar no es un sitio comparable
 EARTH_RADIUS_KM = 6371.0
+POOL_PER_CANDIDATE = 400  # celdas revisadas por candidato pedido antes de agrandar el grupo
+VALUE_DECIMALS = {"albedo": 3}  # con un decimal el albedo (0–1) perdería casi toda la señal
 
 
 def _earth_layers(earth: dict, body: str) -> tuple[dict[str, np.ndarray], np.ndarray, np.ndarray]:
@@ -50,7 +52,7 @@ def _earth_layers(earth: dict, body: str) -> tuple[dict[str, np.ndarray], np.nda
         }
         land = blocks(earth["land"], np.nanmean)
     # Variables globales de MODIS (si ya se calcularon), promediadas a la misma escala
-    for name in ("sunlight", "ice", "soilStability"):
+    for name in ("sunlight", "albedo", "ice", "soilStability"):
         if name in earth:
             layers[name] = earth[name] if k == 1 else np.nanmean(
                 earth[name][: earth[name].shape[0] // k * k, : earth[name].shape[1] // k * k]
@@ -87,9 +89,35 @@ def _haversine_km(lat1, lon1, lat2, lon2):
 
 
 def _top_candidates(score, mask, latlon, layers, used, n: int, min_km: float) -> list[dict]:
-    """Los `n` mejores puntos, a más de `min_km` entre sí para no repetir la misma región."""
+    """Los `n` mejores puntos, a más de `min_km` entre sí para no repetir la misma región.
+
+    Se recorren primero las `n × 400` mejores celdas; si todas caen en pocas regiones (los
+    mejores análogos de un polo lunar se amontonan en la Antártida), el grupo se agranda
+    hasta completar `n` o agotar las celdas válidas.
+    """
     flat = np.where(mask & np.isfinite(score), score, -1).ravel()
-    order = np.argsort(flat)[::-1][: n * 400]
+    pool = n * POOL_PER_CANDIDATE
+    while True:
+        order = np.argsort(flat)[::-1][:pool]
+        picked = _spread_out(flat, order, latlon, n, min_km)
+        exhausted = pool >= flat.size or flat[order[-1]] < 0
+        if len(picked) == n or exhausted:
+            break
+        pool *= 8
+    lats, lons = latlon[0].ravel()[order], latlon[1].ravel()[order]
+    out = []
+    for i in picked:
+        idx = order[i]
+        out.append({
+            "lat": round(float(lats[i]), 3), "lon": round(float(lons[i]), 3),
+            "score": round(float(flat[idx]), 4),
+            "values": {k: round(float(layers[k].ravel()[idx]), VALUE_DECIMALS.get(k, 1)) for k in used},
+        })
+    return out
+
+
+def _spread_out(flat, order, latlon, n: int, min_km: float) -> list[int]:
+    """Posiciones en `order` de hasta `n` celdas válidas separadas al menos `min_km`."""
     lats, lons = latlon[0].ravel()[order], latlon[1].ravel()[order]
     picked: list[int] = []
     for i, idx in enumerate(order):
@@ -98,15 +126,7 @@ def _top_candidates(score, mask, latlon, layers, used, n: int, min_km: float) ->
         if picked and np.min(_haversine_km(lats[i], lons[i], lats[picked], lons[picked])) < min_km:
             continue
         picked.append(i)
-    out = []
-    for i in picked:
-        idx = order[i]
-        out.append({
-            "lat": round(float(lats[i]), 3), "lon": round(float(lons[i]), 3),
-            "score": round(float(flat[idx]), 4),
-            "values": {k: round(float(layers[k].ravel()[idx]), 1) for k in used},
-        })
-    return out
+    return picked
 
 
 def _rank_of(score, mask, latlon, lat, lon) -> dict | None:
@@ -140,14 +160,19 @@ def _known_analogs(csv_path: Path) -> dict[str, list[dict]]:
 
 
 def run(cfg: dict, cache_dir: Path, targets_path: Path, model_path: Path, out_path: Path,
-        only: set[str] | None = None, n: int = 25, min_km: float = 150) -> Path:
-    """Mide los objetivos, puntúa la Tierra para cada uno y escribe los candidatos."""
+        only: set[str] | None = None, n: int = 25, min_km: float = 150, body: str | None = None) -> Path:
+    """Mide los objetivos, puntúa la Tierra para cada uno y escribe los candidatos.
+
+    `only` y `body` limitan los objetivos, para repartir la búsqueda en varias ejecuciones.
+    """
     earth = grid.load(Path(cfg["earthGrid"]["file"]))
     model = json.loads(model_path.read_text(encoding="utf-8"))
     known = _known_analogs(Path(cfg["sitesCsv"]))
     targets = json.loads(targets_path.read_text(encoding="utf-8"))["targets"]
     if only:
         targets = [t for t in targets if t["id"] in only]
+    if body:
+        targets = [t for t in targets if t["body"] == body]
 
     layers_by_body = {}
     results = []

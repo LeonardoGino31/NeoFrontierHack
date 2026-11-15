@@ -49,18 +49,21 @@ La consulta a AppEEARS es asíncrona. Si no termina en 15 minutos, el id de la t
 Es el objetivo del proyecto: para cada sitio de la Luna o Marte, medir sus parámetros y buscar las celdas de la Tierra con los números más parecidos.
 
 ```bash
-python -m pipeline earth-topo      # 1. topografía de toda la Tierra (COP-DEM 90 m; ~1–2 h, reanudable)
-python -m pipeline earth-modis     # 2. hielo, luz solar y suelo de toda la Tierra (MODIS; requiere Earthdata)
-python -m pipeline targets         # 3. objetivos: CSV + backend + oficiales + propuestas propias
-python -m pipeline search          # 4. candidatos -> public/data/earth_candidates.json
+python -m pipeline earth-topo        # 1. topografía de toda la Tierra (COP-DEM 90 m; ~1–2 h, reanudable)
+python -m pipeline earth-modis       # 2. nieve, luz solar, albedo y suelo (MODIS; requiere Earthdata)
+python -m pipeline earth-permafrost  # 3. permafrost (Obu et al.; ~110 MB); se suma al índice de hielo
+python -m pipeline targets           # 4. objetivos: CSV + backend + oficiales + propuestas propias
+python -m pipeline search            # 5. candidatos -> public/data/earth_candidates.json
 ```
+
+La búsqueda se puede repartir en varias ejecuciones en paralelo con `--body moon|mars`, `--targets id1,id2` y `--out archivo.json`; la caché de ventanas se escribe de forma atómica, así que no se pisan.
 
 **Malla de la Tierra.** Celdas de 0.05° (~5 km) con desnivel, % de pendiente segura y % sin obstáculos, a dos escalas para comparar con el mismo tamaño de píxel:
 
 - fina (~90 m), para la Luna;
 - gruesa (~460 m), para Marte, que se compara en bloques de 4 × 4 celdas (20 km).
 
-MODIS agrega hielo (meses con nieve), luz solar con cielo despejado y estabilidad del suelo (inercia térmica aparente). Todo queda en `.data-cache/earth/earth_grid.npz`.
+MODIS agrega nieve (meses con nieve), luz solar con cielo despejado, albedo de onda corta y estabilidad del suelo (inercia térmica aparente). El permafrost viene de los mapas de probabilidad de Obu et al. (hemisferio norte y Antártida, 1 km). El índice de hielo de cada celda es el **mayor** entre nieve y permafrost: basta una de las dos formas de hielo, y así un desierto frío sin nieve pero con permafrost (Valles Secos de McMurdo) cuenta como helado, que es el análogo del hielo enterrado de Marte y la Luna. Todo queda en `.data-cache/earth/earth_grid.npz`.
 
 **Objetivos** (`pipeline/targets.json`):
 
@@ -71,7 +74,7 @@ MODIS agrega hielo (meses con nieve), luz solar con cielo despejado y estabilida
 
 **Convivencia con el backend.** El pipeline nunca escribe en las filas `candidate_only`: `fetch` no las mide como sitios y `apply` no las toca, para no mezclar sus valores con los del backend. A los candidatos los mide aparte, con las mismas fuentes que a la Tierra, al buscar sus análogos.
 
-**Búsqueda.** Usa los mismos `span`, grupos y pesos de `parameter_model.json` y solo los parámetros medidos en ambos lados. El resultado guarda los 25 mejores candidatos por objetivo, separados al menos 150 km, y el puesto que obtienen los análogos conocidos del CSV, para comprobar el método.
+**Búsqueda.** Usa los mismos `span`, grupos y pesos de `parameter_model.json` y solo los parámetros medidos en ambos lados. El resultado guarda los 25 mejores candidatos por objetivo, separados al menos 150 km, y el puesto que obtienen los análogos conocidos del CSV, para comprobar el método. Si las mejores celdas se amontonan en pocas regiones (los análogos de un polo lunar caen casi todos en la Antártida), la búsqueda revisa más celdas hasta completar los 25.
 
 **Credenciales de Earthdata.** Crea `~/.netrc` (permisos 600) con:
 
@@ -85,30 +88,35 @@ machine urs.earthdata.nasa.gov login TU_USUARIO password TU_CONTRASEÑA
 |---|---|---|---|---|
 | Desnivel, pendiente segura | COP-DEM | MOLA 463 m | LOLA 118 m | LOLA 120 m |
 | Luz solar | Día × cielo despejado (MODIS, malla) | Geometría, cielo despejado | 50 % (geometría) | Mapas LOLA (PGDA) |
+| Albedo | Onda corta, cielo blanco (MODIS MCD43C3) | Bolométrico de TES (7.4 km) | LOLA 1064 nm (10 px/°) | LOLA 1064 nm polar (1 km) |
+| Estabilidad del suelo | Inercia térmica aparente (MODIS) | — | Abundancia de rocas de Diviner (70° S–70° N) | — |
 | Tierra visible | — | — | 100 % (geometría) | Mapas LOLA (PGDA) |
-| Hielo | Días de nieve (MODIS) | Hidrógeno de Mars Odyssey GRS | — | Sombra permanente (LOLA) |
+| Hielo | Nieve (MODIS) o permafrost (Obu et al.) | Hidrógeno de Mars Odyssey GRS | — | Sombra permanente (LOLA) |
 | Densidad del aire | — | Mars Climate Database | — | — |
+
+**Escalas comparables.** La estabilidad del suelo se escala a 0–100 con los percentiles 5 y 95 de cada cuerpo (inercia térmica aparente en la Tierra, abundancia de rocas en la Luna): ambos miden lo mismo (superficie compacta o rocosa = alta, polvo suelto = baja), pero el valor es relativo a su cuerpo. El albedo de LOLA es a 1064 nm, en el infrarrojo cercano, y da valores ~1.5–2 veces mayores que el visible: sesga los análogos lunares hacia superficies terrestres más claras. Se guarda tal cual, sin un factor de conversión inventado.
 
 ## Datos que faltan para encontrar análogos
 
-Un parámetro solo entra en la búsqueda si está medido **en los dos lados**: en el objetivo (Luna o Marte) y en la malla de la Tierra. Hoy la búsqueda usa 5 de los 7 parámetros del modelo; ninguno de los dos que faltan (albedo y estabilidad del suelo) está medido en la Luna o Marte.
+Un parámetro solo entra en la búsqueda si está medido **en los dos lados**: en el objetivo (Luna o Marte) y en la malla de la Tierra. Hoy la búsqueda usa 7 de los 7 parámetros en la cara visible de la Luna, y 6 en el polo sur lunar y en Marte. En las 13 parejas del CSV, 182 de 195 valores son reales (antes, 140).
 
-| Parámetro (grupo) | Tierra (malla) | Luna | Marte | Qué falta y fuente propuesta |
-|---|---|---|---|---|
-| Albedo (iluminación) | **falta** | **falta** | **falta** | Tierra: guardar el albedo de MCD43C3 como capa (ya se descarga para la inercia térmica). Luna: mosaico de reflectancia normalizada LROC WAC. Marte: albedo bolométrico de TES. |
-| Estabilidad del suelo (topografía) | Inercia térmica aparente (MODIS) | **falta** | **falta** | Luna: abundancia de rocas y parámetro H de Diviner. Marte: inercia térmica de TES/THEMIS (Putzig y Mellon). Hay que fijar una escala común: la de la Tierra es aparente y se normaliza por percentiles. |
-| Luz solar (iluminación) | Día × cielo despejado | Polo: LOLA. Resto: geometría | Geometría, sin polvo | Marte: descontar la opacidad del polvo (τ de la MCD). Hoy casi todo Marte da ~50 % y no distingue sitios. |
-| Sin obstáculos (topografía) | Desnivel local del DEM | Desnivel local del DEM | Desnivel local del DEM | Es un sustituto. Faltan catálogos de cráteres (Robbins: Luna y Marte) y abundancia de rocas (Diviner, TES). |
-| Hielo | Nieve (MODIS); **falta permafrost** | Solo sombra permanente (1 de 3 indicadores) | Solo GRS (1 de 2) | Tierra: permafrost de ESA CCI. Luna: temperatura máxima de Diviner y LEND, o el *Ice Favorability Index* de USGS que el backend ya descarga. Marte: consistencia de hielo de SWIM, sin la cual las llanuras con hielo enterrado (Arcadia, Utopia, Deuteronilus) salen sin hielo. |
+Lo que falta está en el catálogo de fuentes del backend (`backend/config/source_catalog.json`, rama `desarollo`) como pendiente de integrar; por eso el pipeline no lo descarga:
 
-Con lo que hay, la búsqueda distingue bien los sitios polares de la Luna (luz, hielo y relieve), pero en Marte casi solo compara relieve y pendiente: una llanura marciana se parece a cualquier desierto plano. Por eso el albedo y la estabilidad del suelo de Marte son lo más urgente.
+| Parámetro | Falta en | Fuente prevista por el backend |
+|---|---|---|
+| Estabilidad del suelo | Marte | Inercia térmica de TES (ASU) |
+| Estabilidad del suelo | Luna polar (> 70°) | Sin fuente global; Diviner no cubre los polos |
+| Hielo | Luna (2.º y 3.er indicador) | LEND; el *Ice Favorability Index* de USGS ya lo descarga el backend |
+| Hielo | Marte (2.º indicador) | Consistencia de hielo de SWIM: sin ella, las llanuras con hielo enterrado (Arcadia, Utopia, Deuteronilus) salen sin hielo |
+| Luz solar | Marte (polvo) | Mars Climate Database: hoy casi todo Marte da ~50 % |
+| Sin obstáculos | Luna y Marte | Productos de peligros de LROC y CTX/HiRISE. Mientras tanto se usa el desnivel local del DEM, que se mide igual en la Tierra |
 
 **Datos que el backend aún no tiene y el pipeline sí.** Densidad del aire de la Mars Climate Database (el backend usa una fórmula por elevación), luz solar y hielo de Marte, y la malla de la Tierra. El requisito de Marte en `parameter_model.json` es 0.010 kg/m³ porque así lo cumplen Jezero, Gale y Meridiani con los valores de la MCD. El backend lee ese mismo número con su fórmula, que da valores más altos, así que con 0.010 filtra menos; conviene que pase a usar la MCD.
 
 **Otros detalles del lado del objetivo:**
 
 - **Hielo de Marte.** GRS mide los primeros ~50 cm en celdas de 5° y solo cubre de ~55° S a ~55° N. Dentro de esa franja el agua viene de minerales hidratados (máximo en el ecuador), así que el indicador solo es positivo en la región polar que GRS excluye, o con ≥ 10 % de agua. Por eso los objetivos actuales de Marte salen sin hielo.
-- **Confianza del hielo.** Es la fracción de indicadores medidos: 33 % en la Luna (1 de 3) y 50 % en Marte (1 de 2).
+- **Confianza del hielo.** Es la fracción de indicadores medidos: 33 % en la Luna (1 de 3), 50 % en Marte (1 de 2) y en la Tierra 100 % donde hay mapa de permafrost (nieve y permafrost) o 50 % fuera de él.
 
 ## Estructura
 
@@ -123,6 +131,7 @@ pipeline/
 ├── metrics.py       # cálculos puros (desnivel, pendiente, luz, hielo)
 ├── collect.py       # qué fuente usa cada sitio
 ├── output.py        # site_values.json y volcado al CSV
-├── sources/         # un módulo por proveedor (DEM, mapas lunares, MCD, AppEEARS)
+├── earth/           # malla de la Tierra: topografía, MODIS y permafrost
+├── sources/         # un módulo por proveedor (DEM, mapas lunares, albedo, Diviner, MCD, AppEEARS)
 └── tests/
 ```

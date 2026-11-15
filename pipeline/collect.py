@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from .metrics import annual_sunlit_pct, ice_index, moon_near_side_earth_view_pct
-from .sources import appeears, dem, earth_grid, mars_ice, mcd, moon_maps
+from .sources import albedo, appeears, dem, diviner, earth_grid, mars_ice, mcd, moon_maps
 
 DERIVED_GEOMETRY = {"dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"}
 
@@ -76,6 +76,10 @@ def collect_site(site, cfg: dict, cache_dir: Path, snow: dict) -> dict:
     if site.body == "mars":
         steps.append(("descent", lambda: mcd.descent_density(site, cfg, cache_dir)))
         steps.append(("ice", lambda: mars_ice.hydrogen_indicator(site, cfg, cache_dir)))
+    if site.body in ("moon", "mars"):
+        steps.append(("albedo", lambda: albedo.albedo(site, cfg, cache_dir)))
+    if site.body == "moon":
+        steps.append(("soil", lambda: diviner.soil_stability(site, cfg, cache_dir)))
     if site.body == "earth":
         steps.append(("modis", lambda: earth_grid.grid_values(site, cfg)))
 
@@ -84,10 +88,11 @@ def collect_site(site, cfg: dict, cache_dir: Path, snow: dict) -> dict:
             metrics.update(step())
         except Exception as error:  # noqa: BLE001 — se registra y se sigue con el resto
             errors[name] = f"{type(error).__name__}: {error}"
+    measured = metrics.pop("_iceIndicatorsMeasured", 1)
     if "ice" in metrics:
-        # La malla ya da el índice (nieve); falta el permafrost, el otro indicador esperado
+        # La malla ya da el índice (nieve y, donde hay mapa, permafrost)
         expected = cfg["ice"]["indicators"][site.body]
-        metrics["iceConfidence"] = {"value": round(100 / len(expected)), "unit": "%", "status": "derived",
+        metrics["iceConfidence"] = {"value": round(100 * measured / len(expected)), "unit": "%", "status": "derived",
                                     "note": "indicadores medidos ÷ indicadores esperados"}
     else:
         metrics.update(_ice(site, cfg, metrics, snow))

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T06:35:41+00:00",
+  "generatedAt": "2026-11-15T16:34:11+00:00",
   "windows": {
     "mars": {
       "sizeKm": 20,
@@ -87,15 +87,28 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
+        "albedo": {
+          "value": 0.121,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 20 km"
+          "note": "nieve 0 pts, permafrost 0 %; ventana de 20 km"
         },
         "soilStability": {
           "value": 18.1,
@@ -108,7 +121,7 @@
           "note": "promedio de la ventana de 20 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -172,6 +185,16 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "albedo": {
+          "value": 0.18,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo bolométrico; píxel de 7.4 km",
+          "source": {
+            "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+          }
         },
         "ice": {
           "value": 0,
@@ -240,15 +263,28 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
+        "albedo": {
+          "value": 0.282,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 20 km"
+          "note": "nieve 0 pts, permafrost 0 %; ventana de 20 km"
         },
         "soilStability": {
           "value": 0.2,
@@ -261,7 +297,7 @@
           "note": "promedio de la ventana de 20 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -325,6 +361,16 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "albedo": {
+          "value": 0.222,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo bolométrico; píxel de 7.4 km",
+          "source": {
+            "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+          }
         },
         "ice": {
           "value": 0,
@@ -393,15 +439,25 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
+        "albedo": {
+          "value": 0.218,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
             "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
           },
-          "note": "promedio de la ventana de 20 km"
+          "note": "nieve 0 pts, sin mapa de permafrost; ventana de 20 km"
         },
         "soilStability": {
           "value": 0.0,
@@ -470,15 +526,28 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
+        "albedo": {
+          "value": 0.128,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 20 km"
+          "note": "nieve 0 pts, permafrost 0 %; ventana de 20 km"
         },
         "soilStability": {
           "value": 22.4,
@@ -491,7 +560,7 @@
           "note": "promedio de la ventana de 20 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -555,6 +624,16 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "albedo": {
+          "value": 0.13,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo bolométrico; píxel de 7.4 km",
+          "source": {
+            "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+          }
         },
         "ice": {
           "value": 0,
@@ -623,15 +702,28 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
+        "albedo": {
+          "value": 0.151,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 20 km"
+        },
         "ice": {
           "value": 25.2,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 20 km"
+          "note": "nieve 25 pts, permafrost 0 %; ventana de 20 km"
         },
         "soilStability": {
           "value": 10.3,
@@ -644,7 +736,7 @@
           "note": "promedio de la ventana de 20 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -708,6 +800,16 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 180° a las 15 h, 10 m sobre el suelo"
+        },
+        "albedo": {
+          "value": 0.254,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo bolométrico; píxel de 7.4 km",
+          "source": {
+            "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+          }
         },
         "ice": {
           "value": 0,
@@ -785,15 +887,28 @@
           },
           "note": "promedio de la ventana de 20 km"
         },
-        "ice": {
-          "value": 89.2,
-          "unit": "pts",
+        "albedo": {
+          "value": 0.486,
+          "unit": "",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
             "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
           },
           "note": "promedio de la ventana de 20 km"
+        },
+        "ice": {
+          "value": 100.0,
+          "unit": "pts",
+          "status": "derived",
+          "source": {
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
+          },
+          "note": "nieve 89 pts, permafrost 100 %; ventana de 20 km"
         },
         "soilStability": {
           "value": 97.3,
@@ -806,7 +921,7 @@
           "note": "promedio de la ventana de 20 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -870,6 +985,16 @@
             "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py"
           },
           "note": "mínimo en Ls 90° a las 15 h, 10 m sobre el suelo"
+        },
+        "albedo": {
+          "value": 0.205,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo bolométrico; píxel de 7.4 km",
+          "source": {
+            "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+            "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+          }
         },
         "ice": {
           "value": 0,
@@ -938,15 +1063,25 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.078,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
             "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 0 pts, sin mapa de permafrost; ventana de 5 km"
         },
         "soilStability": {
           "value": 20.3,
@@ -1021,6 +1156,26 @@
             "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
           },
           "note": "cara visible = 100 %, sin libración"
+        },
+        "albedo": {
+          "value": 0.148,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.img"
+          }
+        },
+        "soilStability": {
+          "value": 88,
+          "unit": "pts",
+          "status": "derived",
+          "note": "abundancia de rocas 0.53 %, escalada con los percentiles 5–95 de la Luna",
+          "source": {
+            "dataset": "LRO Diviner rock abundance, global high-resolution mosaic 128 px/° (Bandfield et al. 2011, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_ghrm/geotiff/dghrm_ra_sam_70s70n_tif.tif"
+          }
         }
       }
     },
@@ -1073,15 +1228,28 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.171,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 0 pts, permafrost 0 %; ventana de 5 km"
         },
         "soilStability": {
           "value": 1.2,
@@ -1094,7 +1262,7 @@
           "note": "promedio de la ventana de 5 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -1156,6 +1324,26 @@
             "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
           },
           "note": "cara visible = 100 %, sin libración"
+        },
+        "albedo": {
+          "value": 0.39,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.img"
+          }
+        },
+        "soilStability": {
+          "value": 100,
+          "unit": "pts",
+          "status": "derived",
+          "note": "abundancia de rocas 3.90 %, escalada con los percentiles 5–95 de la Luna",
+          "source": {
+            "dataset": "LRO Diviner rock abundance, global high-resolution mosaic 128 px/° (Bandfield et al. 2011, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_ghrm/geotiff/dghrm_ra_sam_70s70n_tif.tif"
+          }
         }
       }
     },
@@ -1208,15 +1396,28 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.228,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 81.4,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 81 pts, permafrost 0 %; ventana de 5 km"
         },
         "soilStability": {
           "value": 7.1,
@@ -1229,7 +1430,7 @@
           "note": "promedio de la ventana de 5 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -1291,6 +1492,26 @@
             "dataset": "Cálculo geométrico (latitud y oblicuidad del cuerpo, horizonte plano)"
           },
           "note": "cara visible = 100 %, sin libración"
+        },
+        "albedo": {
+          "value": 0.157,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.img"
+          }
+        },
+        "soilStability": {
+          "value": 79,
+          "unit": "pts",
+          "status": "derived",
+          "note": "abundancia de rocas 0.48 %, escalada con los percentiles 5–95 de la Luna",
+          "source": {
+            "dataset": "LRO Diviner rock abundance, global high-resolution mosaic 128 px/° (Bandfield et al. 2011, PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_ghrm/geotiff/dghrm_ra_sam_70s70n_tif.tif"
+          }
         }
       }
     },
@@ -1352,15 +1573,28 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.325,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 100.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 100 pts, permafrost 100 %; ventana de 5 km"
         },
         "soilStability": {
           "value": 100.0,
@@ -1373,7 +1607,7 @@
           "note": "promedio de la ventana de 5 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -1438,6 +1672,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
           },
           "note": "en el píxel con más luz solar"
+        },
+        "albedo": {
+          "value": 0.418,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img"
+          }
         },
         "ice": {
           "value": 100,
@@ -1506,15 +1750,25 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.824,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 100.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
             "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 100 pts, sin mapa de permafrost; ventana de 5 km"
         },
         "soilStability": {
           "value": 16.3,
@@ -1593,6 +1847,16 @@
           },
           "note": "en el píxel con más luz solar"
         },
+        "albedo": {
+          "value": 0.317,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img"
+          }
+        },
         "ice": {
           "value": 100,
           "unit": "pts",
@@ -1669,15 +1933,25 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.184,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
             "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 0 pts, sin mapa de permafrost; ventana de 5 km"
         },
         "soilStability": {
           "value": 0.0,
@@ -1756,6 +2030,16 @@
           },
           "note": "en el píxel con más luz solar"
         },
+        "albedo": {
+          "value": 0.315,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img"
+          }
+        },
         "ice": {
           "value": 100,
           "unit": "pts",
@@ -1823,15 +2107,28 @@
           },
           "note": "promedio de la ventana de 5 km"
         },
+        "albedo": {
+          "value": 0.085,
+          "unit": "",
+          "status": "derived",
+          "source": {
+            "dataset": "Albedo de onda corta, cielo blanco (MODIS MCD43C3, 2024)",
+            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+          },
+          "note": "promedio de la ventana de 5 km"
+        },
         "ice": {
           "value": 0.0,
           "unit": "pts",
           "status": "derived",
           "source": {
-            "dataset": "Meses con nieve (MODIS MOD10CM, 2024)",
-            "url": "https://ladsweb.modaps.eosdis.nasa.gov/"
+            "dataset": "Nieve (MODIS MOD10CM, 2024) o permafrost (Obu et al., ESA GlobPermafrost)",
+            "url": [
+              "https://ladsweb.modaps.eosdis.nasa.gov/",
+              "https://doi.org/10.1594/PANGAEA.888600"
+            ]
           },
-          "note": "promedio de la ventana de 5 km"
+          "note": "nieve 0 pts, permafrost 0 %; ventana de 5 km"
         },
         "soilStability": {
           "value": 0.0,
@@ -1844,7 +2141,7 @@
           "note": "promedio de la ventana de 5 km"
         },
         "iceConfidence": {
-          "value": 50,
+          "value": 100,
           "unit": "%",
           "status": "derived",
           "note": "indicadores medidos ÷ indicadores esperados"
@@ -1909,6 +2206,16 @@
             "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF"
           },
           "note": "en el píxel con más luz solar"
+        },
+        "albedo": {
+          "value": 0.326,
+          "unit": "",
+          "status": "measured",
+          "note": "albedo normal a 1064 nm (infrarrojo cercano): mayor que el visible",
+          "source": {
+            "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+            "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img"
+          }
         },
         "ice": {
           "value": 100,
