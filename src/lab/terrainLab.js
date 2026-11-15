@@ -26,8 +26,9 @@ import { createRoverDrive } from './rover/roverDrive.js';
  * @param {THREE.WebGLRenderer} o.renderer  renderer compartido con el globo
  * @param {HTMLElement} o.launcher  botón que abre el laboratorio (se oculta mientras está abierto)
  * @param {() => void} [o.onClose]  se llama al cerrar, con el canvas ya devuelto
+ * @param {(active: boolean) => void} [o.onRoverChange]  se llama al desplegar o retirar un rover
  */
-export function createTerrainLab({ renderer, launcher, onClose }) {
+export function createTerrainLab({ renderer, launcher, onClose, onRoverChange }) {
   let scene, camera, controls, terrain, marker, scanBar, raf = null;
   let canvasHome = null;  // dónde estaba el canvas antes de abrir
   let savedExposure = 1;  // exposición del globo, que usa otra
@@ -712,6 +713,7 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
     root.querySelectorAll('[data-rover]').forEach((b) => b.classList.toggle('active', b.dataset.rover === id));
     driveBox.hidden = false;
     renderTelemetry();
+    onRoverChange?.(true);
   }
 
   /**
@@ -724,6 +726,7 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
     root.classList.remove('driving');
     root.querySelectorAll('[data-rover]').forEach((b) => b.classList.remove('active'));
     driveBox.hidden = true;
+    onRoverChange?.(false);
     if (!savedCam) return;
     pendingRestore = savedCam;
     controls.minDistance = 0;

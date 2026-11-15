@@ -14,6 +14,9 @@ import { loadParameterModel } from './parameterModel.js';
 import { createComparePanel } from './comparePanel.js';
 import { createStartScreen } from './startScreen.js';
 import { icon } from './icons.js';
+import { setMusicScene, unlockOnGesture } from './audio.js';
+import { createHudControls } from './hudControls.js';
+import { createMapsView } from './mapsView.js';
 import { addKeyLayer, isTyping, KEY_PRIORITY } from './keyboard.js';
 import { createStarfield, createSky } from './globe/background.js';
 import { BODIES, STARTUP_TEXTURE_COUNT, createBodies, loadBodyTextures, upgradeHiRes } from './globe/bodies.js';
@@ -89,6 +92,22 @@ const infoPanel = document.getElementById('info');
 const compareLabels = document.getElementById('compare-labels');
 const bodySwitch = document.getElementById('label-right');
 
+// ---------- Música según la pantalla ----------
+let started = false;      // ya se pulsó EMPEZAR
+let roverActive = false;  // hay un rover desplegado en el laboratorio
+
+/** Elige la música que corresponde a lo que se ve: inicio, laboratorio, comparación o cuerpo en el centro. */
+function updateMusic() {
+  if (!started) setMusicScene('intro');
+  else if (isLabOpen()) setMusicScene(roverActive ? 'rover' : 'lab');
+  else if (compareBody) setMusicScene('compare');
+  else setMusicScene(currentBody ?? 'earth');
+}
+const mapsView = createMapsView({ onClose: returnFromMaps });
+unlockOnGesture();
+createHudControls();
+setMusicScene('intro');
+
 // ---------- Laboratorio 3D (se descarga recién al abrirlo) ----------
 const labLauncher = document.createElement('button');
 labLauncher.id = 'lab-launcher';
@@ -115,18 +134,27 @@ async function openLab(key) {
       launcher: labLauncher,
       onClose: () => {
         controls.enabled = true;
+        roverActive = false;
         onResize(); // la ventana pudo cambiar de tamaño mientras estaba abierto
+        updateMusic();
+      },
+      onRoverChange: (active) => {
+        roverActive = active;
+        updateMusic();
       },
     });
   }
   controls.enabled = false; // comparten el canvas: los controles del globo no deben reaccionar
   lab.open(key);
+  updateMusic();
 }
 
 // ---------- Arranque ----------
 const startScreen = createStartScreen({
   // Se elige cualquier punto de la Tierra: todos tienen un análogo en la Luna o en Marte
   onStart: () => {
+    started = true;
+    updateMusic();
     const all = markers.earthMarkers.children;
     if (all.length) selectEarthPoint(all[Math.floor(Math.random() * all.length)]);
   },
@@ -193,7 +221,10 @@ async function boot() {
 
 /** Paneles HUD, guía y selector de cuerpo (necesitan el modelo de parámetros). */
 function createPanels(model) {
-  comparePanel = createComparePanel({ formatLatLon });
+  comparePanel = createComparePanel({
+    formatLatLon,
+    onOpenMaps: (earth) => diveIntoMarker(earth),
+  });
   paramGuide = createParamGuide({
     model,
     onOpenLab: (key) => {
@@ -259,6 +290,7 @@ function setBody(bodyKey) {
   updatePsrVisibility();
   applyLayout();
   controls.target.set(0, 0, 0);
+  updateMusic();
 }
 
 /** Muestra la capa PSR solo cuando la Luna está en primer plano. */
@@ -306,6 +338,7 @@ function clearSelection() {
     applyLayout();
   }
   updatePsrVisibility();
+  updateMusic();
 }
 
 /**
@@ -365,6 +398,7 @@ function selectEarthPoint(marker) {
 
   // La guía también muestra los valores de este punto
   paramGuide.setContext({ analogName: BODIES[analog.body].name, analogBody: analog.body, data: marker.userData.similarity });
+  updateMusic();
 }
 
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */
@@ -391,12 +425,79 @@ addKeyLayer({
   priority: KEY_PRIORITY.globe,
   isActive: () => !!meshes,
   onKeyDown(event) {
+    if (flight) return; // durante el vuelo hacia el pin no se cambia la selección
     if (event.key === 'Escape') clearSelection();
     if (isTyping(event.target)) return;
     if (event.key === 'ArrowLeft') stepEarthPoint(-1);
     if (event.key === 'ArrowRight') stepEarthPoint(1);
   },
 });
+
+// ---------- Vuelo de cámara hacia el pin y de regreso ----------
+let flight = null; // vuelo en curso: cámara y objetivo interpolados entre dos poses
+const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
+
+/**
+ * Lleva la cámara (y su punto de mira) a otra pose.
+ * @param {{ at?: number, onAt?: () => void, keepLocked?: boolean }} [o]
+ *   onAt se llama una vez al llegar a la fracción `at` del vuelo; keepLocked deja los
+ *   controles desactivados al terminar (la cámara queda dentro del pin mientras se ve el mapa).
+ */
+function startFlight(toPos, toTarget, duration, o = {}) {
+  cameraGoal = null;
+  controls.enabled = false;
+  flight = {
+    t: 0, duration, toPos, toTarget, ...o,
+    fromPos: camera.position.clone(), fromTarget: controls.target.clone(),
+  };
+}
+
+function updateFlight(delta) {
+  flight.t += delta;
+  const k = Math.min(1, flight.t / flight.duration);
+  const e = easeInOut(k);
+  camera.position.lerpVectors(flight.fromPos, flight.toPos, e);
+  controls.target.lerpVectors(flight.fromTarget, flight.toTarget, e);
+  if (flight.onAt && k >= flight.at) {
+    const fn = flight.onAt;
+    flight.onAt = null;
+    fn();
+  }
+  if (k >= 1) {
+    controls.enabled = !flight.keepLocked;
+    flight = null;
+  }
+}
+
+/** Se mete dentro del pin rojo del globo y, cuando ya lo llena, se abre Google Maps desde él. */
+function diveIntoMarker(earth) {
+  if (!selectedMarker || flight) return;
+  const center = meshes.earth.getWorldPosition(new THREE.Vector3());
+  const base = selectedMarker.getWorldPosition(new THREE.Vector3());
+  const normal = base.clone().sub(center).normalize();
+  const s = meshes.earth.scale.x;
+  const head = base.clone().addScaledVector(normal, 0.14 * s); // la cabeza del pin
+  const cameraEnd = head.clone().addScaledVector(normal, 0.5 * s);
+  document.body.classList.add('diving'); // los paneles se desvanecen
+  const spot = { name: earth.name, subtitle: `${earth.region} · ${formatLatLon(earth)}`, lat: earth.lat, lon: earth.lon };
+  const mapReady = mapsView.preload(spot); // el mapa carga en segundo plano durante el vuelo
+  startFlight(cameraEnd, head, 2.2, {
+    keepLocked: true,
+    at: 0.7,
+    // Si el mapa aún no cargó, la cámara se queda dentro del pin hasta que esté listo
+    onAt: () => mapReady.then(() => {
+      // El zoom del mapa nace justo donde quedó el pin en pantalla
+      const p = head.clone().project(camera);
+      mapsView.open(spot, (p.x * 0.5 + 0.5) * window.innerWidth, (-p.y * 0.5 + 0.5) * window.innerHeight);
+    }),
+  });
+}
+
+/** Al cerrar el mapa la cámara sale del pin y vuelve a la vista de comparación. */
+function returnFromMaps() {
+  document.body.classList.remove('diving');
+  startFlight(CAMERA_HOME.clone(), new THREE.Vector3(0, 0, 0), 1.4);
+}
 
 // ---------- Mouse: clic, arrastre y cursor ----------
 const raycaster = new THREE.Raycaster();
@@ -429,7 +530,7 @@ const MAX_TILT = THREE.MathUtils.degToRad(85);
 let dragBody = null;
 const dragLast = new THREE.Vector2();
 // El canvas lo comparte el laboratorio: mientras está abierto, el globo no escucha
-const globeActive = () => meshes && !isLabOpen();
+const globeActive = () => meshes && !isLabOpen() && !flight;
 
 /** Clic, arrastre y cursor sobre el canvas del globo. */
 function setupPointer(canvas) {
@@ -516,13 +617,14 @@ function animate(timestamp) {
     mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, mesh.userData.targetRotationX ?? 0, t);
   }
 
-  markers.pulse(timer.getElapsed());
+  markers.pulse(timer.getElapsed(), camera);
 
   // Regreso suave de la cámara a su posición inicial
   if (cameraGoal) {
     camera.position.lerp(cameraGoal, t);
     if (camera.position.distanceTo(cameraGoal) < 0.01) cameraGoal = null;
   }
+  if (flight) updateFlight(delta);
 
   clouds.rotation.y += 0.015 * delta; // nubes un poco más rápidas que la Tierra
   stars.rotation.y += 0.002 * delta;  // giro muy lento del fondo
