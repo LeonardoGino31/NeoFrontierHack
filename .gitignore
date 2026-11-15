@@ -43,3 +43,6 @@ pnpm-lock.yaml
 .data-cache/
 __pycache__/
 .venv/
+
+# DEM crudos de los sitios terrestres (rasters locales, no se versionan; ver backend/README.md)
+data/raw/

@@ -95,6 +95,13 @@ const infoPanel = document.getElementById('info');
 const compareLabels = document.getElementById('compare-labels');
 const bodySwitch = document.getElementById('label-right');
 
+// Botón arriba al centro (sin selección): salta a un punto al azar del cuerpo en el centro
+const exploreButton = document.createElement('button');
+exploreButton.id = 'explore-random';
+exploreButton.hidden = true;
+document.body.appendChild(exploreButton);
+exploreButton.addEventListener('click', () => exploreRandomPoint());
+
 // ---------- Música según la pantalla ----------
 let started = false;      // ya se pulsó EMPEZAR
 let roverActive = false;  // hay un rover desplegado en el laboratorio
@@ -148,6 +155,7 @@ async function openLab(key) {
         roverActive = false;
         onResize(); // la ventana pudo cambiar de tamaño mientras estaba abierto
         updateMusic();
+        updateExploreButton();
       },
       onRoverChange: (active) => {
         roverActive = active;
@@ -158,6 +166,7 @@ async function openLab(key) {
   controls.enabled = false; // comparten el canvas: los controles del globo no deben reaccionar
   lab.open(key, selectedSiteRef());
   updateMusic();
+  updateExploreButton();
 }
 
 // ---------- Arranque ----------
@@ -168,6 +177,7 @@ const startScreen = createStartScreen({
     updateMusic();
     const all = markers.earthMarkers.children;
     if (all.length) selectEarthPoint(all[Math.floor(Math.random() * all.length)]);
+    updateExploreButton();
   },
 });
 
@@ -327,6 +337,7 @@ function setBody(bodyKey) {
   applyLayout();
   controls.target.set(0, 0, 0);
   updateMusic();
+  updateExploreButton();
 }
 
 /** Muestra la capa PSR solo cuando la Luna está en primer plano. */
@@ -375,6 +386,33 @@ function clearSelection() {
   }
   updatePsrVisibility();
   updateMusic();
+  updateExploreButton();
+}
+
+/** Puntos que se pueden explorar en un cuerpo: parejas en la Tierra, candidatos en Luna/Marte. */
+function explorablePoints(body) {
+  return body === 'earth' ? markers.earthMarkers.children : markers.candidatesFor(body);
+}
+
+/** Muestra el botón de punto al azar solo cuando no hay nada seleccionado ni otra pantalla encima. */
+function updateExploreButton() {
+  const available = started && !!markers && !selectedMarker && !isLabOpen()
+    && explorablePoints(currentBody).length > 0;
+  exploreButton.hidden = !available;
+  if (available) {
+    exploreButton.textContent = `Explorar punto al azar · ${BODIES[currentBody].name}`;
+    exploreButton.title = `Ir a un punto al azar de ${BODIES[currentBody].name}`;
+  }
+}
+
+/** Selecciona un punto al azar del cuerpo que está en el centro. */
+function exploreRandomPoint() {
+  if (flight) return;
+  const points = explorablePoints(currentBody);
+  if (!points.length) return;
+  const marker = points[Math.floor(Math.random() * points.length)];
+  if (marker.userData.kind === 'candidate') selectCandidatePoint(marker);
+  else selectEarthPoint(marker);
 }
 
 /**
@@ -436,6 +474,7 @@ function selectEarthPoint(marker) {
   // La guía también muestra los valores de este punto
   paramGuide.setContext({ analogName: BODIES[analog.body].name, analogBody: analog.body, data: marker.userData.similarity });
   updateMusic();
+  updateExploreButton();
 }
 
 /** Selecciona un candidato autónomo en la Luna o Marte y abre sus factores. */
@@ -476,6 +515,7 @@ function selectCandidatePoint(marker) {
   });
   updatePsrVisibility();
   updateMusic();
+  updateExploreButton();
 }
 
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */

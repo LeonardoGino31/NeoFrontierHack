@@ -212,3 +212,14 @@ docs/                   # Fichas de los análogos destacados
 - Texturas de la Tierra y de respaldo: [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0), basadas en datos de la NASA.
 - Geología: [GLiM](https://doi.pangaea.de/10.1594/PANGAEA.788537) (Hartmann y Moosdorf 2012), [Unified Geologic Map of the Moon](https://astrogeology.usgs.gov/search/map/unified_geologic_map_of_the_moon_1_5m_2020) (Fortezzo, Spudis y Harrel 2020, USGS) y [Geologic Map of Mars, SIM 3292](https://pubs.usgs.gov/publication/sim3292) (Tanaka et al. 2014, USGS). Nombres de lugares de la Luna y Marte: [Gazetteer of Planetary Nomenclature](https://planetarynames.wr.usgs.gov/) (IAU WGPSN / USGS).
 - Proyecto desarrollado para el NASA Space Apps Challenge 2026 (reto *Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars*).
+
+## Imágenes de las parejas (NASA Trek y GIBS)
+
+Las imágenes del panel "Vista real" se descargan una vez y se sirven desde `public/trek/sites/`, para que la demo no dependa de que NASA responda. Hay un recorte de imagen y otro de relieve por cada lado de cada pareja del CSV:
+
+```bash
+python3 scripts/fetch_pair_images.py            # solo las que faltan (requiere numpy y Pillow)
+python3 scripts/fetch_pair_images.py --force    # las regenera todas
+```
+
+Si cambia el CSV (otras parejas), basta con volver a ejecutarlo. Las teselas crudas quedan en `.trek-cache/` (ignorado por git). `scripts/fetch-trek.sh` sigue generando las texturas globales de los globos.
