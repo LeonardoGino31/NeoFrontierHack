@@ -282,20 +282,48 @@ canvas {
 }
 
 .candidate-factor-value .hud-confidence {
-  font-size: 9px;
+  font-size: 10px;
   white-space: nowrap;
 }
 
+/* Método, fuente y limitación: fila propia a todo el ancho, plegada por defecto */
 .hud-factor-note {
-  display: block;
-  max-width: 320px;
-  margin-top: 4px;
-  color: rgba(230, 247, 255, 0.68);
-  font-size: 9px;
+  grid-column: 2 / -1;
+  color: rgba(230, 247, 255, 0.72);
+  font-size: 11px;
   font-weight: 400;
-  line-height: 1.35;
-  text-align: left;
-  white-space: normal;
+  line-height: 1.4;
+  cursor: default;
+}
+
+.hud-factor-note summary {
+  color: rgba(var(--hud-cyan), 0.85);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.hud-factor-note p {
+  margin: 4px 0 0;
+}
+
+.hud-factor-note b {
+  color: rgba(230, 247, 255, 0.9);
+  font-weight: 600;
+}
+
+/* Candidato: panel a la izquierda, algo más ancho y con la cabecera en una sola columna */
+.hud.hud-candidate {
+  width: 400px;
+  max-width: calc(100vw - 48px);
+}
+
+.hud-candidate .hud-info {
+  grid-template-columns: 1fr;
+}
+
+.hud-candidate .hud-key {
+  overflow-wrap: anywhere;
 }
 
 .hud-factor-note a {
@@ -1322,6 +1350,41 @@ canvas {
   display: none;
 }
 
+/* Sin selección, el mismo hueco muestra el botón de punto al azar */
+#explore-random {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  max-width: calc(100vw - 180px);
+  padding: 7px 18px;
+  font: 700 14px 'Rajdhani', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.85);
+  border: 1px solid rgba(120, 220, 255, 0.55);
+  box-shadow: 0 0 14px rgba(120, 220, 255, 0.15);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#explore-random[hidden] {
+  display: none;
+}
+
+#explore-random:hover {
+  background: rgba(120, 220, 255, 0.22);
+  box-shadow: 0 0 18px rgba(120, 220, 255, 0.35);
+}
+
+#explore-random:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 2px;
+}
+
 #point-nav button {
   display: flex;
   align-items: center;
@@ -2087,7 +2150,8 @@ body.diving .hud,
 body.diving #info,
 body.diving #compare-labels,
 body.diving #lab-launcher,
-body.diving #point-nav {
+body.diving #point-nav,
+body.diving #explore-random {
   opacity: 0;
   pointer-events: none;
 }

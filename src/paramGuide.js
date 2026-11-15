@@ -105,11 +105,11 @@ export function createParamGuide({ model, onOpenLab }) {
   /** Muestra la página de `key` (índice global, parámetro o requisito) y marca su botón. */
   function show(key) {
     if (!keys.includes(key)) key = 'overall';
-    currentKey = key;
-    nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
     const isRequirement = activeRequirements.some((r) => r.key === key);
     detail.innerHTML = key === 'overall' ? renderOverall()
       : isRequirement ? renderRequirement(key) : renderParam(key);
+    currentKey = key;
+    nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
     detail.scrollTop = 0;
     if (key !== 'overall' && !isRequirement && !context?.isCandidate) bindSimulator(key);
   }
@@ -262,13 +262,15 @@ export function createParamGuide({ model, onOpenLab }) {
       .map(([b, source]) => `<div class="source"><span>${BODY_NAMES[b]}</span>${source}</div>`)
       .join('');
     const result = context?.analogBody === body ? context.data.requirement : null;
+    // Los candidatos no traen procedencia del requisito y pueden no tener valor
+    const hasValue = result?.value != null;
     const current = result
       ? `<div class="guide-block guide-current">
-           <h3>En el punto seleccionado</h3>
+           <h3>${context.isCandidate ? 'En el punto candidato' : 'En el punto seleccionado'}</h3>
            <div class="current-grid">
-             <div><span>${context.analogName}</span>${result.value.toFixed(req.decimals)} ${req.unit}${provenanceTag(result.provenance)}</div>
+             <div><span>${context.analogName}</span>${hasValue ? `${result.value.toFixed(req.decimals)} ${req.unit}` : 'Sin datos'}${result.provenance ? provenanceTag(result.provenance) : ''}</div>
              <div><span>Mínimo</span>${req.min.toFixed(req.decimals)} ${req.unit}</div>
-             <div><span>Resultado</span><strong class="lvl-${result.pass ? 'high' : 'low'}">${result.pass ? 'APTO' : 'NO APTO'}</strong></div>
+             <div><span>Resultado</span><strong class="lvl-${result.pass ? 'high' : 'low'}">${!hasValue ? 'S/D' : result.pass ? 'APTO' : 'NO APTO'}</strong></div>
            </div>
          </div>`
       : '';
@@ -289,7 +291,9 @@ export function createParamGuide({ model, onOpenLab }) {
       <div class="guide-block">
         <h3>Cómo se evalúa</h3>
         <div class="formula">apto = valor del sitio ≥ ${req.min} ${req.unit}</div>
-        <p class="guide-note">${req.note} No entra al índice de similitud: un sitio que no cumple se marca como no apto aunque su análogo terrestre se parezca mucho.</p>
+        <p class="guide-note">${req.note} ${context?.isCandidate
+          ? 'No entra al puntaje de selección: se muestra aparte como apto o no apto.'
+          : 'No entra al índice de similitud: un sitio que no cumple se marca como no apto aunque su análogo terrestre se parezca mucho.'}</p>
       </div>
       ${current}`;
   }
