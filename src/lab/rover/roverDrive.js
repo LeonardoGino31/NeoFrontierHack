@@ -374,6 +374,8 @@ export function createRoverDrive({ scene, camera, controls, light, tile, ground 
 
   return {
     deploy, undeploy, update, telemetry,
+    /** Cámara detrás del rover (tecla C o botón de reinicio del control de cámara). */
+    snapBehind: () => rover && snapBehind(),
     isActive: () => !!rover,
     id: () => rover?.spec.id ?? null,
     position: () => ({ x: s.x, z: s.z, psi: s.psi }),

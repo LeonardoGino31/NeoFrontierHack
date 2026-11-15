@@ -17,7 +17,7 @@ export function roverMenuHtml() {
       <div class="lab-drive" hidden>
         <div class="lab-drive-grid"></div>
         <div class="lab-drive-status"></div>
-        <p class="lab-drive-hint">WASD conducir · Shift rápido · Espacio frenar<br>Arrastrar: cámara · C: detrás · Esc: salir</p>
+        <p class="lab-drive-hint">WASD conducir · Shift rápido · Espacio frenar<br>Arrastrar o control ◎: cámara · C: detrás · Esc: salir</p>
         <button class="lab-rover-exit">Salir del rover</button>
       </div>
     </div>`;
