@@ -74,3 +74,32 @@ def ice_index(indicators: dict, expected: list[str]) -> tuple[float, float] | No
     index = 100 * sum(bool(v) for v in available) / len(available)
     confidence = 100 * len(available) / len(expected)
     return index, confidence
+
+
+def local_relief_m(dem: np.ndarray) -> np.ndarray:
+    """Desnivel en la vecindad 3 × 3 de cada píxel (máximo − mínimo).
+
+    Es la regla común de "obstáculo" en la Tierra, Marte y la Luna: un píxel con mucho
+    desnivel alrededor es una pared de cráter, un escarpe o un campo de bloques.
+    """
+    padded = np.pad(dem, 1, mode="edge")
+    h, w = dem.shape
+    stack = np.stack([padded[i:i + h, j:j + w] for i in range(3) for j in range(3)])
+    return np.nanmax(stack, axis=0) - np.nanmin(stack, axis=0)
+
+
+def obstacle_limit_m(resolution_m: float, table: list[dict]) -> float:
+    """Desnivel local que convierte un píxel en obstáculo, según la resolución."""
+    for row in sorted(table, key=lambda r: r["maxResolutionM"]):
+        if resolution_m <= row["maxResolutionM"]:
+            return row["limitM"]
+    raise ValueError(f"No hay límite de obstáculo para {resolution_m} m/px.")
+
+
+def obstacle_free_pct(dem: np.ndarray, limit_m: float) -> float:
+    """Porcentaje de píxeles válidos cuyo desnivel local no supera el límite."""
+    lr = local_relief_m(dem)
+    valid = ~np.isnan(lr)
+    if not valid.any():
+        raise ValueError("La ventana no tiene píxeles válidos.")
+    return float(100 * np.count_nonzero(lr[valid] <= limit_m) / valid.sum())

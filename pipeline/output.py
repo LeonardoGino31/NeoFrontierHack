@@ -10,6 +10,7 @@ CSV_COLUMNS = {
     "sunlight": "sunlight",
     "relief": "relief",
     "safeSlope": "safe_slope",
+    "craterFree": "crater_free",
     "ice": "ice",
     "iceConfidence": "ice_confidence",
 }

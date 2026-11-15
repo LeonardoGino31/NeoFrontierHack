@@ -1,0 +1,556 @@
+{
+ "targets": [
+  {
+   "id": "jezero",
+   "body": "mars",
+   "name": "Cráter Jezero",
+   "lat": 18.38,
+   "lon": 77.58,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "gale",
+   "body": "mars",
+   "name": "Cráter Gale",
+   "lat": -5.4,
+   "lon": 137.8,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "meridiani",
+   "body": "mars",
+   "name": "Meridiani Planum",
+   "lat": -1.95,
+   "lon": -5.53,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "arsia",
+   "body": "mars",
+   "name": "Arsia Mons",
+   "lat": -8.26,
+   "lon": -120.1,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "utopia",
+   "body": "mars",
+   "name": "Utopia Planitia",
+   "lat": 46.7,
+   "lon": 117.5,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "marius",
+   "body": "moon",
+   "name": "Colinas de Marius",
+   "lat": 14.09,
+   "lon": -56.8,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "aristarchus",
+   "body": "moon",
+   "name": "Meseta de Aristarco",
+   "lat": 23.7,
+   "lon": -47.4,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "tranquillitatis",
+   "body": "moon",
+   "name": "Pozo de Tranquilidad",
+   "lat": 8.34,
+   "lon": 33.22,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "shackleton",
+   "body": "moon",
+   "name": "Polo sur · Shackleton",
+   "lat": -89.67,
+   "lon": 129.78,
+   "origin": "Sitio objetivo de la app (CSV)"
+  },
+  {
+   "id": "nobile_rim_1",
+   "body": "moon",
+   "name": "Nobile Rim 1",
+   "lat": -85.4381,
+   "lon": 37.36667,
+   "origin": "NASA Artemis III: región candidata"
+  },
+  {
+   "id": "malapert_massif",
+   "body": "moon",
+   "name": "Macizo de Malapert",
+   "lat": -85.9948,
+   "lon": -0.23578,
+   "origin": "NASA Artemis III: región candidata"
+  },
+  {
+   "id": "mons_mouton",
+   "body": "moon",
+   "name": "Mons Mouton",
+   "lat": -84.79059,
+   "lon": 29.19567,
+   "origin": "NASA Artemis III: región candidata"
+  },
+  {
+   "id": "ez_acheron_fossae",
+   "body": "mars",
+   "name": "EZ Acheron Fossae",
+   "lat": 39.8,
+   "lon": -139.4,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_acidalia_plantia",
+   "body": "mars",
+   "name": "EZ Acidalia Plantia",
+   "lat": 20.0,
+   "lon": -40.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arabia_terra",
+   "body": "mars",
+   "name": "EZ Arabia Terra",
+   "lat": 0.4,
+   "lon": -8.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_aram_chaos",
+   "body": "mars",
+   "name": "EZ Aram Chaos",
+   "lat": 2.4,
+   "lon": -20.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arcadia",
+   "body": "mars",
+   "name": "EZ Arcadia",
+   "lat": 38.945,
+   "lon": 172.008,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arcadia_planitia",
+   "body": "mars",
+   "name": "EZ Arcadia Planitia",
+   "lat": 46.2,
+   "lon": -171.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ausonia",
+   "body": "mars",
+   "name": "EZ Ausonia",
+   "lat": -32.032,
+   "lon": 96.529,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_cerberus",
+   "body": "mars",
+   "name": "EZ Cerberus",
+   "lat": 9.973,
+   "lon": 162.001,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_columbus_crater",
+   "body": "mars",
+   "name": "EZ Columbus Crater",
+   "lat": -29.0,
+   "lon": -166.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_copernicus_crater",
+   "body": "mars",
+   "name": "EZ Copernicus Crater",
+   "lat": -49.2,
+   "lon": -169.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_coprates_emelas_chasm",
+   "body": "mars",
+   "name": "EZ Coprates EMelas Chasm",
+   "lat": -11.7,
+   "lon": -68.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_deuteronilus1_2",
+   "body": "mars",
+   "name": "EZ Deuteronilus1 2",
+   "lat": 40.027,
+   "lon": 22.586,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_erebus_montes",
+   "body": "mars",
+   "name": "EZ Erebus Montes",
+   "lat": 39.0,
+   "lon": -167.9,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_gale",
+   "body": "mars",
+   "name": "EZ Gale",
+   "lat": -4.691,
+   "lon": 137.213,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_gusev",
+   "body": "mars",
+   "name": "EZ Gusev",
+   "lat": -13.607,
+   "lon": 175.855,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hadriacus",
+   "body": "mars",
+   "name": "EZ Hadriacus",
+   "lat": -26.802,
+   "lon": 77.509,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hale_crater",
+   "body": "mars",
+   "name": "EZ Hale Crater",
+   "lat": -35.8,
+   "lon": -36.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hebrus",
+   "body": "mars",
+   "name": "EZ Hebrus",
+   "lat": 20.056,
+   "lon": 126.603,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hellas3",
+   "body": "mars",
+   "name": "EZ Hellas3",
+   "lat": -35.434,
+   "lon": 93.987,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hellas_hellas2",
+   "body": "mars",
+   "name": "EZ Hellas Hellas2",
+   "lat": -39.561,
+   "lon": 102.97,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_huygens",
+   "body": "mars",
+   "name": "EZ Huygens",
+   "lat": -13.498,
+   "lon": 55.505,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hypanis_delta",
+   "body": "mars",
+   "name": "EZ Hypanis Delta",
+   "lat": 11.7,
+   "lon": -45.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ismenius_cavus",
+   "body": "mars",
+   "name": "EZ Ismenius Cavus",
+   "lat": 33.8,
+   "lon": 17.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_jezero",
+   "body": "mars",
+   "name": "EZ Jezero",
+   "lat": 17.676,
+   "lon": 77.013,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_kasei_valles",
+   "body": "mars",
+   "name": "EZ Kasei Valles",
+   "lat": 24.8,
+   "lon": -72.6,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_mawrth_valles",
+   "body": "mars",
+   "name": "EZ Mawrth Valles",
+   "lat": 24.3,
+   "lon": -19.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_mclaughlin_crater",
+   "body": "mars",
+   "name": "EZ McLaughlin Crater",
+   "lat": 21.9,
+   "lon": -22.4,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ne_marineris_crater",
+   "body": "mars",
+   "name": "EZ NE Marineris Crater",
+   "lat": -4.1,
+   "lon": -35.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_newton_crater",
+   "body": "mars",
+   "name": "EZ Newton Crater",
+   "lat": -40.6,
+   "lon": -160.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_nili",
+   "body": "mars",
+   "name": "EZ Nili",
+   "lat": 22.083,
+   "lon": 77.005,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_noachis",
+   "body": "mars",
+   "name": "EZ Noachis",
+   "lat": -37.23,
+   "lon": -9.504,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_noactis_landing",
+   "body": "mars",
+   "name": "EZ Noactis Landing",
+   "lat": -6.5,
+   "lon": -92.5,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_protonilus",
+   "body": "mars",
+   "name": "EZ Protonilus",
+   "lat": 42.174,
+   "lon": 48.108,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_se_marineris",
+   "body": "mars",
+   "name": "EZ SE Marineris",
+   "lat": -18.8,
+   "lon": -49.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_s_meridiani_sinus_planium",
+   "body": "mars",
+   "name": "EZ S Meridiani Sinus Planium",
+   "lat": -2.75,
+   "lon": -5.449,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_s_nectaris_fossae",
+   "body": "mars",
+   "name": "EZ S Nectaris Fossae",
+   "lat": -28.9,
+   "lon": -59.7,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_viking",
+   "body": "mars",
+   "name": "EZ Viking",
+   "lat": 22.3,
+   "lon": -48.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_zephyria",
+   "body": "mars",
+   "name": "EZ Zephyria",
+   "lat": -1.411,
+   "lon": 157.106,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "gusev_spirit",
+   "body": "mars",
+   "name": "Gusev · Spirit",
+   "lat": -14.5718,
+   "lon": 175.4785,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "elysium_insight",
+   "body": "mars",
+   "name": "Elysium Planitia · InSight",
+   "lat": 4.5024,
+   "lon": 135.6234,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "utopia_zhurong",
+   "body": "mars",
+   "name": "Utopia Planitia · Zhurong",
+   "lat": 25.066,
+   "lon": 109.925,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "oxia_planum",
+   "body": "mars",
+   "name": "Oxia Planum · Rosalind Franklin (aprox.)",
+   "lat": 18.2,
+   "lon": -24.3,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "lola_base_1",
+   "body": "moon",
+   "name": "Propuesta LOLA 1",
+   "lat": -89.4097,
+   "lon": -140.4403,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 85.3,
+    "earthViewPct": 58.1,
+    "safeSlopePct": 88.2,
+    "craterFreePct": 68.4,
+    "reliefM": 503
+   }
+  },
+  {
+   "id": "lola_base_2",
+   "body": "moon",
+   "name": "Propuesta LOLA 2",
+   "lat": -85.9673,
+   "lon": 1.7425,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 80.5,
+    "earthViewPct": 58.7,
+    "safeSlopePct": 86.3,
+    "craterFreePct": 58.9,
+    "reliefM": 637
+   }
+  },
+  {
+   "id": "lola_base_3",
+   "body": "moon",
+   "name": "Propuesta LOLA 3",
+   "lat": -85.4254,
+   "lon": 32.3572,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 80.0,
+    "earthViewPct": 64.3,
+    "safeSlopePct": 86.7,
+    "craterFreePct": 51.9,
+    "reliefM": 553
+   }
+  },
+  {
+   "id": "lola_base_4",
+   "body": "moon",
+   "name": "Propuesta LOLA 4",
+   "lat": -88.6769,
+   "lon": -65.8113,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 79.7,
+    "earthViewPct": 61.1,
+    "safeSlopePct": 72.8,
+    "craterFreePct": 31.6,
+    "reliefM": 830
+   }
+  },
+  {
+   "id": "lola_base_5",
+   "body": "moon",
+   "name": "Propuesta LOLA 5",
+   "lat": -88.8618,
+   "lon": 123.0823,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 78.0,
+    "earthViewPct": 52.4,
+    "safeSlopePct": 89.0,
+    "craterFreePct": 75.9,
+    "reliefM": 555
+   }
+  },
+  {
+   "id": "lola_base_6",
+   "body": "moon",
+   "name": "Propuesta LOLA 6",
+   "lat": -85.3726,
+   "lon": -114.9222,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 77.0,
+    "earthViewPct": 57.3,
+    "safeSlopePct": 73.0,
+    "craterFreePct": 58.2,
+    "reliefM": 639
+   }
+  },
+  {
+   "id": "lola_base_7",
+   "body": "moon",
+   "name": "Propuesta LOLA 7",
+   "lat": -86.3643,
+   "lon": -22.1835,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 75.2,
+    "earthViewPct": 68.3,
+    "safeSlopePct": 93.1,
+    "craterFreePct": 43.0,
+    "reliefM": 905
+   }
+  },
+  {
+   "id": "lola_base_8",
+   "body": "moon",
+   "name": "Propuesta LOLA 8",
+   "lat": -84.9082,
+   "lon": 37.6798,
+   "origin": "Propuesta propia: análisis de iluminación, Tierra visible, pendiente y sombra permanente (LOLA)",
+   "evidence": {
+    "sunlightPct": 73.5,
+    "earthViewPct": 66.6,
+    "safeSlopePct": 93.8,
+    "craterFreePct": 84.1,
+    "reliefM": 457
+   }
+  }
+ ]
+}

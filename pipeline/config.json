@@ -2,35 +2,72 @@
   "sitesCsv": "public/data/planetary_candidates.csv",
   "output": "public/data/site_values.json",
   "cacheDir": ".data-cache",
-
   "bodies": {
-    "earth": { "radiusKm": 6371.0, "obliquityDeg": 23.44 },
-    "mars": { "radiusKm": 3396.19, "obliquityDeg": 25.19 },
-    "moon": { "radiusKm": 1737.4, "obliquityDeg": 1.54 }
-  },
-
-  "windows": {
-    "mars": { "sizeKm": 20, "resolutionM": 463 },
-    "moon": { "sizeKm": 5, "resolutionM": 120 }
-  },
-
-  "thresholds": {
-    "slopeLimitDeg": [
-      { "maxResolutionM": 120, "limitDeg": 15 },
-      { "maxResolutionM": 100000, "limitDeg": 5 }
-    ],
-    "moonPolarBelowLatDeg": -75,
-    "earthSnowDaysForIce": 180
-  },
-
-  "ice": {
-    "indicators": {
-      "moon": ["permanentShadow", "divinerCold", "lendHydrogen"],
-      "mars": ["odysseyHydrogen", "swimIce"],
-      "earth": ["snowDays", "permafrost"]
+    "earth": {
+      "radiusKm": 6371.0,
+      "obliquityDeg": 23.44
+    },
+    "mars": {
+      "radiusKm": 3396.19,
+      "obliquityDeg": 25.19
+    },
+    "moon": {
+      "radiusKm": 1737.4,
+      "obliquityDeg": 1.54
     }
   },
-
+  "windows": {
+    "mars": {
+      "sizeKm": 20,
+      "resolutionM": 463
+    },
+    "moon": {
+      "sizeKm": 5,
+      "resolutionM": 120
+    }
+  },
+  "thresholds": {
+    "slopeLimitDeg": [
+      {
+        "maxResolutionM": 120,
+        "limitDeg": 15
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitDeg": 5
+      }
+    ],
+    "moonPolarBelowLatDeg": -75,
+    "earthSnowDaysForIce": 180,
+    "obstacleLocalReliefM": [
+      {
+        "maxResolutionM": 120,
+        "limitM": 60
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitM": 80
+      }
+    ],
+    "_obstacleNote": "Desnivel local 3x3 equivalente a la pendiente límite: 2 × res × tan(límite) ≈ 64 m a 120 m (15°) y 81 m a 463 m (5°)."
+  },
+  "ice": {
+    "indicators": {
+      "moon": [
+        "permanentShadow",
+        "divinerCold",
+        "lendHydrogen"
+      ],
+      "mars": [
+        "odysseyHydrogen",
+        "swimIce"
+      ],
+      "earth": [
+        "snowDays",
+        "permafrost"
+      ]
+    }
+  },
   "sources": {
     "copDem": {
       "dataset": "Copernicus DEM GLO-30 (ESA)",
@@ -52,22 +89,30 @@
     "moonSunlight": {
       "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
       "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF",
-      "scale": 0.00004, "offset": 0
+      "scale": 4e-05,
+      "offset": 0
     },
     "moonEarthView": {
       "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
       "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF",
-      "scale": 0.00004, "offset": 0
+      "scale": 4e-05,
+      "offset": 0
     },
     "moonPsr": {
       "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
       "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF",
-      "scale": 0.000025, "offset": 0.5
+      "scale": 2.5e-05,
+      "offset": 0.5
     },
     "mcd": {
       "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
       "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py",
-      "seasonsLs": [0, 90, 180, 270],
+      "seasonsLs": [
+        0,
+        90,
+        180,
+        270
+      ],
       "localTimeH": 15,
       "altitudeM": 10
     },
@@ -81,5 +126,23 @@
       "startDate": "01-01-2024",
       "endDate": "12-31-2024"
     }
+  },
+  "earthGrid": {
+    "file": ".data-cache/earth/earth_grid.npz",
+    "tileCacheDir": ".data-cache/earth/topo",
+    "workers": 12,
+    "coarseBlockPx": 5,
+    "copDem90": {
+      "dataset": "Copernicus DEM GLO-90 (ESA)",
+      "tileList": "https://copernicus-dem-90m.s3.amazonaws.com/tileList.txt",
+      "tileUrl": "https://copernicus-dem-90m.s3.amazonaws.com/{name}/{name}.tif"
+    }
+  },
+  "moonProposals": {
+    "minSunlightPct": 70,
+    "minSafeSlopePct": 70,
+    "maxIceDistanceKm": 10,
+    "minSeparationKm": 15,
+    "count": 10
   }
 }

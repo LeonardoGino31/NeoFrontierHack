@@ -5,7 +5,8 @@ from pathlib import Path
 
 import requests
 
-from ..metrics import relief_m, safe_slope_pct, slope_deg, slope_limit_deg
+from ..metrics import (obstacle_free_pct, obstacle_limit_m, relief_m, safe_slope_pct, slope_deg,
+                       slope_limit_deg)
 from ..raster import read_window
 
 
@@ -50,6 +51,7 @@ def topography(site, cfg: dict, cache_dir: Path) -> dict:
     urls, dataset = dem_source(site, cfg, cache_dir)
     dem = read_window(urls, site.lat, site.lon, window["sizeKm"], window["resolutionM"], cache_dir)
     limit = slope_limit_deg(window["resolutionM"], cfg["thresholds"]["slopeLimitDeg"])
+    obstacle = obstacle_limit_m(window["resolutionM"], cfg["thresholds"]["obstacleLocalReliefM"])
     source = {"dataset": dataset, "url": urls[0] if len(urls) == 1 else urls}
     return {
         "relief": {"value": round(relief_m(dem)), "unit": "m", "status": "derived", "source": source},
@@ -57,5 +59,11 @@ def topography(site, cfg: dict, cache_dir: Path) -> dict:
             "value": round(safe_slope_pct(slope_deg(dem, window["resolutionM"]), limit), 1),
             "unit": "%", "status": "derived", "source": source,
             "note": f"% de píxeles con pendiente < {limit}° a {window['resolutionM']} m/px",
+        },
+        # Misma regla en los tres cuerpos: obstáculo = desnivel local 3 × 3 mayor que el límite
+        "craterFree": {
+            "value": round(obstacle_free_pct(dem, obstacle), 1), "unit": "%", "status": "derived",
+            "source": source,
+            "note": f"% de píxeles con desnivel local ≤ {obstacle} m a {window['resolutionM']} m/px",
         },
     }

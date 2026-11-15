@@ -44,6 +44,38 @@ python -m pipeline fetch
 
 La consulta a AppEEARS es asíncrona. Si no termina en 15 minutos, el id de la tarea queda en `.data-cache/appeears_task.json` y basta con volver a ejecutar más tarde. **Esta parte aún no se ha probado con credenciales reales.**
 
+## Búsqueda de análogos en toda la Tierra
+
+Es el objetivo del proyecto: para cada sitio de la Luna o Marte, medir sus parámetros y buscar las celdas de la Tierra con los números más parecidos.
+
+```bash
+python -m pipeline earth-topo      # 1. topografía de toda la Tierra (COP-DEM 90 m; ~1–2 h, reanudable)
+python -m pipeline earth-modis     # 2. hielo, luz solar y suelo de toda la Tierra (MODIS; requiere Earthdata)
+python -m pipeline targets         # 3. objetivos: CSV + oficiales + propuestas propias
+python -m pipeline search          # 4. candidatos -> public/data/earth_candidates.json
+```
+
+**Malla de la Tierra.** Celdas de 0.05° (~5 km) con desnivel, % de pendiente segura y % sin obstáculos, a dos escalas para comparar con el mismo tamaño de píxel:
+
+- fina (~90 m), para la Luna;
+- gruesa (~460 m), para Marte, que se compara en bloques de 4 × 4 celdas (20 km).
+
+MODIS agrega hielo (meses con nieve), luz solar con cielo despejado y estabilidad del suelo (inercia térmica aparente). Todo queda en `.data-cache/earth/earth_grid.npz`.
+
+**Objetivos** (`pipeline/targets.json`):
+
+- análogos del CSV, incluidas las regiones Artemis III;
+- 38 Exploration Zones de Marte y 4 sitios de aterrizaje (`targets_official.json`);
+- **propuestas propias**: `moon_proposals.py` recorre todo el polo sur lunar (75°–90° S) en bloques de 5 km y elige los que tienen luz solar ≥ 70 %, Tierra visible ≥ 50 %, pendiente segura ≥ 70 % y sombra permanente a ≤ 10 km. La propuesta 1 cae a ~15 km de la cresta de Shackleton y las propuestas 2 y 3 junto a Malapert y Nobile Rim 1: el método encuentra las zonas de Artemis III sin que se las indiquemos.
+
+**Búsqueda.** Usa los mismos `span`, grupos y pesos de `parameter_model.json` y solo los parámetros medidos en ambos lados. El resultado guarda los 25 mejores candidatos por objetivo, separados al menos 150 km, y el puesto que obtienen los análogos conocidos del CSV, para comprobar el método.
+
+**Credenciales de Earthdata.** Crea `~/.netrc` (permisos 600) con:
+
+```
+machine urs.earthdata.nasa.gov login TU_USUARIO password TU_CONTRASEÑA
+```
+
 ## Qué mide hoy
 
 | Métrica | Tierra | Marte | Luna (cara visible) | Luna (polo sur) |
