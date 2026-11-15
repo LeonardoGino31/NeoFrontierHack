@@ -3,6 +3,31 @@
  "grid": 241,
  "sites": [
   {
+   "key": "earth_tierra-moon-approx-0001",
+   "id": "tierra-moon-approx-0001",
+   "body": "earth",
+   "name": "Antártida",
+   "lat": -78.625,
+   "lon": 160.675,
+   "minM": 585.3,
+   "maxM": 2729.72,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Antártida",
+   "partner": "moon_moon-approx-0001",
+   "values": {
+    "sunlight": 31.7,
+    "albedo": 0.349,
+    "relief": 140.6,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 57.9,
+    "ice": 100.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
    "key": "moon_moon-approx-0001",
    "id": "moon-approx-0001",
    "body": "moon",
@@ -13,16 +38,43 @@
    "maxM": -417.78,
    "demDataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
    "imageDataset": "LRO WAC global mosaic 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-moon-approx-0001",
    "values": {
     "sunlight": 46.8,
     "albedo": 0.33,
     "relief": 234.0,
     "safe_slope": 100.0,
     "crater_free": 99.9,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 100.0,
     "ice_confidence": 33.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-moon-approx-0002",
+   "id": "tierra-moon-approx-0002",
+   "body": "earth",
+   "name": "Mesa County",
+   "lat": 38.625,
+   "lon": -108.675,
+   "minM": 1755.22,
+   "maxM": 2949.38,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Colorado, Estados Unidos de América",
+   "partner": "moon_moon-approx-0002",
+   "values": {
+    "sunlight": 27.6,
+    "albedo": 0.323,
+    "relief": 297.0,
+    "safe_slope": 91.0,
+    "crater_free": 91.7,
+    "soil_stability": 10.3,
+    "ice": 100.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "moon_moon-approx-0002",
@@ -35,16 +87,43 @@
    "maxM": -150.85,
    "demDataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
    "imageDataset": "LRO WAC global mosaic 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-moon-approx-0002",
    "values": {
     "sunlight": 43.7,
     "albedo": 0.317,
     "relief": 442.0,
     "safe_slope": 96.9,
     "crater_free": 86.7,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 100.0,
     "ice_confidence": 33.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-moon-alt-near_miss-0001",
+   "id": "tierra-moon-alt-near_miss-0001",
+   "body": "earth",
+   "name": "Rio Arriba County",
+   "lat": 36.775,
+   "lon": -106.325,
+   "minM": 2413.94,
+   "maxM": 3482.65,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Nuevo México, Estados Unidos de América",
+   "partner": "moon_moon-alt-near_miss-0001",
+   "values": {
+    "sunlight": 27.5,
+    "albedo": 0.291,
+    "relief": 366.2,
+    "safe_slope": 75.8,
+    "crater_free": 76.3,
+    "soil_stability": 13.5,
+    "ice": 100.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "moon_moon-alt-near_miss-0001",
@@ -57,16 +136,43 @@
    "maxM": -803.42,
    "demDataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
    "imageDataset": "LRO WAC global mosaic 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-moon-alt-near_miss-0001",
    "values": {
     "sunlight": 51.0,
     "albedo": 0.305,
     "relief": 423.0,
     "safe_slope": 82.8,
     "crater_free": 74.7,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 100.0,
     "ice_confidence": 33.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0001",
+   "id": "tierra-mars-approx-0001",
+   "body": "earth",
+   "name": "Rwaished Sub-District",
+   "lat": 32.1,
+   "lon": 38.1,
+   "minM": 692.13,
+   "maxM": 745.48,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Gobernación de Mafraq, Jordania",
+   "partner": "mars_mars-approx-0001",
+   "values": {
+    "sunlight": 41.2,
+    "albedo": 0.279,
+    "relief": 44.0,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 2.5,
+    "ice": 0.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0001",
@@ -79,16 +185,43 @@
    "maxM": -2710.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0001",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.278,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0002",
+   "id": "tierra-mars-approx-0002",
+   "body": "earth",
+   "name": "Región Hod Occidental",
+   "lat": 15.5,
+   "lon": -9.7,
+   "minM": 174.73,
+   "maxM": 215.34,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Mauritania",
+   "partner": "mars_mars-approx-0002",
+   "values": {
+    "sunlight": 28.8,
+    "albedo": 0.259,
+    "relief": 38.3,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 7.5,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0002",
@@ -101,16 +234,43 @@
    "maxM": -3876.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0002",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.259,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0004",
+   "id": "tierra-mars-approx-0004",
+   "body": "earth",
+   "name": "Hardap",
+   "lat": -23.7,
+   "lon": 18.3,
+   "minM": 1251.71,
+   "maxM": 1306.32,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Namibia",
+   "partner": "mars_mars-approx-0004",
+   "values": {
+    "sunlight": 38.4,
+    "albedo": 0.243,
+    "relief": 44.2,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 1.6,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0004",
@@ -123,16 +283,43 @@
    "maxM": -3935.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0004",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.245,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0006",
+   "id": "tierra-mars-approx-0006",
+   "body": "earth",
+   "name": "Distrito de Algufra",
+   "lat": 27.5,
+   "lon": 16.5,
+   "minM": 596.48,
+   "maxM": 655.43,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Libia",
+   "partner": "mars_mars-approx-0006",
+   "values": {
+    "sunlight": 44.1,
+    "albedo": 0.27,
+    "relief": 51.3,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 1.2,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0006",
@@ -145,16 +332,43 @@
    "maxM": -2931.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0006",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.269,
     "relief": 5.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0007",
+   "id": "tierra-mars-approx-0007",
+   "body": "earth",
+   "name": "Namakwa District Municipality",
+   "lat": -29.5,
+   "lon": 19.5,
+   "minM": 1000.11,
+   "maxM": 1091.44,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "El Cabo Septentrional, Sudáfrica",
+   "partner": "mars_mars-approx-0007",
+   "values": {
+    "sunlight": 42.4,
+    "albedo": 0.254,
+    "relief": 85.9,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 2.7,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0007",
@@ -167,16 +381,43 @@
    "maxM": -3922.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0007",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.253,
     "relief": 9.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0010",
+   "id": "tierra-mars-approx-0010",
+   "body": "earth",
+   "name": "Antártida",
+   "lat": -83.7,
+   "lon": -103.7,
+   "minM": 1959.16,
+   "maxM": 2106.24,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "MODIS Terra reflectancia corregida, 15-12-2020 (NASA GIBS)",
+   "region": "Antártida",
+   "partner": "mars_mars-approx-0010",
+   "values": {
+    "sunlight": 24.0,
+    "albedo": 0.811,
+    "relief": 67.7,
+    "safe_slope": 99.8,
+    "crater_free": 100.0,
+    "soil_stability": 50.0,
+    "ice": 100.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0010",
@@ -189,16 +430,43 @@
    "maxM": -1922.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0010",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.06,
     "relief": 67.0,
     "safe_slope": 99.9,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 100.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0013",
+   "id": "tierra-mars-approx-0013",
+   "body": "earth",
+   "name": "Hardap",
+   "lat": -25.3,
+   "lon": 19.3,
+   "minM": 1016.32,
+   "maxM": 1094.23,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Namibia",
+   "partner": "mars_mars-approx-0013",
+   "values": {
+    "sunlight": 40.5,
+    "albedo": 0.281,
+    "relief": 48.6,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 1.6,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0013",
@@ -211,16 +479,43 @@
    "maxM": -3038.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0013",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.275,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0020",
+   "id": "tierra-mars-approx-0020",
+   "body": "earth",
+   "name": "Región Hod Oriental",
+   "lat": 16.3,
+   "lon": -8.3,
+   "minM": 184.66,
+   "maxM": 220.26,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Mauritania",
+   "partner": "mars_mars-approx-0020",
+   "values": {
+    "sunlight": 29.7,
+    "albedo": 0.296,
+    "relief": 25.8,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 5.9,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0020",
@@ -233,16 +528,43 @@
    "maxM": -3868.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0020",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.282,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0025",
+   "id": "tierra-mars-approx-0025",
+   "body": "earth",
+   "name": "Municipio de Mulegé",
+   "lat": 27.5,
+   "lon": -113.7,
+   "minM": 7.95,
+   "maxM": 89.2,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Baja California Sur, México",
+   "partner": "mars_mars-approx-0025",
+   "values": {
+    "sunlight": 33.3,
+    "albedo": 0.271,
+    "relief": 77.4,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 0.0,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0025",
@@ -255,16 +577,43 @@
    "maxM": -3879.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0025",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.275,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0040",
+   "id": "tierra-mars-approx-0040",
+   "body": "earth",
+   "name": "Mongolia Interior",
+   "lat": 41.5,
+   "lon": 104.7,
+   "minM": 735.52,
+   "maxM": 817.42,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "China",
+   "partner": "mars_mars-approx-0040",
+   "values": {
+    "sunlight": 30.3,
+    "albedo": 0.268,
+    "relief": 68.1,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 0.0,
+    "ice": 0.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0040",
@@ -277,16 +626,43 @@
    "maxM": -2783.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0040",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.277,
     "relief": 2.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0047",
+   "id": "tierra-mars-approx-0047",
+   "body": "earth",
+   "name": "Kutum",
+   "lat": 14.5,
+   "lon": 24.1,
+   "minM": 928.21,
+   "maxM": 1054.8,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Darfur del Norte, Sudán",
+   "partner": "mars_mars-approx-0047",
+   "values": {
+    "sunlight": 36.9,
+    "albedo": 0.27,
+    "relief": 86.9,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 4.6,
+    "ice": 0.0,
+    "ice_confidence": 50.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0047",
@@ -299,16 +675,43 @@
    "maxM": -2715.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0047",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.273,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
+  },
+  {
+   "key": "earth_tierra-mars-approx-0048",
+   "id": "tierra-mars-approx-0048",
+   "body": "earth",
+   "name": "Jorasán del Sur",
+   "lat": 33.7,
+   "lon": 58.3,
+   "minM": 1274.39,
+   "maxM": 1371.31,
+   "demDataset": "Copernicus DEM GLO-30 (ESA)",
+   "imageDataset": "Sentinel-2 cloudless 2020 (EOX IT Services, CC BY-NC-SA 4.0)",
+   "region": "Irán",
+   "partner": "mars_mars-approx-0048",
+   "values": {
+    "sunlight": 37.8,
+    "albedo": 0.247,
+    "relief": 95.8,
+    "safe_slope": 100.0,
+    "crater_free": 100.0,
+    "soil_stability": 0.0,
+    "ice": 0.0,
+    "ice_confidence": 100.0
+   },
+   "dataStatus": "medido_parcial"
   },
   {
    "key": "mars_mars-approx-0048",
@@ -321,16 +724,18 @@
    "maxM": -3875.0,
    "demDataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
    "imageDataset": "Viking MDIM 2.1 color 232 m + THEMIS IR día 100 m (USGS Astrogeology)",
+   "partner": "earth_tierra-mars-approx-0048",
    "values": {
     "sunlight": 50.0,
     "albedo": 0.249,
     "relief": 3.0,
     "safe_slope": 100.0,
     "crater_free": 100.0,
-    "soil_stability": null,
+    "soil_stability": 50.0,
     "ice": 0.0,
     "ice_confidence": 50.0
-   }
+   },
+   "dataStatus": "medido_parcial"
   }
  ]
 }
