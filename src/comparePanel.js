@@ -4,15 +4,18 @@
 
 import { TREK_LAYERS, siteImages, trekUrl } from './trekSites.js';
 import { EARTH_LAYERS, earthImages } from './earthSites.js';
+import { MAPS_PIN_SVG } from './mapsView.js';
 
 const BODY_NAMES = { mars: 'Marte', moon: 'Luna' };
 const TREK_NAMES = { mars: 'Mars Trek', moon: 'Moon Trek' };
 
 /**
  * Crea el panel (oculto) y devuelve sus controles.
- * @param {{ formatLatLon: (p: {lat: number, lon: number}) => string }} deps
+ * @param {{ formatLatLon: (p: {lat: number, lon: number}) => string,
+ *           onOpenMaps: (earth: object, origin: {x: number, y: number}) => void }} deps
+ *   onOpenMaps se llama al tocar el pin de Google Maps de la tarjeta de la Tierra
  */
-export function createComparePanel({ formatLatLon }) {
+export function createComparePanel({ formatLatLon, onOpenMaps }) {
   const panel = document.createElement('section');
   panel.id = 'compare-panel';
   panel.className = 'compare-panel';
@@ -39,6 +42,14 @@ export function createComparePanel({ formatLatLon }) {
   panel.querySelector('.cmp-collapse').addEventListener('click', (e) => {
     panel.classList.toggle('collapsed');
     e.currentTarget.textContent = panel.classList.contains('collapsed') ? '+' : '–';
+  });
+
+  // Pin de Google Maps: el zoom nace desde donde está el pin
+  panel.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cmp-gmap');
+    if (!btn || !pair) return;
+    const r = btn.getBoundingClientRect();
+    onOpenMaps?.(pair.earth, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
   });
 
   panel.querySelector('.cmp-tabs').addEventListener('click', (e) => {
@@ -73,7 +84,8 @@ export function createComparePanel({ formatLatLon }) {
       img: earthImages(earth)[view],
       caption: `${EARTH_LAYERS[view]} · ~${km} km`,
       title: earth.name,
-      subtitle: `Tierra · ${earth.region} · ${formatLatLon(earth)}`,
+      subtitle: `Tierra · ${earth.region} · ${formatLatLon(earth)}
+        <button class="cmp-gmap" type="button" title="Ver este lugar en Google Maps" aria-label="Ver ${earth.name} en Google Maps">${MAPS_PIN_SVG}</button>`,
       body: `<p>${earth.why}</p>
         <p class="cmp-limits"><b>Dónde falla:</b> ${earth.limits}</p>`,
     });

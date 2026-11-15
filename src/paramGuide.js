@@ -111,7 +111,7 @@ export function createParamGuide({ model, onOpenLab }) {
     detail.innerHTML = key === 'overall' ? renderOverall()
       : isRequirement ? renderRequirement(key) : renderParam(key);
     detail.scrollTop = 0;
-    if (key !== 'overall' && !isRequirement) bindSimulator(key);
+    if (key !== 'overall' && !isRequirement && !context?.isCandidate) bindSimulator(key);
   }
 
   /** HTML de la página del índice global: fórmula y pesos de los grupos por cuerpo. */
@@ -140,28 +140,37 @@ export function createParamGuide({ model, onOpenLab }) {
     const current = context
       ? `<div class="guide-block guide-current">
            <h3>En el punto seleccionado</h3>
-           <p>Comparación Tierra – ${context.analogName}:
+           <p>${context.isCandidate ? 'Puntaje del sitio' : `Comparación Tierra – ${context.analogName}`}:
              <strong class="lvl-${level(context.data.overall)}">${(context.data.overall * 100).toFixed(1)} %</strong></p>
+           ${context.isCandidate ? `<p class="guide-note">Cobertura de parámetros: ${context.candidate.parameterDataCoveragePercent ?? 0}%. El valor resume las capas disponibles; no es una similitud con la Tierra.</p>` : ''}
          </div>`
       : '';
+    const what = context?.isCandidate
+      ? 'Resume la evaluación de este punto en un número entre 0 % y 100 %. Se combinan los puntajes de los grupos con los pesos del objetivo del cuerpo y se usan solo las capas disponibles.'
+      : OVERALL_INFO.what;
+    const note = context?.isCandidate
+      ? 'Este puntaje de selección no representa similitud con la Tierra. Revisa la cobertura de parámetros y los filtros del punto; las capas sin datos no se consideran una medición.'
+      : OVERALL_INFO.note;
 
     return `
       <header class="guide-title">
         <span class="guide-title-icon">${icon('target')}</span>
-        <div><h2>Índice global de similitud</h2><span class="guide-tag">promedio ponderado</span></div>
+        <div><h2>${context?.isCandidate ? 'Puntaje del candidato' : 'Índice global de similitud'}</h2><span class="guide-tag">promedio ponderado</span></div>
         <button class="guide-lab-btn" data-lab="natural">${icon('cube')} Laboratorio 3D</button>
       </header>
-      <div class="guide-block"><h3>Qué es</h3><p>${OVERALL_INFO.what}</p></div>
+      <div class="guide-block"><h3>Qué es</h3><p>${what}</p></div>
       <div class="guide-block">
         <h3>Fórmula</h3>
         <div class="formula">grupo = promedio de sus subparámetros<br>índice = Σ (peso<sub>g</sub> × grupo<sub>g</sub>) / Σ peso<sub>g</sub></div>
       </div>
-      <div class="guide-block"><h3>Peso de cada grupo según el objetivo</h3>${rows}<p class="guide-note">${OVERALL_INFO.note}</p></div>
+      <div class="guide-block"><h3>Peso de cada grupo según el objetivo</h3>${rows}<p class="guide-note">${note}</p></div>
       <div class="guide-block"><h3>Por qué sirve</h3><p>${OVERALL_INFO.why}</p></div>
       ${current}
-      <p class="guide-disclaimer">${context
-        ? `En este punto, ${context.data.dataSummary.real} de ${context.data.dataSummary.total} valores vienen de datos reales; el resto es de demostración.`
-        : 'Cada valor indica su procedencia: Medido, Calculado o Estimado vienen del pipeline de datos (con su fuente); Demo es ilustrativo.'} Abre un parámetro para ver la fuente de cada número.</p>`;
+      <p class="guide-disclaimer">${context?.isCandidate
+        ? 'Evaluación exploratoria con las capas disponibles; la cobertura incompleta se indica junto al punto.'
+        : `${context
+          ? `En este punto, ${context.data.dataSummary.real} de ${context.data.dataSummary.total} valores vienen de datos reales; el resto es de demostración.`
+          : 'Cada valor indica su procedencia: Medido, Calculado o Estimado vienen del pipeline de datos (con su fuente); Demo es ilustrativo.'} Abre un parámetro para ver la fuente de cada número.`}</p>`;
   }
 
   /** HTML de la página de un subparámetro, con fuentes, fórmula y simulador. */
@@ -176,16 +185,30 @@ export function createParamGuide({ model, onOpenLab }) {
       .join('');
 
     const result = context?.data.results.find((r) => r.param.key === key);
+    const filter = context?.isCandidate ? context.data.candidate.hardFilters[key] : null;
+    const filterStatus = filter
+      ? { passed: 'Pasa el filtro', failed: 'No pasa el filtro', not_evaluated: 'Filtro no evaluado' }[filter.status] ?? filter.status
+      : null;
     const current = result
-      ? `<div class="guide-block guide-current">
-           <h3>En el punto seleccionado</h3>
-           <div class="current-grid">
-             <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.earth)}</div>
-             <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.analog)}</div>
-             <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
-           </div>
-           ${result.confidence ? `<p class="guide-note">Confianza de la estimación: Tierra ${Math.round(result.confidence.earth)}% (${STATUS_LABELS[result.provenance.confidence.earth.status].toLowerCase()}) · ${context.analogName} ${Math.round(result.confidence.analog)}% (${STATUS_LABELS[result.provenance.confidence.analog.status].toLowerCase()}). No forma parte del índice de similitud.</p>` : ''}
-         </div>`
+      ? context?.isCandidate
+        ? `<div class="guide-block guide-current">
+             <h3>En el punto candidato</h3>
+             <div class="current-grid">
+               <div><span>${context.analogName}</span>${result.analog == null ? 'Sin datos' : `${result.analog.toFixed(p.decimals)} ${p.unit}`}</div>
+               <div><span>Estado del factor</span>${filterStatus ?? 'Dato descriptivo'}</div>
+               <div><span>Confianza</span>${result.confidence?.analog == null ? 'Sin dato' : `${Math.round(result.confidence.analog)}%`}</div>
+             </div>
+             ${filter ? `<p class="guide-note">${filter.label}: ${filterStatus}. ${filter.value == null ? '' : `Valor ${filter.value} ${filter.unit}; umbral ${filter.threshold} ${filter.unit}.`}</p>` : ''}
+           </div>`
+        : `<div class="guide-block guide-current">
+             <h3>En el punto seleccionado</h3>
+             <div class="current-grid">
+               <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.earth)}</div>
+               <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.analog)}</div>
+               <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
+             </div>
+             ${result.confidence ? `<p class="guide-note">Confianza de la estimación: Tierra ${Math.round(result.confidence.earth)}% (${STATUS_LABELS[result.provenance.confidence.earth.status].toLowerCase()}) · ${context.analogName} ${Math.round(result.confidence.analog)}% (${STATUS_LABELS[result.provenance.confidence.analog.status].toLowerCase()}). No forma parte del índice de similitud.</p>` : ''}
+           </div>`
       : '';
 
     return `
@@ -204,24 +227,29 @@ export function createParamGuide({ model, onOpenLab }) {
       <div class="guide-block"><h3>Ejemplo en la Tierra</h3><p>${info.example}</p></div>
       <div class="guide-block"><h3>Fuentes de datos</h3><div class="sources">${sources}</div></div>
 
-      <div class="guide-block">
-        <h3>Cómo se compara</h3>
-        <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
-        <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
-        ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tiene la estimación.</p>' : ''}
-        <div class="simulator">
-          <svg class="sim-plot" viewBox="0 0 300 130"></svg>
-          <div class="sim-controls">
-            <label>Tierra <output data-out="earth"></output>
-              <input type="range" data-sim="earth"></label>
-            <label>Análogo <output data-out="analog"></output>
-              <input type="range" data-sim="analog"></label>
-            <div class="sim-calc"></div>
-            <div class="hud-bar sim-bar"><div class="hud-fill"></div>
-              <span class="hud-label">Similitud</span><span class="hud-big sim-pct"></span></div>
-          </div>
-        </div>
-      </div>
+      ${context?.isCandidate
+        ? `<div class="guide-block"><h3>Cómo se usa este factor</h3>
+             <p>Se muestra el valor disponible en la capa del candidato. No se calcula similitud porque todavía no hay una ubicación terrestre asociada.</p>
+             ${p.key === 'ice' ? '<p class="guide-note">El potencial de hielo y su confianza son distintos. La confianza comunica cobertura y coherencia espacial; no es probabilidad de encontrar hielo.</p>' : ''}
+           </div>`
+        : `<div class="guide-block">
+             <h3>Cómo se compara</h3>
+             <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
+             <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
+             ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tiene la estimación.</p>' : ''}
+             <div class="simulator">
+               <svg class="sim-plot" viewBox="0 0 300 130"></svg>
+               <div class="sim-controls">
+                 <label>Tierra <output data-out="earth"></output>
+                   <input type="range" data-sim="earth"></label>
+                 <label>Análogo <output data-out="analog"></output>
+                   <input type="range" data-sim="analog"></label>
+                 <div class="sim-calc"></div>
+                 <div class="hud-bar sim-bar"><div class="hud-fill"></div>
+                   <span class="hud-label">Similitud</span><span class="hud-big sim-pct"></span></div>
+               </div>
+             </div>
+           </div>`}
       ${current}`;
   }
 

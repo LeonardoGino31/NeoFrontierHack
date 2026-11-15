@@ -1,0 +1,224 @@
+{
+  "body": "mars",
+  "mission": "Aterrizaje y recorridos de rover aproximados",
+  "generated_utc": "2026-11-15T14:52:08.896561+00:00",
+  "result": "mars_candidates.geojson",
+  "alternatives_result": "mars_candidate_alternatives.geojson",
+  "alternatives_geojson": "/home/andie/Desktop/NeoFrontierHack/backend/data/outputs/mars_candidate_alternatives.geojson",
+  "candidate_count": 200,
+  "alternative_candidate_count": 12,
+  "alternative_candidate_counts_by_status": {
+    "passed_but_too_close": 12
+  },
+  "alternative_limits": {
+    "total_maximum": 12,
+    "selection_priority": [
+      "passed_but_too_close",
+      "near_miss",
+      "ice_unassessed"
+    ],
+    "near_miss_margin_points": 5.0,
+    "near_miss_cells_before_spacing": 0,
+    "ice_unassessed_cells_before_spacing": 1339474,
+    "passed_candidates_suppressed_by_spacing_encountered": 976
+  },
+  "eligible_cell_count_before_hard_filters": 1426373,
+  "eligible_cell_count_before_spatial_separation": 1339474,
+  "grid_km_at_equator": 10.0,
+  "coordinate_crs": "PROJCS[\"Equirectangular Mars\",GEOGCS[\"GCS_Mars\",DATUM[\"D_Mars\",SPHEROID[\"Mars_localRadius\",3396190,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "coordinate_convention": "Native geographic convention recorded by the DEM; verify its PDS/USGS label before cross-source overlays.",
+  "minimum_separation_km": 30.0,
+  "site_footprint_km": 30,
+  "safe_slope_limit_degrees": 15,
+  "requirement": {
+    "key": "descent",
+    "description": "Densidad del aire para el descenso",
+    "minimum": 0.018,
+    "unit": "kg/m³",
+    "method": "Estimación atmosférica simplificada del README: 0.020 * exp(-elevación_km / 11.1); no incluye estación, clima ni perfil vertical."
+  },
+  "hard_filter_summary": [
+    {
+      "key": "safeSlope",
+      "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+      "operator": "gte",
+      "threshold": 80.0,
+      "unit": "%",
+      "required": true,
+      "status": "applied",
+      "evaluated_cells": 1426371,
+      "rejected_cells": 1674,
+      "rejected_for_missing_data": 2,
+      "remaining_cells": 1424699,
+      "source_layer_configured": false
+    },
+    {
+      "key": "relief",
+      "label": "Desnivel local máximo de 1.000 m",
+      "operator": "lte",
+      "threshold": 1000.0,
+      "unit": "m",
+      "required": true,
+      "status": "applied",
+      "evaluated_cells": 1424699,
+      "rejected_cells": 85225,
+      "rejected_for_missing_data": 0,
+      "remaining_cells": 1339474,
+      "source_layer_configured": false
+    },
+    {
+      "key": "sunlight",
+      "label": "Iluminación solar promedio mínima de 30%",
+      "operator": "gte",
+      "threshold": 30.0,
+      "unit": "%",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    },
+    {
+      "key": "craterFree",
+      "label": "Superficie libre de peligros ≥75%",
+      "operator": "gte",
+      "threshold": 75.0,
+      "unit": "%",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    },
+    {
+      "key": "soilStability",
+      "label": "Estabilidad del suelo ≥50 puntos",
+      "operator": "gte",
+      "threshold": 50.0,
+      "unit": "pts",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    },
+    {
+      "key": "iceConfidence",
+      "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos",
+      "operator": "gte",
+      "threshold": 50.0,
+      "unit": "pts",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    }
+  ],
+  "filters_not_evaluated": [
+    "sunlight",
+    "craterFree",
+    "soilStability",
+    "iceConfidence"
+  ],
+  "model_weights": {
+    "illumination": 0.5,
+    "topography": 2,
+    "ice": 1
+  },
+  "scoring_coverage_percent": 57.1,
+  "missing_optional_layers": [
+    "sunlight",
+    "albedo",
+    "craterFree",
+    "soilStability",
+    "ice",
+    "iceConfidence"
+  ],
+  "scored_parameters": [
+    "relief",
+    "safeSlope"
+  ],
+  "not_scored": {
+    "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece la misión."
+  },
+  "ice_confidence_interpretation": null,
+  "sources": {
+    "dem": {
+      "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/mars_dem.tif",
+      "band": 1,
+      "scale": 1.0,
+      "offset": 0.0,
+      "units": "m",
+      "source_id": "usgs-mola-global-463m",
+      "source_url": "https://planetarymaps.usgs.gov/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif",
+      "native_size": [
+        46080,
+        23040
+      ],
+      "analysis_size": [
+        2095,
+        1048
+      ],
+      "native_pixel_km_at_equator": 0.4631,
+      "effective_grid_km_at_equator": 10.1881,
+      "nodata": -32768.0,
+      "bounds": [
+        -10669675.197320545,
+        -5334837.598660273,
+        10669675.197320545,
+        5334837.598660273
+      ],
+      "crs": "PROJCS[\"Equirectangular Mars\",GEOGCS[\"GCS_Mars\",DATUM[\"D_Mars\",SPHEROID[\"Mars_localRadius\",3396190,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "grid_kind": "equirectangular",
+      "projection_parameters": {
+        "proj": "eqc",
+        "lat_ts": 0,
+        "lat_0": 0,
+        "lon_0": 0,
+        "x_0": 0,
+        "y_0": 0,
+        "R": 3396190,
+        "units": "m",
+        "no_defs": true
+      }
+    },
+    "layers": {}
+  },
+  "heuristic_criteria": {
+    "sunlight": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "relief": {
+      "direction": "lower",
+      "scale": 2000
+    },
+    "safeSlope": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "craterFree": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "soilStability": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "ice": {
+      "direction": "higher",
+      "scale": 100
+    }
+  },
+  "limitations": [
+    "Los umbrales son heurísticos configurables para exploración; no son límites certificados de misión.",
+    "Resultado exploratorio aproximado; no es recomendación de aterrizaje ni certificación de seguridad.",
+    "La pendiente y el desnivel se derivan del DEM remuestreado a la resolución de análisis.",
+    "Los filtros de capas opcionales solo se evalúan si se proporciona una capa; revisar filters_not_evaluated.",
+    "Cráteres/rocas y estabilidad del suelo requieren capas de entrada documentadas.",
+    "La similitud con la Tierra y el CSV planetary_candidates.csv no participan en este proceso.",
+    "La puntuación se calcula solo con los parámetros disponibles; consultar data_coverage y scoring_coverage.",
+    "La cuadrícula geográfica se estrecha hacia los polos; revisar la advertencia polar y usar productos polares para análisis de detalle."
+  ]
+}

@@ -75,6 +75,14 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   header.addEventListener('pointerup', () => (drag = null));
 
+  function animateBars() {
+    const fills = panel.querySelectorAll('.hud-fill');
+    fills.forEach((fill) => (fill.style.width = '0%'));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => fills.forEach((fill) => (fill.style.width = `${fill.dataset.width}%`)))
+    );
+  }
+
   /** Posición por defecto: centrado entre los dos planetas. */
   function placeDefault() {
     panel.style.left = `${(window.innerWidth - panel.offsetWidth) / 2}px`;
@@ -86,6 +94,8 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
    * `nav` = { index, total }: posición del punto entre los del cuerpo análogo seleccionado.
    */
   function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav: position }) {
+    header.querySelector('span').textContent = 'Análisis de similitud';
+    panel.querySelector('.hud-footer').innerHTML = 'Tierra / análogo · <span class="hud-demo">datos de demo</span>';
     const { purpose } = data.profile;
     nav.querySelector('.nav-count').textContent = `${position.index + 1} / ${position.total}`;
     nav.hidden = false;
@@ -140,12 +150,87 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     panel.hidden = false;
     if (!userMoved) placeDefault();
 
-    // Animar las barras: empiezan en 0 y crecen hasta su valor
-    const fills = panel.querySelectorAll('.hud-fill');
-    fills.forEach((f) => (f.style.width = '0%'));
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => fills.forEach((f) => (f.style.width = `${f.dataset.width}%`)))
-    );
+    animateBars();
+  }
+
+  /** Muestra factores y filtros del candidato sin inventar una comparación terrestre. */
+  function showCandidate({ candidate, bodyName, formatLatLon, data, nav: position }) {
+    header.querySelector('span').textContent = 'Análisis del candidato';
+    panel.querySelector('.hud-footer').textContent = 'Punto candidato · sin comparación terrestre';
+    const statusText = {
+      passed_but_too_close: 'Cumple los filtros evaluados; quedó cerca de un candidato principal',
+      near_miss: 'Casi cumple; el potencial de hielo quedó bajo el umbral',
+      ice_unassessed: 'Potencial de hielo sin evaluar por falta de cobertura',
+    }[candidate.status] ?? candidate.status;
+    const detail = candidate.selectionDetail;
+    const detailText = candidate.status === 'passed_but_too_close'
+      ? `Distancia al candidato principal: ${detail.distance_to_nearest_selected_km ?? '—'} km (separación mínima ${detail.minimum_separation_km ?? '—'} km).`
+      : candidate.status === 'near_miss'
+        ? `Hielo: ${detail.value ?? '—'} pts; umbral ${detail.threshold ?? '—'} pts; diferencia ${detail.shortfall ?? '—'} pts.`
+        : 'No hay cobertura raster de hielo para evaluar este punto.';
+
+    nav.querySelector('.nav-count').textContent = `${position.index + 1} / ${position.total}`;
+    nav.hidden = false;
+    panel.querySelector('.hud-info').innerHTML = `
+      <div><span class="hud-key">${bodyName} · ${candidate.site.name}</span>${formatLatLon(candidate.site)}</div>
+      <div><span class="hud-key">${statusText}</span>${detailText}</div>
+      <div class="hud-candidate-coverage">Datos de parámetros: ${candidate.parameterDataCoveragePercent ?? 0}% · filtros evaluados: ${candidate.hardFilterCoveragePercent ?? 0}%</div>`;
+
+    const overallPct = data.overall * 100;
+    const score = panel.querySelector('.hud-score');
+    score.dataset.key = 'overall';
+    score.className = `hud-score hud-${level(data.overall)}`;
+    score.innerHTML = `
+      <div class="hud-icon">${icon('target')}</div>
+      <div class="hud-bar hud-${level(data.overall)}">
+        <div class="hud-fill" data-width="${overallPct}"></div>
+        <span class="hud-label">Puntaje de selección<small class="hud-purpose">${data.profile.purpose}</small></span>
+        <span class="hud-big hud-level-text">${fmt(overallPct, 1)}<small>%</small></span>
+      </div>`;
+
+    const groups = data.groups.map(({ group, items, similarity }) => {
+      const groupPct = similarity == null ? null : similarity * 100;
+      const groupClass = similarity == null ? '' : `hud-${level(similarity)}`;
+      const groupRow = `
+        <div class="hud-row hud-group ${groupClass}" data-key="${items[0]?.param.key ?? 'overall'}" title="Ver factores del grupo">
+          <div class="hud-icon">${icon(group.icon)}</div>
+          <div class="hud-bar ${groupClass}">
+            ${groupPct == null ? '' : `<div class="hud-fill" data-width="${groupPct}"></div>`}
+            <span class="hud-label">${group.label}</span>
+            <span class="hud-values">${groupPct == null ? 'Sin puntuación' : `${Math.round(groupPct)}%`}</span>
+          </div>
+        </div>`;
+      const factorRows = items.map(({ param, analog, confidence }) => {
+        const value = analog == null ? 'Sin datos' : `${fmt(analog, param.decimals)} ${param.unit}`;
+        const confidenceText = confidence?.analog == null
+          ? ''
+          : `<small class="hud-confidence">Confianza del indicador: ${Math.round(confidence.analog)}%</small>`;
+        return `
+          <div class="candidate-factor" data-key="${param.key}" title="Ver explicación del factor">
+            <span class="candidate-factor-icon">${icon(param.icon)}</span>
+            <span class="candidate-factor-label">${param.label}</span>
+            <span class="candidate-factor-value">${value}${confidenceText}</span>
+          </div>`;
+      }).join('');
+      return groupRow + factorRows;
+    }).join('');
+
+    const { req, value, pass } = data.requirement;
+    const requirementValue = value == null ? 'Sin datos' : `${fmt(value, req.decimals)} ${req.unit}`;
+    const reqRow = `
+      <div class="hud-row hud-req ${pass ? 'hud-req-ok' : 'hud-req-fail'}" data-key="${req.key}" title="Mínimo: ${fmt(req.min, req.decimals)} ${req.unit} · ver explicación">
+        <div class="hud-icon">${icon(req.icon)}</div>
+        <div class="hud-bar">
+          <span class="hud-label">${req.short}</span>
+          <span class="hud-values">${requirementValue}</span>
+        </div>
+        <div class="hud-pct">${value == null ? 'S/D' : pass ? 'APTO' : 'NO APTO'}</div>
+      </div>`;
+    panel.querySelector('.hud-rows').innerHTML = groups + '<hr class="hud-divider">' + reqRow;
+
+    panel.hidden = false;
+    if (!userMoved) placeDefault();
+    animateBars();
   }
 
   /** Oculta el HUD y su barra de navegación. */
@@ -158,5 +243,5 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     if (!panel.hidden && !userMoved) placeDefault();
   });
 
-  return { show, hide };
+  return { show, showCandidate, hide };
 }

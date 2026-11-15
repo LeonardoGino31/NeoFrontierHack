@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "description": "Umbrales heurísticos y configurables para selección exploratoria; no son límites certificados de misión.",
+  "site_footprint_km": 30,
+  "safe_slope_limit_degrees": 15,
+  "candidate_defaults": {
+    "grid_km": 10,
+    "limit": 200,
+    "minimum_separation_km": 30,
+    "alternative_limit": 12,
+    "near_miss_margin_points": 5
+  },
+  "bodies": {
+    "moon": {
+      "mission": "Base lunar aproximada",
+      "hard_filters": [
+        { "key": "safeSlope", "operator": "gte", "threshold": 80, "unit": "%", "required": true, "require_coverage": true, "label": "Al menos 80% del entorno analizado con pendiente ≤15°" },
+        { "key": "relief", "operator": "lte", "threshold": 1000, "unit": "m", "required": true, "require_coverage": true, "label": "Desnivel local máximo de 1.000 m" },
+        { "key": "sunlight", "operator": "gte", "threshold": 30, "unit": "%", "required": false, "require_coverage": true, "label": "Visibilidad solar promedio mínima de 30% en el período del producto LOLA" },
+        { "key": "craterFree", "operator": "gte", "threshold": 70, "unit": "%", "required": false, "require_coverage": true, "label": "Superficie libre de peligros ≥70%" },
+        { "key": "soilStability", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Estabilidad del suelo ≥50 puntos" },
+        { "key": "ice", "operator": "gte", "threshold": 25, "unit": "pts", "required": false, "require_coverage": true, "label": "Potencial de hielo ≥25 puntos" },
+        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Cobertura y coherencia espacial del indicador de hielo ≥50 puntos" }
+      ],
+      "criteria": {
+        "sunlight": { "direction": "higher", "scale": 100 },
+        "relief": { "direction": "lower", "scale": 2000 },
+        "safeSlope": { "direction": "higher", "scale": 100 },
+        "craterFree": { "direction": "higher", "scale": 100 },
+        "soilStability": { "direction": "higher", "scale": 100 },
+        "ice": { "direction": "higher", "scale": 100 }
+      },
+      "not_scored": {
+        "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece una base."
+      },
+      "requirement_method": {
+        "earth_view_analog": "Aproximación geométrica: 100% en el hemisferio lunar visible desde la Tierra y 0% en el hemisferio lejano; no modela relieve local, libración ni relés."
+      }
+    },
+    "mars": {
+      "mission": "Aterrizaje y recorridos de rover aproximados",
+      "hard_filters": [
+        { "key": "safeSlope", "operator": "gte", "threshold": 80, "unit": "%", "required": true, "require_coverage": true, "label": "Al menos 80% del entorno analizado con pendiente ≤15°" },
+        { "key": "relief", "operator": "lte", "threshold": 1000, "unit": "m", "required": true, "require_coverage": true, "label": "Desnivel local máximo de 1.000 m" },
+        { "key": "sunlight", "operator": "gte", "threshold": 30, "unit": "%", "required": false, "require_coverage": true, "label": "Iluminación solar promedio mínima de 30%" },
+        { "key": "craterFree", "operator": "gte", "threshold": 75, "unit": "%", "required": false, "require_coverage": true, "label": "Superficie libre de peligros ≥75%" },
+        { "key": "soilStability", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Estabilidad del suelo ≥50 puntos" },
+        { "key": "iceConfidence", "operator": "gte", "threshold": 50, "unit": "pts", "required": false, "require_coverage": true, "label": "Si se puntúa hielo, cobertura y coherencia espacial deben ser ≥50 puntos" }
+      ],
+      "criteria": {
+        "sunlight": { "direction": "higher", "scale": 100 },
+        "relief": { "direction": "lower", "scale": 2000 },
+        "safeSlope": { "direction": "higher", "scale": 100 },
+        "craterFree": { "direction": "higher", "scale": 100 },
+        "soilStability": { "direction": "higher", "scale": 100 },
+        "ice": { "direction": "higher", "scale": 100 }
+      },
+      "not_scored": {
+        "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece la misión."
+      },
+      "requirement_method": {
+        "descent_density_analog": "Estimación atmosférica simplificada del README: 0.020 * exp(-elevación_km / 11.1); no incluye estación, clima ni perfil vertical."
+      }
+    }
+  }
+}
