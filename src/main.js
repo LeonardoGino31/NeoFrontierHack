@@ -14,6 +14,8 @@ import { loadParameterModel } from './parameterModel.js';
 import { createComparePanel } from './comparePanel.js';
 import { createStartScreen } from './startScreen.js';
 import { icon } from './icons.js';
+import { setMusicScene, unlockOnGesture } from './audio.js';
+import { createHudControls } from './hudControls.js';
 import { addKeyLayer, isTyping, KEY_PRIORITY } from './keyboard.js';
 import { createStarfield, createSky } from './globe/background.js';
 import { BODIES, STARTUP_TEXTURE_COUNT, createBodies, loadBodyTextures, upgradeHiRes } from './globe/bodies.js';
@@ -89,6 +91,21 @@ const infoPanel = document.getElementById('info');
 const compareLabels = document.getElementById('compare-labels');
 const bodySwitch = document.getElementById('label-right');
 
+// ---------- Música según la pantalla ----------
+let started = false;      // ya se pulsó EMPEZAR
+let roverActive = false;  // hay un rover desplegado en el laboratorio
+
+/** Elige la música que corresponde a lo que se ve: inicio, laboratorio, comparación o cuerpo en el centro. */
+function updateMusic() {
+  if (!started) setMusicScene('intro');
+  else if (isLabOpen()) setMusicScene(roverActive ? 'rover' : 'lab');
+  else if (compareBody) setMusicScene('compare');
+  else setMusicScene(currentBody ?? 'earth');
+}
+unlockOnGesture();
+createHudControls();
+setMusicScene('intro');
+
 // ---------- Laboratorio 3D (se descarga recién al abrirlo) ----------
 const labLauncher = document.createElement('button');
 labLauncher.id = 'lab-launcher';
@@ -115,18 +132,27 @@ async function openLab(key) {
       launcher: labLauncher,
       onClose: () => {
         controls.enabled = true;
+        roverActive = false;
         onResize(); // la ventana pudo cambiar de tamaño mientras estaba abierto
+        updateMusic();
+      },
+      onRoverChange: (active) => {
+        roverActive = active;
+        updateMusic();
       },
     });
   }
   controls.enabled = false; // comparten el canvas: los controles del globo no deben reaccionar
   lab.open(key);
+  updateMusic();
 }
 
 // ---------- Arranque ----------
 const startScreen = createStartScreen({
   // Se elige cualquier punto de la Tierra: todos tienen un análogo en la Luna o en Marte
   onStart: () => {
+    started = true;
+    updateMusic();
     const all = markers.earthMarkers.children;
     if (all.length) selectEarthPoint(all[Math.floor(Math.random() * all.length)]);
   },
@@ -259,6 +285,7 @@ function setBody(bodyKey) {
   updatePsrVisibility();
   applyLayout();
   controls.target.set(0, 0, 0);
+  updateMusic();
 }
 
 /** Muestra la capa PSR solo cuando la Luna está en primer plano. */
@@ -306,6 +333,7 @@ function clearSelection() {
     applyLayout();
   }
   updatePsrVisibility();
+  updateMusic();
 }
 
 /**
@@ -365,6 +393,7 @@ function selectEarthPoint(marker) {
 
   // La guía también muestra los valores de este punto
   paramGuide.setContext({ analogName: BODIES[analog.body].name, analogBody: analog.body, data: marker.userData.similarity });
+  updateMusic();
 }
 
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */
