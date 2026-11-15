@@ -176,16 +176,19 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     header.querySelector('span').textContent = 'Análisis del candidato';
     panel.querySelector('.hud-footer').textContent = 'Punto candidato · sin comparación terrestre';
     const statusText = {
+      selected: 'Candidato elegido: cumple los filtros evaluados',
       passed_but_too_close: 'Cumple los filtros evaluados; quedó cerca de un candidato principal',
       near_miss: 'Casi cumple; el potencial de hielo quedó bajo el umbral',
       ice_unassessed: 'El IFI no cubría el punto; el valor actual es un proxy de latitud',
     }[candidate.status] ?? candidate.status;
     const detail = candidate.selectionDetail;
-    const detailText = candidate.status === 'passed_but_too_close'
-      ? `Distancia al candidato principal: ${detail.distance_to_nearest_selected_km ?? '—'} km (separación mínima ${detail.minimum_separation_km ?? '—'} km).`
-      : candidate.status === 'near_miss'
-        ? `Hielo: ${detail.value ?? '—'} pts; umbral ${detail.threshold ?? '—'} pts; diferencia ${detail.shortfall ?? '—'} pts.`
-        : 'El valor de hielo mostrado ahora es un proxy de latitud con confianza muy baja.';
+    const detailText = candidate.status === 'selected'
+      ? `Puntaje del backend: ${candidate.overallScore}/100${candidate.scoreIsPartial ? ' (datos parciales)' : ''}.`
+      : candidate.status === 'passed_but_too_close'
+        ? `Distancia al candidato principal: ${detail.distance_to_nearest_selected_km ?? '—'} km (separación mínima ${detail.minimum_separation_km ?? '—'} km).`
+        : candidate.status === 'near_miss'
+          ? `Hielo según el backend (IFI, entorno de 30 km): ${detail.value ?? '—'} pts; umbral ${detail.threshold ?? '—'} pts; diferencia ${detail.shortfall ?? '—'} pts.`
+          : 'El valor de hielo mostrado ahora es un proxy de latitud con confianza muy baja.';
 
     nav.querySelector('.nav-count').textContent = `${position.index + 1} / ${position.total}`;
     nav.hidden = false;

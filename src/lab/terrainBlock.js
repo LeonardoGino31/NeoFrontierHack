@@ -10,7 +10,6 @@ const DEPTH_KM = 1.4;    // espesor del bloque bajo el punto más bajo del relie
 const FADE_KM = 0.9;     // tramo inferior en el que la roca se desvanece
 const STRATA_KM = 0.6;   // alto de un ciclo de estratos de la textura
 const ROCK = new THREE.Color(0x9a9184);
-const RUST = new THREE.Color(0xa05a36);
 
 /** Textura de estratos: bandas horizontales de distinto espesor y tono, con grano. */
 function strataTexture() {
@@ -44,7 +43,7 @@ function strataTexture() {
 /**
  * Crea las paredes del bloque para la grilla del terreno.
  * @param {{ sizeKm: number, segments: number }} o  mismas medidas que la malla del terreno
- * @returns {{ group: THREE.Group, update: (posY: ArrayLike<number>, stride: number, bottom: number) => void, setTint: (rust: number) => void, depthKm: number }}
+ * @returns {{ group: THREE.Group, update: (posY: ArrayLike<number>, stride: number, bottom: number) => void, setTint: (ground: THREE.Color) => void, depthKm: number }}
  */
 export function createTerrainBlock({ sizeKm, segments }) {
   const W = segments + 1;
@@ -143,9 +142,9 @@ export function createTerrainBlock({ sizeKm, segments }) {
     }
   }
 
-  /** Tiñe la roca: 0 = gris neutro, 1 = óxido marciano (mismo `rust` de los presets). */
-  function setTint(rust) {
-    material.color.copy(ROCK).lerp(RUST, rust * 0.8);
+  /** Tiñe la roca con el color medio del suelo del punto, así el corte combina con la imagen. */
+  function setTint(ground) {
+    material.color.copy(ROCK).lerp(ground, 0.7);
     material.emissive.copy(material.color).multiplyScalar(0.3);
   }
 

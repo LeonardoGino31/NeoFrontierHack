@@ -22,8 +22,9 @@ class Site:
 def is_candidate_only(row: dict) -> bool:
     """Fila de un candidato del backend, sin punto en la Tierra.
 
-    Sus columnas `*_analog` las escribe el backend: el pipeline no las mide ni las pisa,
-    pero sí usa el punto como objetivo de la búsqueda de análogos (targets.py).
+    Sus columnas `*_analog` las escribe `candidates.py` (una sola medición por punto, que
+    la pareja copia); `fetch` y `apply` no las tocan. El punto es además objetivo de la
+    búsqueda de análogos (targets.py).
     """
     return row.get("record_type") == CANDIDATE_ONLY or not row.get("earth_site_id")
 

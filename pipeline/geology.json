@@ -1,0 +1,230 @@
+{
+  "_note": "Vocabulario litológico común. Cada mapa geológico (GLiM en la Tierra, Unified Geologic Map en la Luna, SIM 3292 en Marte) se traduce a estas clases. `affinity[objetivo][tierra]` es la similitud (0–1) entre la clase del sitio de la Luna o Marte y la de una celda terrestre; la diagonal vale 1 y lo que no aparece vale 0.",
+  "classes": [
+    {
+      "key": "basalt",
+      "label": "Basalto (coladas volcánicas máficas)"
+    },
+    {
+      "key": "pyroclastic",
+      "label": "Depósitos piroclásticos y cenizas"
+    },
+    {
+      "key": "felsicVolcanic",
+      "label": "Volcánico ácido o intermedio"
+    },
+    {
+      "key": "maficPlutonic",
+      "label": "Plutónico básico (gabro, anortosita)"
+    },
+    {
+      "key": "felsicPlutonic",
+      "label": "Plutónico ácido o intermedio (granito)"
+    },
+    {
+      "key": "metamorphic",
+      "label": "Metamórfico"
+    },
+    {
+      "key": "clasticSedimentary",
+      "label": "Sedimentario clástico (areniscas, lutitas)"
+    },
+    {
+      "key": "carbonate",
+      "label": "Carbonatos"
+    },
+    {
+      "key": "evaporite",
+      "label": "Evaporitas (sales, sulfatos)"
+    },
+    {
+      "key": "unconsolidated",
+      "label": "Sedimentos sueltos (llanuras, depósitos eólicos)"
+    },
+    {
+      "key": "ice",
+      "label": "Hielo y depósitos polares"
+    },
+    {
+      "key": "impactBreccia",
+      "label": "Corteza fragmentada por impactos (brecha, megarregolito)"
+    },
+    {
+      "key": "anorthositicCrust",
+      "label": "Corteza anortosítica (tierras altas lunares)"
+    }
+  ],
+  "bodies": {
+    "earth": {
+      "_source": "GLiM, clases de primer nivel (Classnames.txt). wb = agua y nd = sin dato quedan fuera.",
+      "glimWater": 11,
+      "glim": {
+        "1": "unconsolidated",
+        "2": "basalt",
+        "3": "clasticSedimentary",
+        "4": "maficPlutonic",
+        "5": "clasticSedimentary",
+        "6": "carbonate",
+        "7": "felsicVolcanic",
+        "8": "metamorphic",
+        "9": "felsicPlutonic",
+        "10": "felsicVolcanic",
+        "11": null,
+        "12": "pyroclastic",
+        "13": "felsicPlutonic",
+        "14": "evaporite",
+        "15": null,
+        "16": "ice"
+      }
+    },
+    "mars": {
+      "_source": "SIM 3292 (Tanaka et al. 2014). Clase según la interpretación del folleto: tierras altas noeicas = corteza de impacto; unidades de transición y de cuenca = sedimentos; tierras bajas = llanuras de sedimentos; apron (Medusae Fossae) = piroclásticos o eólicos.",
+      "units": {
+        "eNh": "impactBreccia",
+        "mNh": "impactBreccia",
+        "lNh": "impactBreccia",
+        "Nhu": "impactBreccia",
+        "HNhu": "impactBreccia",
+        "eHh": "impactBreccia",
+        "AHi": "impactBreccia",
+        "eNhm": "impactBreccia",
+        "mNhm": "impactBreccia",
+        "Nhe": "impactBreccia",
+        "Nve": "basalt",
+        "lNv": "basalt",
+        "eHv": "basalt",
+        "lHv": "basalt",
+        "Hve": "basalt",
+        "lHvf": "basalt",
+        "lAvf": "basalt",
+        "AHv": "basalt",
+        "Ave": "basalt",
+        "lAv": "basalt",
+        "Av": "basalt",
+        "HNt": "clasticSedimentary",
+        "Ht": "clasticSedimentary",
+        "eHt": "clasticSedimentary",
+        "lHt": "clasticSedimentary",
+        "Htu": "clasticSedimentary",
+        "AHtu": "clasticSedimentary",
+        "Hto": "clasticSedimentary",
+        "eHb": "clasticSedimentary",
+        "lHb": "clasticSedimentary",
+        "HNb": "clasticSedimentary",
+        "eAb": "clasticSedimentary",
+        "ANa": "clasticSedimentary",
+        "lHl": "unconsolidated",
+        "mAl": "unconsolidated",
+        "lApd": "unconsolidated",
+        "Aa": "pyroclastic",
+        "lAa": "pyroclastic",
+        "lApc": "ice",
+        "Ap": "ice",
+        "Apu": "ice",
+        "Hp": "ice",
+        "Hpu": "ice",
+        "Hpe": "ice"
+      }
+    },
+    "moon": {
+      "_source": "Unified Geologic Map of the Moon (Fortezzo et al. 2020). Mares = basalto; manto oscuro (Id) y meseta de Aristarco (EIp) = piroclásticos; domos de terra (Itd, p. ej. Gruithuisen) = volcánico silícico; terra = corteza anortosítica; cráteres, cuencas, sus formaciones de eyecta y llanuras claras = brecha de impacto.",
+      "units": {
+        "Em": "basalt",
+        "Im1": "basalt",
+        "Im2": "basalt",
+        "Imd": "basalt",
+        "Id": "pyroclastic",
+        "EIp": "pyroclastic",
+        "Itd": "felsicVolcanic",
+        "It": "anorthositicCrust",
+        "INt": "anorthositicCrust",
+        "Nt": "anorthositicCrust",
+        "pNt": "anorthositicCrust",
+        "Cc": "impactBreccia",
+        "Ccc": "impactBreccia",
+        "Csc": "impactBreccia",
+        "Ec": "impactBreccia",
+        "Ecc": "impactBreccia",
+        "Esc": "impactBreccia",
+        "Ic": "impactBreccia",
+        "Ic1": "impactBreccia",
+        "Ic2": "impactBreccia",
+        "Icc": "impactBreccia",
+        "Icf": "impactBreccia",
+        "Isc": "impactBreccia",
+        "Iic": "impactBreccia",
+        "Nc": "impactBreccia",
+        "pNc": "impactBreccia",
+        "Ib": "impactBreccia",
+        "Ibm": "impactBreccia",
+        "Nb": "impactBreccia",
+        "Nbl": "impactBreccia",
+        "Nbm": "impactBreccia",
+        "Nbsc": "impactBreccia",
+        "pNb": "impactBreccia",
+        "pNbm": "impactBreccia",
+        "Iia": "impactBreccia",
+        "Iiap": "impactBreccia",
+        "Iif": "impactBreccia",
+        "Iohi": "impactBreccia",
+        "Ioho": "impactBreccia",
+        "Iohs": "impactBreccia",
+        "Iom": "impactBreccia",
+        "Iork": "impactBreccia",
+        "Iorm": "impactBreccia",
+        "Nnj": "impactBreccia",
+        "INp": "impactBreccia",
+        "Ip": "impactBreccia",
+        "Np": "impactBreccia",
+        "Ntp": "impactBreccia",
+        "Ig": "impactBreccia"
+      }
+    }
+  },
+  "affinity": {
+    "basalt": {
+      "pyroclastic": 0.7,
+      "maficPlutonic": 0.5,
+      "felsicVolcanic": 0.3,
+      "unconsolidated": 0.2,
+      "metamorphic": 0.1
+    },
+    "pyroclastic": {
+      "basalt": 0.7,
+      "felsicVolcanic": 0.4,
+      "unconsolidated": 0.3
+    },
+    "felsicVolcanic": {
+      "basalt": 0.4,
+      "pyroclastic": 0.5,
+      "felsicPlutonic": 0.4
+    },
+    "impactBreccia": {
+      "maficPlutonic": 0.5,
+      "metamorphic": 0.5,
+      "felsicPlutonic": 0.4,
+      "basalt": 0.4,
+      "unconsolidated": 0.3,
+      "clasticSedimentary": 0.2
+    },
+    "anorthositicCrust": {
+      "maficPlutonic": 0.9,
+      "metamorphic": 0.5,
+      "felsicPlutonic": 0.4,
+      "basalt": 0.3
+    },
+    "clasticSedimentary": {
+      "unconsolidated": 0.6,
+      "carbonate": 0.5,
+      "evaporite": 0.5
+    },
+    "unconsolidated": {
+      "clasticSedimentary": 0.6,
+      "evaporite": 0.4,
+      "carbonate": 0.3
+    },
+    "ice": {
+      "unconsolidated": 0.3
+    }
+  }
+}

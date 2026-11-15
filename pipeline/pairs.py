@@ -3,8 +3,10 @@
 Para cada fila `candidate_only` del CSV (un punto de la Luna o Marte elegido por el backend):
   1. toma de `earth_candidates.json` el mejor punto de la Tierra que esté a más de
      `min_km` de los ya elegidos (si no, varios candidatos polares caerían en la misma celda);
-  2. mide los dos lados con las mismas fuentes que la búsqueda;
-  3. agrega una fila `pair` con esos valores. La fila del candidato se conserva intacta.
+  2. mide el punto terrestre con las mismas fuentes que la búsqueda; el lado del análogo
+     se copia de la fila del candidato (candidates.py ya lo midió), así ambas coinciden;
+  3. agrega una fila `pair` con esos valores y la comparación litológica. La fila del
+     candidato se conserva intacta.
 
 Las parejas elegidas a mano que había antes se guardan en `known_analogs.json`: dejan de
 mostrarse en el globo, pero siguen sirviendo para validar la búsqueda (puesto que obtienen).
@@ -18,6 +20,7 @@ from pathlib import Path
 
 import requests
 
+from . import geology
 from .collect import collect_site
 from .output import write_values
 from .sites import Site, is_candidate_only
@@ -100,65 +103,93 @@ def _value(metrics: dict, key: str):
     return None if record is None else record["value"]
 
 
-def _fallback(candidate_row: dict, column: str, key: str, metrics: dict) -> float | None:
-    """Estimación del backend para una métrica que el pipeline no mide en ese punto.
+def _pair_row(fields: list[str], cand: dict, earth: dict, model: dict, earth_info: dict,
+              earth_class: str | None) -> dict:
+    """Fila `pair` del CSV: el análogo copiado del candidato y el punto terrestre medido.
 
-    Se registra como `estimated` con su método, para que la app no la presente como medición.
+    Si un factor no se midió en un lado, la app exige un número: se pone el centro del rango
+    del simulador y la app lo marca como demo (no coincide con site_values.json).
     """
-    raw = candidate_row.get(column, "")
-    if raw == "":
-        return None
-    meta = json.loads(candidate_row.get("candidate_factor_metadata_json") or "{}").get(key, {})
-    metrics[key] = {"value": float(raw), "unit": meta.get("unit", ""), "status": "estimated",
-                    "note": meta.get("method", "estimación del backend"),
-                    "source": {"dataset": "Estimación del backend (backend/scripts/enrich_candidate_factors.py)"}}
-    return float(raw)
-
-
-def _pair_row(fields: list[str], cand: dict, earth: dict, analog: dict, model: dict,
-              earth_info: dict) -> dict:
-    """Fila `pair` del CSV: datos descriptivos de ambos sitios y los valores medidos."""
     body = cand["body"]
     row = {k: "" for k in fields}
     # El análogo se copia tal cual del candidato: la app exige que coincida entre filas
     for k in ("candidate_id", "body", "analog_site_name", "analog_latitude", "analog_longitude",
-              "footprint_km", "analog_kind", "analog_description", "analog_polar"):
-        row[k] = cand[k]
+              "footprint_km", "analog_kind", "analog_description", "analog_polar",
+              "geology_analog", "geology_unit_analog"):
+        row[k] = cand.get(k, "")
     row |= {"record_type": "pair", "data_status": PAIR_STATUS,
             "pair_id": f"par-{cand['candidate_id']}", **earth_info["columns"]}
 
-    em, am = earth["metrics"], analog["metrics"]
+    em = earth["metrics"]
     for p in model["parameters"]:
-        for side, metrics, key in (("earth", em, p["key"]), ("analog", am, p["key"])):
-            value = _value(metrics, key)
-            if value is None and side == "analog":
-                value = _fallback(cand, p["columns"][side], key, metrics)
-            lo, hi = p["ranges"]["earth" if side == "earth" else body]
-            row[p["columns"][side]] = str(value if value is not None else round((lo + hi) / 2, p["decimals"]))
+        columns = [(p["columns"], p["key"], p["ranges"])]
         if "confidenceColumns" in p:
-            for side, metrics in (("earth", em), ("analog", am)):
-                value = _value(metrics, f"{p['key']}Confidence")
-                if value is None and side == "analog":
-                    value = _fallback(cand, p["confidenceColumns"][side], f"{p['key']}Confidence", metrics)
-                row[p["confidenceColumns"][side]] = str(value if value is not None else 0)
+            columns.append((p["confidenceColumns"], f"{p['key']}Confidence", None))
+        for cols, key, ranges in columns:
+            value = _value(em, key)
+            if value is None:
+                value = round(sum(ranges["earth"]) / 2, p["decimals"]) if ranges else 0
+            row[cols["earth"]] = str(value)
+            analog = cand.get(cols["analog"], "")
+            if analog == "":
+                analog = str(round(sum(ranges[body]) / 2, p["decimals"]) if ranges else 0)
+            row[cols["analog"]] = analog
     req = model["bodies"][body]["requirement"]
-    value = _value(am, req["key"])
-    row[req["column"]] = str(value if value is not None else cand.get(req["column"], ""))
+    row[req["column"]] = cand.get(req["column"], "")
+    target_class = cand.get("geology_analog")
+    row["geology_earth"] = earth_class or ""
+    if target_class and earth_class:
+        lut = geology.affinity_lut(target_class)
+        row["geology_similarity"] = str(round(float(lut[geology.class_code(earth_class)]), 2))
     return row
 
 
-def _earth_text(cand: dict, pick: dict, rank: int, earth: dict, window_km: float) -> tuple[str, str]:
+def _sentence(text: str) -> str:
+    """Primera letra en mayúscula sin tocar el resto (`capitalize` pasaría "GLiM" a "glim")."""
+    return text[:1].upper() + text[1:]
+
+
+def _use_search_values(earth: dict, pick: dict, window_km: float) -> None:
+    """Pone en el punto terrestre los valores de la celda con que la búsqueda lo eligió.
+
+    `collect_site` mide otra ventana (DEM de 30 m, o varias celdas de 0.05° que cerca de los
+    polos cubren hielo y roca a la vez) y podía dar otro número: la pareja debe mostrar los
+    valores que produjeron la similitud.
+    """
+    for key, value in pick["values"].items():
+        record = earth["metrics"].get(key)
+        if record is None or value is None:
+            continue
+        record["value"] = value
+        record["note"] = f"celda de la búsqueda global ({window_km:g} km)" + (
+            f"; {record['note']}" if record.get("note") else "")
+
+
+def _earth_text(cand: dict, pick: dict, rank: int, earth: dict, window_km: float,
+                earth_class: str | None) -> tuple[str, str]:
     """Descripción y límites del punto terrestre, a partir de lo que se midió."""
     m = earth["metrics"]
     parts = [f"desnivel {m['relief']['value']} m" if "relief" in m else "",
              f"pendiente segura {m['safeSlope']['value']} %" if "safeSlope" in m else "",
              f"luz solar {m['sunlight']['value']} %" if "sunlight" in m else "",
              f"hielo {m['ice']['value']:.0f} pts" if "ice" in m else ""]
+    if earth_class:
+        parts.append(f"roca: {geology.class_label(earth_class).lower()} (GLiM)")
     description = (f"La celda de {window_km:g} km más parecida a {cand['analog_site_name']} en toda la Tierra "
                    f"(similitud {100 * pick['score']:.1f} %, puesto {rank} de la búsqueda global). "
-                   + ", ".join(p for p in parts if p).capitalize() + ".")
-    limits = ("La búsqueda compara solo los parámetros medidos (terreno, luz, albedo, suelo y hielo); "
-              "la gravedad, la atmósfera, la radiación y la geología no entran en la comparación.")
+                   + _sentence(", ".join(p for p in parts if p)) + ".")
+    target_class = cand.get("geology_analog")
+    if target_class and earth_class and target_class != earth_class:
+        rock = (f"La roca no es la misma: {geology.class_label(target_class).lower()} en "
+                f"{'la Luna' if cand['body'] == 'moon' else 'Marte'} frente a "
+                f"{geology.class_label(earth_class).lower()} aquí. ")
+    elif target_class and earth_class:
+        rock = f"Misma clase de roca ({geology.class_label(earth_class).lower()}), según mapas de escala regional. "
+    else:
+        rock = "Sin dato de geología para comparar la roca. "
+    limits = (rock + "La comparación usa terreno, luz, albedo, suelo, hielo y litología a escala regional "
+              "(GLiM 0.5°); no reproduce la gravedad, el vacío o la atmósfera, la radiación ni la "
+              "mineralogía de detalle.")
     return description, limits
 
 
@@ -171,9 +202,12 @@ def build(cfg: dict, cache_dir: Path, csv_path: Path, candidates_path: Path, val
     save_known_analogs(rows, known_path)
     candidates = [r for r in rows if is_candidate_only(r)]
     results = {t["id"]: t for t in json.loads(candidates_path.read_text(encoding="utf-8"))["targets"]}
+    # Las mediciones de los candidatos (candidates.py) se conservan: la app comprueba contra ellas
+    previous = json.loads(values_path.read_text(encoding="utf-8"))["sites"] if values_path.exists() else {}
+    values = {k: v for k, v in previous.items() if not k.startswith("earth:")}
 
     chosen: list[tuple[float, float]] = []
-    pairs, values = [], {}
+    pairs = []
     for cand in candidates:
         cid, body = cand["candidate_id"], cand["body"]
         target = results.get(cid)
@@ -187,18 +221,16 @@ def build(cfg: dict, cache_dir: Path, csv_path: Path, candidates_path: Path, val
         print(f"- {cid} -> {name} ({region}), puesto {rank}, similitud {100 * pick['score']:.1f} %")
 
         earth = collect_site(Site(earth_id, "earth", body, name, pick["lat"], pick["lon"]), cfg, cache_dir, snow={})
-        analog = collect_site(Site(cid, body, body, cand["analog_site_name"],
-                                   float(cand["analog_latitude"]), float(cand["analog_longitude"])),
-                              cfg, cache_dir, snow={})
-        description, limits = _earth_text(cand, pick, rank, earth, cfg["windows"][body]["sizeKm"])
+        _use_search_values(earth, pick, cfg["windows"][body]["sizeKm"])
+        earth_class = pick["values"].get("lithology")
+        description, limits = _earth_text(cand, pick, rank, earth, cfg["windows"][body]["sizeKm"], earth_class)
         earth_info = {"id": earth_id, "columns": {
             "earth_site_id": earth_id, "earth_site_name": name, "earth_region": region,
             "earth_latitude": str(pick["lat"]), "earth_longitude": str(pick["lon"]),
             "earth_kind": "Análogo encontrado por la búsqueda", "earth_description": description,
             "earth_limits": limits}}
-        pairs.append(_pair_row(fields, cand, earth, analog, model, earth_info))
+        pairs.append(_pair_row(fields, cand, earth, model, earth_info, earth_class))
         values[f"earth:{earth_id}"] = earth
-        values[f"{body}:{cid}"] = analog
 
     with csv_path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")

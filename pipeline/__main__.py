@@ -7,21 +7,31 @@
     python -m pipeline earth-topo --bbox -70,-25,-66,-21   # solo una región (oeste,sur,este,norte)
     python -m pipeline earth-modis      # nieve, luz solar, albedo y suelo globales (requiere Earthdata)
     python -m pipeline earth-permafrost # permafrost (Obu et al.); se suma al índice de hielo
+    python -m pipeline earth-geology    # litología (GLiM) en la malla de la Tierra
+    python -m pipeline candidates       # candidatos del backend -> filas candidate_only del CSV (sin duplicados)
+    python -m pipeline search-merge a.json b.json  # une búsquedas repartidas con --out
+    python -m pipeline validation       # puesto de los análogos conocidos -> public/data/validation.json
     python -m pipeline targets          # objetivos: CSV + backend + oficiales + propuestas propias
     python -m pipeline search           # candidatos en la Tierra -> public/data/earth_candidates.json
     python -m pipeline pairs            # cada candidato del backend + su mejor análogo -> parejas del CSV
+    python -m pipeline lab-terrain      # DEM e imagen real de cada punto -> public/data/lab/ (laboratorio 3D)
 """
 
 import argparse
 import json
 from pathlib import Path
 
+from . import geology
+from .candidates import build as build_candidates
 from .collect import collect
 from .earth import permafrost, topography
 from .earth.modis import run as modis_run
+from .lab_terrain import run as lab_terrain_run
 from .output import apply_to_csv, write_values
 from .pairs import build as build_pairs
 from .search import run as search_run
+from .search import merge as merge_search
+from .search import write_validation
 from .sites import load_sites
 from .targets import build as build_targets
 
@@ -43,10 +53,17 @@ def main() -> None:
     modis = sub.add_parser("earth-modis", help="capas globales de MODIS (requiere cuenta de Earthdata)")
     modis.add_argument("--year", type=int, default=2024)
     sub.add_parser("earth-permafrost", help="probabilidad de permafrost en la malla (hemisferio norte y Antártida)")
+    sub.add_parser("earth-geology", help="litología de la Tierra (GLiM) en la malla, para la búsqueda")
+    sub.add_parser("candidates", help="filas de candidatos del CSV desde las salidas del backend, sin duplicados")
+    sub.add_parser("validation", help="resume el puesto de los análogos conocidos -> public/data/validation.json")
+    merge_cmd = sub.add_parser("search-merge", help="une búsquedas parciales (--out) en earth_candidates.json")
+    merge_cmd.add_argument("parts", nargs="+", help="archivos escritos por search --out")
     sub.add_parser("targets", help="arma pipeline/targets.json")
     pairs_cmd = sub.add_parser("pairs", help="crea una pareja por candidato del backend con su mejor análogo")
     pairs_cmd.add_argument("--min-km", type=float, default=150,
                            help="separación mínima entre los puntos terrestres elegidos")
+    lab = sub.add_parser("lab-terrain", help="recortes de DEM e imagen de cada punto para el laboratorio 3D")
+    lab.add_argument("--workers", type=int, default=4, help="lecturas remotas en paralelo")
     search = sub.add_parser("search", help="busca análogos en la Tierra para cada objetivo")
     search.add_argument("--targets", help="ids separados por comas (por defecto, todos)")
     search.add_argument("--top", type=int, default=25, help="candidatos por objetivo")
@@ -67,8 +84,26 @@ def main() -> None:
         print(f"Malla escrita en {modis_run(cfg, cache_dir, args.year)}")
         return
 
+    if args.command == "lab-terrain":
+        print(f"Índice escrito en {lab_terrain_run(cfg, cache_dir, csv_path, Path('public/data/lab'), args.workers)}")
+        return
+
     if args.command == "earth-permafrost":
         print(f"Malla escrita en {permafrost.run(cfg, cache_dir)}")
+        return
+
+    if args.command == "earth-geology":
+        print(f"Malla escrita en {geology.run_earth(cfg, cache_dir)}")
+        return
+
+    if args.command == "search-merge":
+        print(f"Escrito {merge_search([Path(p) for p in args.parts], Path('public/data/earth_candidates.json'))}")
+        return
+
+    if args.command == "validation":
+        summary = write_validation([Path("public/data/earth_candidates.json")], Path("public/data/validation.json"))
+        for body, stats in summary["bodies"].items():
+            print(f"  {body}: " + ", ".join(f"{m} mediana top {s['medianTopPct']} %" for m, s in stats.items()))
         return
 
     model_path = Path("public/data/parameter_model.json")
@@ -81,6 +116,12 @@ def main() -> None:
         out = search_run(cfg, cache_dir, HERE / "targets.json", model_path,
                          Path(args.out), only, args.top, body=args.body)
         print(f"Escrito {out}")
+        return
+
+    if args.command == "candidates":
+        model = json.loads(model_path.read_text(encoding="utf-8"))
+        count = build_candidates(cfg, cache_dir, csv_path, output, model)
+        print(f"{count} candidatos escritos en {csv_path}")
         return
 
     if args.command == "pairs":

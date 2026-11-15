@@ -172,6 +172,34 @@
       "periodDays": 8,
       "startDate": "01-01-2024",
       "endDate": "12-31-2024"
+    },
+    "geology": {
+      "earth": {
+        "dataset": "GLiM, Global Lithological Map 0.5° (Hartmann y Moosdorf 2012, PANGAEA)",
+        "page": "https://doi.pangaea.de/10.1594/PANGAEA.788537",
+        "url": "https://doi.pangaea.de/10.1594/PANGAEA.788537?format=textfile",
+        "member": "glim_wgs84_0point5deg.txt.asc"
+      },
+      "moon": {
+        "dataset": "Unified Geologic Map of the Moon 1:5M, raster 64 px/° (Fortezzo et al. 2020, USGS)",
+        "page": "https://astrogeology.usgs.gov/search/map/unified_geologic_map_of_the_moon_1_5m_2020",
+        "url": "https://asc-astropedia.s3.us-west-2.amazonaws.com/Moon/Geology/Ancillary/unified_geologic_map_of_the_moon_raster.zip",
+        "raster": "Unified_Geologic_Map_of_the_Moon_64ppd.tif",
+        "units": "Dn_GeologicUnit_RGBcolor.csv",
+        "dnColumn": "DN",
+        "unitColumn": "Unit"
+      },
+      "mars": {
+        "dataset": "Geologic Map of Mars, SIM 3292 (Tanaka et al. 2014, USGS)",
+        "page": "https://pubs.usgs.gov/publication/sim3292",
+        "url": "https://pubs.usgs.gov/sim/3292/downloads/sim3292_database.zip"
+      },
+      "names": {
+        "dataset": "Gazetteer of Planetary Nomenclature (IAU WGPSN / USGS)",
+        "page": "https://planetarynames.wr.usgs.gov/",
+        "moon": "https://asc-planetarynames-data.s3.us-west-2.amazonaws.com/MOON_nomenclature_center_pts.zip",
+        "mars": "https://asc-planetarynames-data.s3.us-west-2.amazonaws.com/MARS_nomenclature_center_pts.zip"
+      }
     }
   },
   "earthGrid": {
@@ -201,5 +229,20 @@
     ],
     "maxPerBody": null,
     "_note": "null = todos los candidatos del backend. Cada objetivo se mide en la red (ventanas de LOLA/MOLA, MCD, TES); un número limita el tiempo de `search`."
+  },
+  "candidateRows": {
+    "statuses": [
+      "selected",
+      "near_miss"
+    ],
+    "minSeparationKm": {
+      "moon": 30,
+      "mars": 300
+    },
+    "maxPerBody": {
+      "moon": 10,
+      "mars": 12
+    },
+    "_note": "Candidatos del backend que pasan al CSV. passed_but_too_close no entra: está a menos de la separación mínima de un candidato elegido. En Marte el backend elige 200 puntos casi empatados (~99.9) en las mismas llanuras; 300 km de separación deja uno por región."
   }
 }

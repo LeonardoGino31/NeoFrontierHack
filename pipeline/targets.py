@@ -70,8 +70,9 @@ def _from_known(path: Path) -> list[dict]:
 def _from_backend(rules: dict) -> list[dict]:
     """Candidatos de las salidas GeoJSON del backend, los mejores `maxPerBody` por cuerpo (null = todos).
 
-    El CSV solo trae las alternativas; los candidatos principales viven en los GeoJSON.
-    Si el backend no se ha ejecutado (o no está en esta rama), no aporta objetivos.
+    El CSV trae solo una selección sin duplicados (candidates.py); aquí entran todos, para
+    que cada punto del backend tenga sus análogos en la Tierra. Si el backend no se ha
+    ejecutado (o no está en esta rama), no aporta objetivos.
     """
     by_body: dict[str, list[dict]] = {}
     for name in rules["files"]:
