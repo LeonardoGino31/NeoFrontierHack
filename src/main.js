@@ -13,6 +13,8 @@ import { loadPlanetaryData } from './planetaryData.js';
 import { loadParameterModel } from './parameterModel.js';
 import { createComparePanel } from './comparePanel.js';
 import { createStartScreen } from './startScreen.js';
+import { loadSiteValues } from './siteValues.js';
+import { createDiscoveryPanel } from './discoveryPanel.js';
 import { icon } from './icons.js';
 import { setMusicScene, unlockOnGesture } from './audio.js';
 import { createHudControls } from './hudControls.js';
@@ -74,6 +76,7 @@ const SLOTS = {
 // ---------- Estado ----------
 // Se completan en boot(), cuando llegan los datos y las texturas
 let meshes = null;       // bodyKey -> mesh
+let discovery = null;    // panel de análogos encontrados en la Tierra
 let clouds = null;
 let psrOverlay = null;
 let sky = null;
@@ -165,8 +168,8 @@ const startScreen = createStartScreen({
 const PROGRESS_STEPS = STARTUP_TEXTURE_COUNT + 3;
 let progressDone = 0;
 const step = () => startScreen.setProgress(++progressDone / PROGRESS_STEPS);
-const dataReady = loadParameterModel()
-  .then(async (model) => ({ model, ...(await loadPlanetaryData(model)) }))
+const dataReady = Promise.all([loadParameterModel(), loadSiteValues()])
+  .then(async ([model, siteValues]) => ({ model, siteValues, ...(await loadPlanetaryData(model)) }))
   .finally(step);
 const texturesReady = loadBodyTextures(step);
 
@@ -182,7 +185,7 @@ async function boot() {
   await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
   createRenderer();
 
-  const [{ model, pairs }, tex] = await Promise.all([dataReady, texturesReady]);
+  const [{ model, siteValues, pairs, candidates }, tex] = await Promise.all([dataReady, texturesReady]);
 
   ({ meshes, clouds, psrOverlay } = createBodies(tex, {
     maxAnisotropy: renderer.capabilities.getMaxAnisotropy(),
@@ -193,8 +196,9 @@ async function boot() {
     sky = createSky(tex.sky);
     scene.add(sky);
   }
-  markers = createMarkers({ meshes, pairs, model });
+  markers = createMarkers({ meshes, pairs, candidates, model, siteValues });
   createPanels(model);
+  await createDiscovery(model);
 
   // La app arranca en la Tierra, que es donde están los puntos, ya en su lugar (sin animación)
   setBody('earth');
@@ -219,6 +223,29 @@ async function boot() {
   upgradeHiRes(renderer, meshes);
 }
 
+/** Gira la Tierra (al centro) para mostrar un punto de frente. */
+function focusEarthPoint(lat, lon) {
+  clearSelection();
+  setBody('earth');
+  faceTowardCamera(meshes.earth, latLonToVector3(lat, lon, 1), 0);
+  meshes.earth.userData.targetRotationX = THREE.MathUtils.degToRad(lat);
+}
+
+/** Panel de análogos encontrados (solo si ya se ejecutó `python -m pipeline search`). */
+async function createDiscovery(model) {
+  discovery = await createDiscoveryPanel({
+    model,
+    earthMesh: meshes.earth,
+    latLonToVector3,
+    formatLatLon,
+    onOpen: () => {
+      clearSelection();
+      setBody('earth');
+    },
+    focus: focusEarthPoint,
+  });
+}
+
 /** Paneles HUD, guía y selector de cuerpo (necesitan el modelo de parámetros). */
 function createPanels(model) {
   comparePanel = createComparePanel({
@@ -232,10 +259,10 @@ function createPanels(model) {
       openLab(key); // abre el laboratorio en el modo de ese parámetro
     },
   });
-  similarityPanel = createSimilarityPanel({
+similarityPanel = createSimilarityPanel({
     onClose: () => clearSelection(),
     onHelp: (key) => paramGuide.open(key), // abre la guía en ese parámetro
-    onNav: (dir) => stepEarthPoint(dir),
+    onNav: (dir) => stepSelectedPoint(dir),
   });
 
   // Selector Marte | Luna sobre la mitad derecha
@@ -283,10 +310,11 @@ function applyLayout() {
 /** Lleva un cuerpo al centro y reparte los demás a los lados. */
 function setBody(bodyKey) {
   if (!BODIES[bodyKey] || bodyKey === currentBody) return;
+  const hadSelection = !!selectedMarker || !!compareBody;
   currentBody = bodyKey;
-  // Los puntos solo existen cuando la Tierra está en el centro
+  // Los pares terrestres se muestran al enfocar la Tierra; los candidatos siguen a Luna/Marte.
   markers.earthMarkers.visible = currentBody === 'earth';
-  if (currentBody !== 'earth') clearSelection();
+  if (currentBody !== 'earth' || hadSelection) clearSelection();
   updatePsrVisibility();
   applyLayout();
   controls.target.set(0, 0, 0);
@@ -353,6 +381,7 @@ function faceTowardCamera(mesh, localPos, bodyX) {
 
 /** Entra al modo comparación con el punto de la Tierra `marker` y su análogo. */
 function selectEarthPoint(marker) {
+  discovery?.close();
   clearSelection();
   selectedMarker = marker;
   markers.highlight(marker, true);
@@ -401,6 +430,46 @@ function selectEarthPoint(marker) {
   updateMusic();
 }
 
+/** Selecciona un candidato autónomo en la Luna o Marte y abre sus factores. */
+function selectCandidatePoint(marker) {
+  discovery?.close();
+  clearSelection();
+  const { candidate } = marker.userData;
+  const { body, site } = candidate;
+  selectedMarker = marker;
+  markers.highlight(marker, true);
+
+  if (currentBody !== body) {
+    currentBody = body;
+    markers.earthMarkers.visible = false;
+    applyLayout();
+  }
+
+  const localPos = latLonToVector3(site.lat, site.lon, 1);
+  cameraGoal = CAMERA_HOME.clone();
+  controls.target.set(0, 0, 0);
+  faceTowardCamera(meshes[body], localPos, 0);
+  meshes[body].userData.targetRotationX = THREE.MathUtils.degToRad(site.lat);
+
+  const siblings = markers.candidatesFor(body);
+  similarityPanel.showCandidate({
+    candidate,
+    bodyName: BODIES[body].name,
+    formatLatLon,
+    data: marker.userData.analysis,
+    nav: { index: siblings.indexOf(marker), total: siblings.length },
+  });
+  paramGuide.setContext({
+    isCandidate: true,
+    analogName: BODIES[body].name,
+    analogBody: body,
+    candidate,
+    data: marker.userData.analysis,
+  });
+  updatePsrVisibility();
+  updateMusic();
+}
+
 /** Pasa al punto anterior (−1) o siguiente (+1) entre los del cuerpo análogo actual. */
 function stepEarthPoint(dir) {
   if (!selectedMarker) return;
@@ -409,9 +478,23 @@ function stepEarthPoint(dir) {
   selectEarthPoint(list[(i + dir + list.length) % list.length]);
 }
 
+/** Navega puntos terrestres emparejados o candidatos autónomos según la selección activa. */
+function stepSelectedPoint(dir) {
+  if (!selectedMarker) return;
+  if (selectedMarker.userData.kind === 'candidate') {
+    const body = selectedMarker.userData.body;
+    const list = markers.candidatesFor(body);
+    const index = list.indexOf(selectedMarker);
+    selectCandidatePoint(list[(index + dir + list.length) % list.length]);
+    return;
+  }
+  stepEarthPoint(dir);
+}
+
 /** Cambia el análogo a otro cuerpo, saltando al primer punto de la Tierra emparejado con él. */
 function switchAnalogBody(body) {
-  if (!selectedMarker || selectedMarker.userData.analog.body === body) return;
+  // `body` y no `analog.body`: un candidato seleccionado no tiene pareja en la Tierra
+  if (!selectedMarker || selectedMarker.userData.body === body) return;
   const [first] = markers.markersFor(body);
   if (first) selectEarthPoint(first);
 }
@@ -428,8 +511,8 @@ addKeyLayer({
     if (flight) return; // durante el vuelo hacia el pin no se cambia la selección
     if (event.key === 'Escape') clearSelection();
     if (isTyping(event.target)) return;
-    if (event.key === 'ArrowLeft') stepEarthPoint(-1);
-    if (event.key === 'ArrowRight') stepEarthPoint(1);
+    if (event.key === 'ArrowLeft') stepSelectedPoint(-1);
+    if (event.key === 'ArrowRight') stepSelectedPoint(1);
   },
 });
 
@@ -518,10 +601,15 @@ function pick() {
   raycaster.setFromCamera(pointer, camera);
   const targets = Object.values(meshes);
   if (markers.earthMarkers.visible) targets.push(...markers.earthMarkers.children);
+  for (const group of Object.values(markers.candidateMarkers)) {
+    if (group.visible) targets.push(...group.children);
+  }
   const hit = raycaster.intersectObjects(targets, false)[0];
   if (!hit) return { marker: null, bodyKey: null };
-  const isMarker = !hit.object.userData.bodyKey;
-  return { marker: isMarker ? hit.object : null, bodyKey: isMarker ? 'earth' : hit.object.userData.bodyKey };
+  const kind = hit.object.userData.kind;
+  if (kind === 'earth_pair') return { marker: hit.object, bodyKey: 'earth' };
+  if (kind === 'candidate') return { marker: hit.object, bodyKey: hit.object.userData.body };
+  return { marker: null, bodyKey: hit.object.userData.bodyKey };
 }
 
 // En el modo comparación cada cuerpo se gira por separado arrastrándolo
@@ -568,7 +656,8 @@ function setupPointer(canvas) {
     updatePointer(event);
     const { marker, bodyKey } = pick();
     if (marker) {
-      selectEarthPoint(marker);
+      if (marker.userData.kind === 'candidate') selectCandidatePoint(marker);
+      else selectEarthPoint(marker);
       return;
     }
     // En el modo comparación un clic en un cuerpo no lo cambia: ahí se usa para arrastrar

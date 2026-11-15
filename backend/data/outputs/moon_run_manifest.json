@@ -1,0 +1,405 @@
+{
+  "body": "moon",
+  "mission": "Base lunar aproximada",
+  "generated_utc": "2026-11-15T14:50:34.949892+00:00",
+  "result": "moon_candidates.geojson",
+  "alternatives_result": "moon_candidate_alternatives.geojson",
+  "alternatives_geojson": "/home/andie/Desktop/NeoFrontierHack/backend/data/outputs/moon_candidate_alternatives.geojson",
+  "candidate_count": 2,
+  "alternative_candidate_count": 12,
+  "alternative_candidate_counts_by_status": {
+    "passed_but_too_close": 8,
+    "near_miss": 1,
+    "ice_unassessed": 3
+  },
+  "alternative_limits": {
+    "total_maximum": 12,
+    "selection_priority": [
+      "passed_but_too_close",
+      "near_miss",
+      "ice_unassessed"
+    ],
+    "near_miss_margin_points": 5.0,
+    "near_miss_cells_before_spacing": 50,
+    "ice_unassessed_cells_before_spacing": 27934,
+    "passed_candidates_suppressed_by_spacing_encountered": 8
+  },
+  "eligible_cell_count_before_hard_filters": 64087,
+  "eligible_cell_count_before_spatial_separation": 10,
+  "grid_km_at_equator": 10.0,
+  "coordinate_crs": "PROJCS[\"SimpleCylindrical Moon\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon\",SPHEROID[\"Moon\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "coordinate_convention": "Native geographic convention recorded by the DEM; verify its PDS/USGS label before cross-source overlays.",
+  "minimum_separation_km": 30.0,
+  "site_footprint_km": 30,
+  "safe_slope_limit_degrees": 15,
+  "requirement": {
+    "key": "earthView",
+    "description": "Comunicación con la Tierra",
+    "minimum": 50.0,
+    "unit": "%",
+    "method": "capa de visibilidad promedio de la Tierra derivada de LOLA"
+  },
+  "hard_filter_summary": [
+    {
+      "key": "safeSlope",
+      "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+      "operator": "gte",
+      "threshold": 80.0,
+      "unit": "%",
+      "required": true,
+      "status": "applied",
+      "evaluated_cells": 64087,
+      "rejected_cells": 1960,
+      "rejected_for_missing_data": 0,
+      "remaining_cells": 62127,
+      "source_layer_configured": false
+    },
+    {
+      "key": "relief",
+      "label": "Desnivel local máximo de 1.000 m",
+      "operator": "lte",
+      "threshold": 1000.0,
+      "unit": "m",
+      "required": true,
+      "status": "applied",
+      "evaluated_cells": 62127,
+      "rejected_cells": 22964,
+      "rejected_for_missing_data": 0,
+      "remaining_cells": 39163,
+      "source_layer_configured": false
+    },
+    {
+      "key": "sunlight",
+      "label": "Visibilidad solar promedio mínima de 30% en el período del producto LOLA",
+      "operator": "gte",
+      "threshold": 30.0,
+      "unit": "%",
+      "required": false,
+      "status": "applied",
+      "evaluated_cells": 39163,
+      "rejected_cells": 3012,
+      "rejected_for_missing_data": 0,
+      "remaining_cells": 36151,
+      "source_layer_configured": true
+    },
+    {
+      "key": "craterFree",
+      "label": "Superficie libre de peligros ≥70%",
+      "operator": "gte",
+      "threshold": 70.0,
+      "unit": "%",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    },
+    {
+      "key": "soilStability",
+      "label": "Estabilidad del suelo ≥50 puntos",
+      "operator": "gte",
+      "threshold": 50.0,
+      "unit": "pts",
+      "required": false,
+      "status": "not_available",
+      "evaluated_cells": 0,
+      "rejected_cells": 0,
+      "source_layer_configured": false
+    },
+    {
+      "key": "ice",
+      "label": "Potencial de hielo ≥25 puntos",
+      "operator": "gte",
+      "threshold": 25.0,
+      "unit": "pts",
+      "required": false,
+      "status": "applied",
+      "evaluated_cells": 8217,
+      "rejected_cells": 36141,
+      "rejected_for_missing_data": 27934,
+      "remaining_cells": 10,
+      "source_layer_configured": true
+    },
+    {
+      "key": "iceConfidence",
+      "label": "Cobertura y coherencia espacial del indicador de hielo ≥50 puntos",
+      "operator": "gte",
+      "threshold": 50.0,
+      "unit": "pts",
+      "required": false,
+      "status": "applied",
+      "evaluated_cells": 10,
+      "rejected_cells": 0,
+      "rejected_for_missing_data": 0,
+      "remaining_cells": 10,
+      "source_layer_configured": false
+    }
+  ],
+  "filters_not_evaluated": [
+    "craterFree",
+    "soilStability"
+  ],
+  "model_weights": {
+    "illumination": 1.5,
+    "topography": 1,
+    "ice": 1.5
+  },
+  "scoring_coverage_percent": 100.0,
+  "missing_optional_layers": [
+    "albedo",
+    "craterFree",
+    "soilStability"
+  ],
+  "scored_parameters": [
+    "ice",
+    "relief",
+    "safeSlope",
+    "sunlight"
+  ],
+  "not_scored": {
+    "albedo": "Se conserva como medición descriptiva; el modelo no define si un valor alto o bajo favorece una base."
+  },
+  "ice_confidence_interpretation": "3x3 local coverage multiplied by spatial coherence",
+  "sources": {
+    "dem": {
+      "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_dem.tif",
+      "band": 1,
+      "scale": 0.5,
+      "offset": 0.0,
+      "units": "m",
+      "source_id": "usgs-lola-global-118m",
+      "source_url": "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif",
+      "native_size": [
+        92160,
+        46080
+      ],
+      "analysis_size": [
+        1098,
+        549
+      ],
+      "native_pixel_km_at_equator": 0.1185,
+      "effective_grid_km_at_equator": 9.9498,
+      "nodata": -32768.0,
+      "bounds": [
+        -5458203.076608,
+        -2729101.538304,
+        5458203.076608,
+        2729101.538304
+      ],
+      "crs": "PROJCS[\"SimpleCylindrical Moon\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon\",SPHEROID[\"Moon\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "grid_kind": "equirectangular",
+      "projection_parameters": {
+        "proj": "eqc",
+        "lat_ts": 0,
+        "lat_0": 0,
+        "lon_0": 0,
+        "x_0": 0,
+        "y_0": 0,
+        "R": 1737400,
+        "units": "m",
+        "no_defs": true
+      }
+    },
+    "layers": {
+      "sunlight": {
+        "units": "%",
+        "normalization": null,
+        "mosaic_sources": [
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_sunlight_north.tif",
+            "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65N_240M_201608",
+            "source_url": "https://pgda.gsfc.nasa.gov/products/69",
+            "data_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65N_240M_201608.TIF",
+            "units": "%",
+            "coverage": "65N–90N",
+            "native_resolution_m": 240,
+            "band": 1,
+            "scale": 100.0,
+            "offset": 0.0,
+            "raster_scale": 4e-05,
+            "raster_offset": 0.0,
+            "effective_scale": 0.004,
+            "effective_offset": 0.0,
+            "native_size": [
+              6420,
+              6420
+            ],
+            "crs": "PROJCS[\"Moon2000_npole\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",90],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",SOUTH],AXIS[\"Northing\",SOUTH]]"
+          },
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_sunlight_south.tif",
+            "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65S_240M_201608",
+            "source_url": "https://pgda.gsfc.nasa.gov/products/69",
+            "data_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65S_240M_201608.TIF",
+            "units": "%",
+            "coverage": "65S–90S",
+            "native_resolution_m": 240,
+            "band": 1,
+            "scale": 100.0,
+            "offset": 0.0,
+            "raster_scale": 4e-05,
+            "raster_offset": 0.0,
+            "effective_scale": 0.004,
+            "effective_offset": 0.0,
+            "native_size": [
+              6420,
+              6420
+            ],
+            "crs": "PROJCS[\"Moon2000_spole\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",NORTH],AXIS[\"Northing\",NORTH]]"
+          }
+        ],
+        "valid_cell_count": 187000
+      },
+      "ice": {
+        "units": "relative_favorability_0_100",
+        "normalization": "joint_minmax",
+        "mosaic_sources": [
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_ice_north.tif",
+            "source_id": "USGS-Moon-IceFavorabilityIndex-North-591m",
+            "source_url": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_north_pole_591mp",
+            "data_url": "https://planetarymaps.usgs.gov/mosaic/Lunar_Research/IceFavorabilityIndex/Moon_IceFavorabilityIndex_90N000E_591mp.tif",
+            "units": "relative_favorability_0_100",
+            "coverage": "75.863N–90N",
+            "native_resolution_m": 591,
+            "band": 1,
+            "scale": 1.0,
+            "offset": 0.0,
+            "raster_scale": 1.0,
+            "raster_offset": 0.0,
+            "effective_scale": 1.0,
+            "effective_offset": 0.0,
+            "native_size": [
+              1000,
+              1000
+            ],
+            "crs": "PROJCS[\"Moon2000_spole\",GEOGCS[\"GCS_Moon\",DATUM[\"Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",70],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",SOUTH],AXIS[\"Northing\",SOUTH]]"
+          },
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_ice_south.tif",
+            "source_id": "USGS-Moon-IceFavorabilityIndex-South-591m",
+            "source_url": "https://astrogeology.usgs.gov/search/map/moon_ice_favorability_index_south_pole_591mp",
+            "data_url": "https://planetarymaps.usgs.gov/mosaic/Lunar_Research/IceFavorabilityIndex/Moon_IceFavorabilityIndex_90S000E_591mp.tif",
+            "units": "relative_favorability_0_100",
+            "coverage": "75.863S–90S",
+            "native_resolution_m": 591,
+            "band": 1,
+            "scale": 1.0,
+            "offset": 0.0,
+            "raster_scale": 1.0,
+            "raster_offset": 0.0,
+            "effective_scale": 1.0,
+            "effective_offset": 0.0,
+            "native_size": [
+              1000,
+              1000
+            ],
+            "crs": "PROJCS[\"Moon2000_spole\",GEOGCS[\"GCS_Moon\",DATUM[\"Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",-70],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",NORTH],AXIS[\"Northing\",NORTH]]"
+          }
+        ],
+        "valid_cell_count": 75388,
+        "normalization_input_minimum": 0.0008480281103402376,
+        "normalization_input_maximum": 0.5578666925430298,
+        "normalized_range": [
+          0,
+          100
+        ]
+      },
+      "earthView": {
+        "units": "%",
+        "normalization": null,
+        "mosaic_sources": [
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_earthView_north.tif",
+            "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65N_240M_201608_EARTH",
+            "source_url": "https://pgda.gsfc.nasa.gov/products/69",
+            "data_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65N_240M_201608_EARTH.TIF",
+            "units": "%",
+            "coverage": "65N–90N",
+            "native_resolution_m": 240,
+            "band": 1,
+            "scale": 100.0,
+            "offset": 0.0,
+            "raster_scale": 4e-05,
+            "raster_offset": 0.0,
+            "effective_scale": 0.004,
+            "effective_offset": 0.0,
+            "native_size": [
+              6420,
+              6420
+            ],
+            "crs": "PROJCS[\"Moon2000_npole\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",90],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",SOUTH],AXIS[\"Northing\",SOUTH]]"
+          },
+          {
+            "path": "/home/andie/Desktop/NeoFrontierHack/backend/data/raw/moon_earthView_south.tif",
+            "source_id": "LRO-L-LOLA-4-GDR-V1.0:AVGVISIB_65S_240M_201608_EARTH",
+            "source_url": "https://pgda.gsfc.nasa.gov/products/69",
+            "data_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_65S_240M_201608_EARTH.TIF",
+            "units": "%",
+            "coverage": "65S–90S",
+            "native_resolution_m": 240,
+            "band": 1,
+            "scale": 100.0,
+            "offset": 0.0,
+            "raster_scale": 4e-05,
+            "raster_offset": 0.0,
+            "effective_scale": 0.004,
+            "effective_offset": 0.0,
+            "native_size": [
+              6420,
+              6420
+            ],
+            "crs": "PROJCS[\"Moon2000_spole\",GEOGCS[\"GCS_Moon\",DATUM[\"D_Moon_2000\",SPHEROID[\"Moon_2000_IAU_IAG\",1737400,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",NORTH],AXIS[\"Northing\",NORTH]]"
+          }
+        ],
+        "valid_cell_count": 187000
+      },
+      "iceConfidence": {
+        "units": "pts",
+        "method": "3x3 local coverage multiplied by spatial coherence",
+        "formula": "coverage_percent * (1 - local_stddev / 50)",
+        "neighborhood_cells": 9,
+        "data_quality_proxy": true,
+        "not_probability": true,
+        "derived_from": "ice",
+        "valid_cell_count": 75388
+      }
+    }
+  },
+  "heuristic_criteria": {
+    "sunlight": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "relief": {
+      "direction": "lower",
+      "scale": 2000
+    },
+    "safeSlope": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "craterFree": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "soilStability": {
+      "direction": "higher",
+      "scale": 100
+    },
+    "ice": {
+      "direction": "higher",
+      "scale": 100
+    }
+  },
+  "limitations": [
+    "Los umbrales son heurísticos configurables para exploración; no son límites certificados de misión.",
+    "Resultado exploratorio aproximado; no es recomendación de aterrizaje ni certificación de seguridad.",
+    "La pendiente y el desnivel se derivan del DEM remuestreado a la resolución de análisis.",
+    "Los filtros de capas opcionales solo se evalúan si se proporciona una capa; revisar filters_not_evaluated.",
+    "Cráteres/rocas y estabilidad del suelo requieren capas de entrada documentadas.",
+    "La similitud con la Tierra y el CSV planetary_candidates.csv no participan en este proceso.",
+    "La puntuación se calcula solo con los parámetros disponibles; consultar data_coverage y scoring_coverage.",
+    "La cuadrícula geográfica se estrecha hacia los polos; revisar la advertencia polar y usar productos polares para análisis de detalle."
+  ]
+}

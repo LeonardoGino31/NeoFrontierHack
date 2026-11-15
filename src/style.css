@@ -242,6 +242,67 @@ canvas {
   opacity: 0.85;
 }
 
+.hud-candidate-coverage {
+  grid-column: 1 / -1;
+  color: rgba(230, 247, 255, 0.65);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.candidate-factor {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(92px, auto);
+  align-items: center;
+  gap: 8px;
+  margin: 3px 10px 5px 50px;
+  padding: 5px 8px;
+  color: rgba(230, 247, 255, 0.9);
+  background: rgba(var(--hud-cyan), 0.06);
+  border-left: 1px solid rgba(var(--hud-cyan), 0.35);
+  cursor: pointer;
+}
+
+.candidate-factor:hover {
+  background: rgba(var(--hud-cyan), 0.15);
+}
+
+.candidate-factor-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.candidate-factor-label {
+  font-size: 12px;
+}
+
+.candidate-factor-value {
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.candidate-factor-value .hud-confidence {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.hud-factor-note {
+  display: block;
+  max-width: 320px;
+  margin-top: 4px;
+  color: rgba(230, 247, 255, 0.68);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+
+.hud-factor-note a {
+  color: #ffd21a;
+  text-decoration: underline;
+}
+
 .hud-big {
   font-size: 22px;
   font-weight: 700;
@@ -312,6 +373,31 @@ canvas {
 
 .hud-demo {
   color: rgba(255, 205, 90, 0.8);
+}
+
+.hud-real {
+  color: rgba(110, 240, 190, 0.9);
+}
+
+/* Procedencia de cada valor en la guía: verde = real, ámbar = demo */
+.prov {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(110, 240, 190, 0.9);
+}
+
+.prov a {
+  color: inherit;
+}
+
+.prov-demo {
+  color: rgba(255, 205, 90, 0.85);
+}
+
+.prov-estimated {
+  color: rgba(150, 200, 255, 0.9);
 }
 
 /* ===== HUD: botones de cabecera y filas clicables ===== */
@@ -1735,6 +1821,108 @@ canvas {
 
 .lab-rovers .lab-rover-exit:hover:not(:disabled) {
   background: #ef4444;
+}
+
+/* ===== Análogos encontrados (búsqueda global) ===== */
+#discovery-launcher {
+  position: fixed;
+  top: 16px;
+  left: 68px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.8);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  cursor: pointer;
+  z-index: 15;
+}
+
+#discovery-launcher svg {
+  width: 22px;
+  height: 22px;
+}
+
+#discovery-panel {
+  position: fixed;
+  top: 72px;
+  left: 16px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  z-index: 14;
+}
+
+.disc-pick {
+  display: grid;
+  gap: 4px;
+  margin: 10px 12px 0;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.85);
+}
+
+.disc-pick select {
+  padding: 6px;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.9);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  font: inherit;
+  text-transform: none;
+}
+
+.disc-body {
+  padding: 4px 12px 12px;
+  font-size: 13px;
+}
+
+.disc-body h4 {
+  margin: 12px 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.85);
+}
+
+.disc-origin,
+.disc-note {
+  margin: 6px 0;
+  color: rgba(230, 247, 255, 0.7);
+}
+
+.disc-values {
+  display: grid;
+  gap: 2px;
+}
+
+.disc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-top: 3px;
+  padding: 5px 8px;
+  color: #e6f7ff;
+  font: inherit;
+  text-align: left;
+  background: rgba(120, 220, 255, 0.08);
+  border: 1px solid rgba(120, 220, 255, 0.25);
+  cursor: pointer;
+}
+
+.disc-row:hover {
+  border-color: rgba(120, 220, 255, 0.8);
+}
+
+.disc-known {
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.disc-score {
+  color: rgb(110, 240, 190);
+  font-weight: 700;
 }
 
 /* ===== Pin de Google Maps en la tarjeta de la Tierra ===== */

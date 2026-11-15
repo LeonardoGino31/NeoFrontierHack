@@ -1,0 +1,341 @@
+{
+ "_comment": "Objetivos oficiales fijos. La lista de búsqueda (targets.json) se arma con python -m pipeline targets: estos + los análogos del CSV + las propuestas propias.",
+ "targets": [
+  {
+   "id": "ez_acheron_fossae",
+   "body": "mars",
+   "name": "EZ Acheron Fossae",
+   "lat": 39.8,
+   "lon": -139.4,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_acidalia_plantia",
+   "body": "mars",
+   "name": "EZ Acidalia Plantia",
+   "lat": 20.0,
+   "lon": -40.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arabia_terra",
+   "body": "mars",
+   "name": "EZ Arabia Terra",
+   "lat": 0.4,
+   "lon": -8.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_aram_chaos",
+   "body": "mars",
+   "name": "EZ Aram Chaos",
+   "lat": 2.4,
+   "lon": -20.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arcadia",
+   "body": "mars",
+   "name": "EZ Arcadia",
+   "lat": 38.945,
+   "lon": 172.008,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_arcadia_planitia",
+   "body": "mars",
+   "name": "EZ Arcadia Planitia",
+   "lat": 46.2,
+   "lon": -171.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ausonia",
+   "body": "mars",
+   "name": "EZ Ausonia",
+   "lat": -32.032,
+   "lon": 96.529,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_cerberus",
+   "body": "mars",
+   "name": "EZ Cerberus",
+   "lat": 9.973,
+   "lon": 162.001,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_columbus_crater",
+   "body": "mars",
+   "name": "EZ Columbus Crater",
+   "lat": -29.0,
+   "lon": -166.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_copernicus_crater",
+   "body": "mars",
+   "name": "EZ Copernicus Crater",
+   "lat": -49.2,
+   "lon": -169.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_coprates_emelas_chasm",
+   "body": "mars",
+   "name": "EZ Coprates EMelas Chasm",
+   "lat": -11.7,
+   "lon": -68.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_deuteronilus1_2",
+   "body": "mars",
+   "name": "EZ Deuteronilus1 2",
+   "lat": 40.027,
+   "lon": 22.586,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_erebus_montes",
+   "body": "mars",
+   "name": "EZ Erebus Montes",
+   "lat": 39.0,
+   "lon": -167.9,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_gale",
+   "body": "mars",
+   "name": "EZ Gale",
+   "lat": -4.691,
+   "lon": 137.213,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_gusev",
+   "body": "mars",
+   "name": "EZ Gusev",
+   "lat": -13.607,
+   "lon": 175.855,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hadriacus",
+   "body": "mars",
+   "name": "EZ Hadriacus",
+   "lat": -26.802,
+   "lon": 77.509,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hale_crater",
+   "body": "mars",
+   "name": "EZ Hale Crater",
+   "lat": -35.8,
+   "lon": -36.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hebrus",
+   "body": "mars",
+   "name": "EZ Hebrus",
+   "lat": 20.056,
+   "lon": 126.603,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hellas3",
+   "body": "mars",
+   "name": "EZ Hellas3",
+   "lat": -35.434,
+   "lon": 93.987,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hellas_hellas2",
+   "body": "mars",
+   "name": "EZ Hellas Hellas2",
+   "lat": -39.561,
+   "lon": 102.97,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_huygens",
+   "body": "mars",
+   "name": "EZ Huygens",
+   "lat": -13.498,
+   "lon": 55.505,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_hypanis_delta",
+   "body": "mars",
+   "name": "EZ Hypanis Delta",
+   "lat": 11.7,
+   "lon": -45.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ismenius_cavus",
+   "body": "mars",
+   "name": "EZ Ismenius Cavus",
+   "lat": 33.8,
+   "lon": 17.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_jezero",
+   "body": "mars",
+   "name": "EZ Jezero",
+   "lat": 17.676,
+   "lon": 77.013,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_kasei_valles",
+   "body": "mars",
+   "name": "EZ Kasei Valles",
+   "lat": 24.8,
+   "lon": -72.6,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_mawrth_valles",
+   "body": "mars",
+   "name": "EZ Mawrth Valles",
+   "lat": 24.3,
+   "lon": -19.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_mclaughlin_crater",
+   "body": "mars",
+   "name": "EZ McLaughlin Crater",
+   "lat": 21.9,
+   "lon": -22.4,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_ne_marineris_crater",
+   "body": "mars",
+   "name": "EZ NE Marineris Crater",
+   "lat": -4.1,
+   "lon": -35.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_newton_crater",
+   "body": "mars",
+   "name": "EZ Newton Crater",
+   "lat": -40.6,
+   "lon": -160.0,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_nili",
+   "body": "mars",
+   "name": "EZ Nili",
+   "lat": 22.083,
+   "lon": 77.005,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_noachis",
+   "body": "mars",
+   "name": "EZ Noachis",
+   "lat": -37.23,
+   "lon": -9.504,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_noactis_landing",
+   "body": "mars",
+   "name": "EZ Noactis Landing",
+   "lat": -6.5,
+   "lon": -92.5,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_protonilus",
+   "body": "mars",
+   "name": "EZ Protonilus",
+   "lat": 42.174,
+   "lon": 48.108,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_se_marineris",
+   "body": "mars",
+   "name": "EZ SE Marineris",
+   "lat": -18.8,
+   "lon": -49.2,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_s_meridiani_sinus_planium",
+   "body": "mars",
+   "name": "EZ S Meridiani Sinus Planium",
+   "lat": -2.75,
+   "lon": -5.449,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_s_nectaris_fossae",
+   "body": "mars",
+   "name": "EZ S Nectaris Fossae",
+   "lat": -28.9,
+   "lon": -59.7,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_viking",
+   "body": "mars",
+   "name": "EZ Viking",
+   "lat": 22.3,
+   "lon": -48.3,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "ez_zephyria",
+   "body": "mars",
+   "name": "EZ Zephyria",
+   "lat": -1.411,
+   "lon": 157.106,
+   "origin": "NASA Human Landing Sites Workshop (2015): Exploration Zone; centro del mosaico CTX de USGS"
+  },
+  {
+   "id": "gusev_spirit",
+   "body": "mars",
+   "name": "Gusev · Spirit",
+   "lat": -14.5718,
+   "lon": 175.4785,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "elysium_insight",
+   "body": "mars",
+   "name": "Elysium Planitia · InSight",
+   "lat": 4.5024,
+   "lon": 135.6234,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "utopia_zhurong",
+   "body": "mars",
+   "name": "Utopia Planitia · Zhurong",
+   "lat": 25.066,
+   "lon": 109.925,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  },
+  {
+   "id": "oxia_planum",
+   "body": "mars",
+   "name": "Oxia Planum · Rosalind Franklin (aprox.)",
+   "lat": 18.2,
+   "lon": -24.3,
+   "origin": "Sitio de aterrizaje de una misión (real o planificada)"
+  }
+ ]
+}

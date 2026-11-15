@@ -1,0 +1,205 @@
+{
+  "sitesCsv": "public/data/planetary_candidates.csv",
+  "output": "public/data/site_values.json",
+  "cacheDir": ".data-cache",
+  "bodies": {
+    "earth": {
+      "radiusKm": 6371.0,
+      "obliquityDeg": 23.44
+    },
+    "mars": {
+      "radiusKm": 3396.19,
+      "obliquityDeg": 25.19
+    },
+    "moon": {
+      "radiusKm": 1737.4,
+      "obliquityDeg": 1.54
+    }
+  },
+  "windows": {
+    "mars": {
+      "sizeKm": 20,
+      "resolutionM": 463
+    },
+    "moon": {
+      "sizeKm": 5,
+      "resolutionM": 120
+    }
+  },
+  "thresholds": {
+    "slopeLimitDeg": [
+      {
+        "maxResolutionM": 120,
+        "limitDeg": 15
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitDeg": 5
+      }
+    ],
+    "moonPolarBelowLatDeg": -75,
+    "earthSnowDaysForIce": 180,
+    "obstacleLocalReliefM": [
+      {
+        "maxResolutionM": 120,
+        "limitM": 60
+      },
+      {
+        "maxResolutionM": 100000,
+        "limitM": 80
+      }
+    ],
+    "_obstacleNote": "Desnivel local 3x3 equivalente a la pendiente límite: 2 × res × tan(límite) ≈ 64 m a 120 m (15°) y 81 m a 463 m (5°).",
+    "marsIceWehPct": 10,
+    "_marsIceNote": "Agua equivalente de GRS a partir de la cual se asume hielo en el primer metro; los minerales hidratados llegan a ~7 %."
+  },
+  "ice": {
+    "indicators": {
+      "moon": [
+        "permanentShadow",
+        "divinerCold",
+        "lendHydrogen"
+      ],
+      "mars": [
+        "odysseyHydrogen",
+        "swimIce"
+      ],
+      "earth": [
+        "snowDays",
+        "permafrost"
+      ]
+    }
+  },
+  "sources": {
+    "copDem": {
+      "dataset": "Copernicus DEM GLO-30 (ESA)",
+      "tileList": "https://copernicus-dem-30m.s3.amazonaws.com/tileList.txt",
+      "tileUrl": "https://copernicus-dem-30m.s3.amazonaws.com/{name}/{name}.tif"
+    },
+    "molaDem": {
+      "dataset": "MGS MOLA global DEM 463 m (USGS Astrogeology)",
+      "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
+    },
+    "lolaGlobalDem": {
+      "dataset": "LRO LOLA global DEM 118 m (USGS Astrogeology)",
+      "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+    },
+    "lolaPolarDem": {
+      "dataset": "LRO LOLA south pole DEM 120 m (NASA GSFC PGDA)",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_120MPP_ADJ.TIF"
+    },
+    "moonSunlight": {
+      "dataset": "LOLA average solar visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+      "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608.TIF",
+      "scale": 4e-05,
+      "offset": 0
+    },
+    "moonEarthView": {
+      "dataset": "LOLA average Earth visibility 75S 120 m (Mazarico et al. 2011, PGDA)",
+      "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_75S_120M_201608_EARTH.TIF",
+      "scale": 4e-05,
+      "offset": 0
+    },
+    "moonPsr": {
+      "dataset": "LOLA permanently shadowed regions 75S 120 m (PGDA)",
+      "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_75S_120M_201608.TIF",
+      "scale": 2.5e-05,
+      "offset": 0.5
+    },
+    "mcd": {
+      "dataset": "Mars Climate Database v6.2, climatology scenario (LMD/ESA/CNES)",
+      "url": "https://www-mars.lmd.jussieu.fr/mcd_python/cgi-bin/mcdcgi.py",
+      "seasonsLs": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "localTimeH": 15,
+      "altitudeM": 10
+    },
+    "marsGrsWater": {
+      "dataset": "Mars Odyssey GRS water concentration 5°×5°, smoothed (Boynton et al. 2007, PDS Geosciences)",
+      "url": "https://pds-geosciences.wustl.edu/ody/ody-m-grs-5-elements-v1/odgm_xxxx/data/smoothed/h2o_sr_5x5.tab"
+    },
+    "moonAlbedo": {
+      "dataset": "LRO LOLA 1064 nm normal albedo maps, GDR (PDS Geosciences)",
+      "polarFromLatDeg": 60,
+      "global": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldam_10_float.img",
+        "imageName": "LDAM_10_FLOAT.IMG"
+      },
+      "south": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50s_1000m_float.img",
+        "imageName": "LDAM_50S_1000M_FLOAT.IMG"
+      },
+      "north": {
+        "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50n_1000m_float.lbl",
+        "image": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldam_50n_1000m_float.img",
+        "imageName": "LDAM_50N_1000M_FLOAT.IMG"
+      }
+    },
+    "moonRockAbundance": {
+      "dataset": "LRO Diviner rock abundance, global high-resolution mosaic 128 px/° (Bandfield et al. 2011, PDS Geosciences)",
+      "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_ghrm/geotiff/dghrm_ra_sam_70s70n_tif.tif",
+      "maxAbsLatDeg": 70
+    },
+    "marsAlbedo": {
+      "dataset": "MGS TES global bolometric albedo 7.4 km (Christensen et al. 2001, USGS Astrogeology)",
+      "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars_MGS_TES_Albedo_mosaic_global_7410m.tif"
+    },
+    "earthPermafrost": {
+      "dataset": "Permafrost probability 1 km (Obu et al. 2019 y 2020, ESA GlobPermafrost, PANGAEA)",
+      "regions": [
+        {
+          "name": "hemisferio norte (2000–2016)",
+          "url": "https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERPROB_5.0_20181128_2000_2016_NH.zip"
+        },
+        {
+          "name": "Antártida (2000–2017)",
+          "url": "https://store.pangaea.de/Publications/ObuJ-etal_2019/UiO_PEX_PERPROB_5.0_20181205_2000_2017_ANT.zip"
+        }
+      ]
+    },
+    "appeears": {
+      "dataset": "MODIS/Terra Snow Cover 8-Day 500 m (MOD10A2.061) via AppEEARS",
+      "api": "https://appeears.earthdatacloud.nasa.gov/api",
+      "product": "MOD10A2.061",
+      "layer": "Maximum_Snow_Extent",
+      "snowValue": 200,
+      "periodDays": 8,
+      "startDate": "01-01-2024",
+      "endDate": "12-31-2024"
+    }
+  },
+  "earthGrid": {
+    "file": ".data-cache/earth/earth_grid.npz",
+    "tileCacheDir": ".data-cache/earth/topo",
+    "workers": 12,
+    "coarseBlockPx": 5,
+    "copDem90": {
+      "dataset": "Copernicus DEM GLO-90 (ESA)",
+      "tileList": "https://copernicus-dem-90m.s3.amazonaws.com/tileList.txt",
+      "tileUrl": "https://copernicus-dem-90m.s3.amazonaws.com/{name}/{name}.tif"
+    }
+  },
+  "moonProposals": {
+    "minSunlightPct": 70,
+    "minSafeSlopePct": 70,
+    "maxIceDistanceKm": 10,
+    "minSeparationKm": 15,
+    "count": 10
+  },
+  "backendCandidates": {
+    "files": [
+      "backend/data/outputs/moon_candidates.geojson",
+      "backend/data/outputs/moon_candidate_alternatives.geojson",
+      "backend/data/outputs/mars_candidates.geojson",
+      "backend/data/outputs/mars_candidate_alternatives.geojson"
+    ],
+    "maxPerBody": null,
+    "_note": "null = todos los candidatos del backend. Cada objetivo se mide en la red (ventanas de LOLA/MOLA, MCD, TES); un número limita el tiempo de `search`."
+  }
+}

@@ -14,6 +14,7 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 - **Sombra permanente del polo sur lunar**: capa de LRO LOLA con las regiones donde nunca da el sol (posible hielo), activable al ver la Luna.
 - **Laboratorio 3D**: terreno procedural de 20 × 20 km donde cada parámetro se visualiza sobre el relieve y se puede modificar en vivo.
 - **Rovers en el laboratorio**: Perseverance, Sojourner (Marte), Apollo LRV y Yutu-2 (Luna) modelados en 3D a escala real, con ruedas que giran y se orientan y suspensión que copia el suelo; se conducen sobre el terreno que se haya ajustado.
+- **Backend experimental de sitios**: proceso Python separado para priorizar ubicaciones aproximadas en Luna y Marte desde DEM científicos y capas raster opcionales. Exporta candidatos con coordenadas y métricas a GeoJSON, sin intervenir en el CSV Tierra–análogo.
 
 > ⚠️ Estado actual: los sitios, sus pares en la Tierra y las imágenes son reales; los valores de similitud, la confianza del potencial de hielo y los índices del laboratorio siguen siendo **de demostración**. La metodología de abajo es una propuesta; debe definirse y validarse antes de sustituir los valores de demostración.
 
@@ -26,7 +27,7 @@ La guía de parámetros explica qué significa cada indicador y enumera fuentes 
 | Cuerpo | Objetivo | Peso de los grupos | Requisito del sitio |
 |---|---|---|---|
 | Luna | Estación base permanente | Iluminación ×1.5 · Topografía ×1 · Hielo ×1.5 | Comunicación con la Tierra ≥ 50 % del tiempo |
-| Marte | Aterrizaje y recorridos de rover | Iluminación ×0.5 · Topografía ×2 · Hielo ×1 | Densidad del aire ≥ 0.018 kg/m³ (≈ aterrizar por debajo de +1 km) |
+| Marte | Aterrizaje y recorridos de rover | Iluminación ×0.5 · Topografía ×2 · Hielo ×1 | Densidad del aire ≥ 0.010 kg/m³ (mínimo del año a las 15 h; los sitios donde ya se aterrizó lo cumplen) |
 
 ### Parámetros comparados (Tierra – análogo)
 
@@ -82,9 +83,27 @@ FORCE=1 ./scripts/fetch-trek.sh  # vuelve a descargar todo
 
 Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (solo para la vista polar). Las tiles crudas quedan en `.trek-cache/`, que no se versiona. Usa los servicios WMTS públicos de Trek (`https://trek.nasa.gov/tiles/...`) y GIBS (`https://gibs.earthdata.nasa.gov/wmts/...`).
 
+### Backend de ubicaciones lunares y marcianas
+
+El backend está aislado en `backend/` y funciona por lotes. Trek conserva su papel de catálogo y visualización: sus tiles WMTS son imágenes renderizadas. Para medir relieve y pendiente, el backend usa DEM numéricos LOLA/MOLA descargados desde USGS/PDS. Puedes descargar el DEM global de referencia (varios GB) de forma explícita:
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -e backend
+backend/.venv/bin/planetary-backend sources
+backend/.venv/bin/planetary-backend download-dem --body moon --accept-large-download
+backend/.venv/bin/planetary-backend download-dem --body mars --accept-large-download
+backend/.venv/bin/planetary-backend analyze --body moon
+backend/.venv/bin/planetary-backend analyze --body mars
+```
+
+Los comandos `analyze` escriben `backend/data/outputs/moon_candidates.geojson`, `mars_candidates.geojson` y sus manifiestos de procedencia. Los GeoJSON contienen puntos candidatos separados espacialmente, valores de parámetros, puntuaciones de grupos, filtros aplicados y cobertura de datos. Las entradas opcionales se declaran en `backend/examples/moon_manifest.json` y `mars_manifest.json`; se aceptan GeoTIFF geográficos o equirectangulares del mismo cuerpo y CRS planetario que el DEM. `sunlight`, `albedo`, `craterFree`, `soilStability`, `ice` e `iceConfidence` quedan nulos mientras no se proporcione una capa correspondiente.
+
+La pendiente y el desnivel se derivan del DEM remuestreado a una malla aproximada. La visibilidad lunar de la Tierra usa una aproximación geométrica del hemisferio visible; la densidad atmosférica de Marte usa la fórmula simplificada que ya se documenta en la guía. El puntaje solo usa parámetros con dato y criterio configurado, por eso el resultado incluye cobertura y puede ser parcial. No es una evaluación de ingeniería ni una recomendación de misión. Las reglas y escalas heurísticas están en `backend/config/site_selection.json`; las fuentes y productos base están en `backend/config/source_catalog.json`.
+
 ### Datos de ubicaciones y similitud
 
-- `public/data/planetary_candidates.csv` es la fuente de ambas ubicaciones y de los valores usados para calcular la similitud. Cada fila representa una pareja completa Tierra–análogo.
+- `public/data/planetary_candidates.csv` es la fuente de ubicaciones y sus datos. Contiene registros autónomos de candidatos lunares/marcianos (del backend) y, por cada uno, una pareja Tierra–análogo cuyo punto terrestre es el análogo que encontró la búsqueda del pipeline (`python -m pipeline pairs`, ver [`pipeline/README.md`](pipeline/README.md)). Los registros de candidatos no tienen coordenadas terrestres ni calculan similitud; sus parejas sí.
 - El encabezado del CSV sigue este orden de bloques:
 
   1. **Identificadores:** `pair_id`, `earth_site_id`, `candidate_id`, `body`.
@@ -93,16 +112,23 @@ Requiere `curl`, ImageMagick 7 (`magick`) y `python3` con `numpy` y `Pillow` (so
   4. **Estado del registro:** `data_status`.
   5. **Valores comparados**, en este orden: `sunlight_earth`, `sunlight_analog`; `albedo_earth`, `albedo_analog`; `relief_earth`, `relief_analog`; `safe_slope_earth`, `safe_slope_analog`; `crater_free_earth`, `crater_free_analog`; `soil_stability_earth`, `soil_stability_analog`; `ice_earth`, `ice_analog`; `ice_confidence_earth`, `ice_confidence_analog`. La confianza del hielo se muestra aparte y no se incluye en el índice.
   6. **Requisito del sitio** (solo del análogo): `earth_view_analog` (% del tiempo, solo Luna) y `descent_density_analog` (kg/m³, solo Marte). La columna que no aplica al cuerpo se deja vacía.
-- Para agregar una pareja, añade una fila de datos debajo del encabezado, respetando ese orden y con un `pair_id` y un `earth_site_id` únicos. `body` debe ser `mars` o `moon`; incluye las coordenadas de ambos puntos y valores numéricos para los parámetros aplicables.
-- `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra. `analog_latitude` / `analog_longitude` posicionan su contraparte en Marte o la Luna. Al seleccionar el punto, el índice y los porcentajes se calculan con los valores de esa fila.
+  7. **Registros de candidatos** (columnas añadidas al final): `record_type`, `candidate_status`, `candidate_eligible`, `candidate_filter_status`, puntaje y cobertura, más objetos JSON con puntuaciones por grupo/parámetro, filtros, motivo de selección y `candidate_factor_metadata_json` (método, tipo, fuente, confianza y límites de cada factor descriptivo).
+- Las parejas existentes usan `record_type=pair` (o dejan la columna vacía). Para agregar una pareja, añade una fila debajo del encabezado con `pair_id` y `earth_site_id` únicos, ambos puntos y los valores numéricos comparados.
+- Un candidato sin contraparte terrestre usa `record_type=candidate_only`, `candidate_id` único y las columnas del sitio lunar/marciano y sus factores. Las columnas de la Tierra y `pair_id` se dejan vacías; no se inventa una coincidencia ni se calcula similitud.
+- El CSV contiene actualmente las 12 alternativas limitadas de cada cuerpo, copiadas de `backend/data/outputs/moon_candidate_alternatives.geojson` y `mars_candidate_alternatives.geojson`. Si se regeneran esas listas, el CSV no se actualiza automáticamente. `python3 backend/scripts/enrich_candidate_factors.py` vuelve a calcular los factores provisionales y su metadato para las filas `candidate_only`, sin cambiar la selección de ubicaciones.
+- En una pareja, `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra y las coordenadas del análogo lo posicionan en Marte o la Luna. En un candidato autónomo solo se muestra el marcador en su cuerpo; al seleccionarlo aparecen su puntaje de selección, factores disponibles, requisito y estado de filtros.
 - Usa un `earth_site_id` único por punto seleccionable de la Tierra y un `pair_id` único por fila. Un `candidate_id` sí puede repetirse para emparejar el mismo análogo con distintos puntos terrestres; sus datos deben coincidir en todas esas filas.
 - No agregues filas de notas ni encabezados intermedios al CSV: el cargador interpreta cada fila posterior al encabezado como un registro.
-- `src/planetaryData.js` carga y valida el CSV, crea las parejas para los marcadores y entrega los valores al cálculo de similitud.
-- Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos, no mediciones ni resultados científicos. La densidad de Marte se estimó con la elevación MOLA aproximada de cada sitio y la visibilidad de la Tierra de los sitios polares es ilustrativa. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
+- `src/planetaryData.js` carga y valida ambos tipos de registros; los pares alimentan la similitud y los candidatos autónomos muestran sus factores sin comparación terrestre.
+- Las parejas Tierra–análogo tienen `data_status=medido_parcial`: sus valores los mide el pipeline en ambos lados (con su fuente en `public/data/site_values.json`). Las 13 parejas elegidas a mano que había antes quedaron en `pipeline/known_analogs.json` como validación de la búsqueda. En los 24 candidatos lunares/marcianos, albedo, terreno libre de peligros y estabilidad se acompañan de metadatos: el albedo es el punto medio del rango configurado por cuerpo (no un muestreo local); libre de cráteres y estabilidad son proxies calculados con pendiente segura y desnivel; no sustituyen un inventario de cráteres/rocas ni una medición geotécnica. La luz solar marciana se estima como promedio anual geométrico del porcentaje de cada sol con el Sol sobre un horizonte plano; no representa energía recibida e ignora polvo y relieve local. El hielo lunar usa el IFI donde ya había cobertura y un proxy latitudinal fuera de ella; Marte usa un proxy latitudinal porque el raster SWIM aún no se ha ingerido. Los grupos de iluminación y hielo muestran sus índices 0–100; el de hielo no es cantidad ni probabilidad de hielo. Completar esos índices no recalcula el puntaje global ni añade filtros. Los proxies se muestran con confianza baja o muy baja y límites explícitos. El HUD del candidato indica método y limitaciones al lado del valor.
 - `public/data/parameter_model.json` define el modelo: ruta del CSV (`dataset`), grupos, subparámetros (con sus columnas del CSV, `span` y rangos del simulador), y por cuerpo su objetivo, los pesos de los grupos y el requisito del sitio. `src/parameterModel.js` lo carga y valida al iniciar; `src/similarity.js` solo contiene las fórmulas. Para cambiar un peso, un umbral o añadir un subparámetro se edita el JSON (y el CSV si hacen falta columnas nuevas), no el código. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
 - Las imágenes recortadas del panel NASA siguen siendo recursos aparte; agregarlas no es necesario para que aparezcan los marcadores ni para calcular similitudes.
 
 Luego abre la URL que muestra la terminal (por defecto `http://localhost:5173`).
+
+## Datos reales (pipeline)
+
+`pipeline/` descarga solo la ventana de cada sitio desde las fuentes abiertas (LOLA, MOLA, COP-DEM, Mars Climate Database, MODIS) y escribe `public/data/site_values.json` con cada valor y su fuente. Ver [`pipeline/README.md`](pipeline/README.md).
 
 ## Estructura
 
@@ -129,8 +155,9 @@ src/
 public/textures/        # Texturas de la Tierra y estrellas (+ respaldo de Marte y la Luna)
 public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA Trek
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
-public/data/            # Modelo de parámetros (JSON) y parejas Tierra–análogo con sus valores (CSV)
+public/data/            # Modelo de parámetros y parejas Tierra–análogo/candidatos autónomos (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
+backend/                # Proceso batch independiente para candidatos lunares y marcianos
 ```
 
 ## Controles
@@ -150,7 +177,6 @@ scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y 
 
 ## Próximos pasos
 
-- Backend con FastAPI, Pandas y scikit-learn para calcular la similitud con datos reales.
 - Recortes de DEM reales (MOLA, LOLA, Copernicus) en el laboratorio.
 - Asistente de IA que explique los resultados a partir de los valores calculados.
 
