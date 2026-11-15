@@ -50,6 +50,14 @@
       "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
     }
   ],
+  "geology": {
+    "key": "lithology", "label": "Litología", "icon": "layers",
+    "weights": { "moon": 1.5, "mars": 2 },
+    "columns": { "earth": "geology_earth", "analog": "geology_analog" },
+    "unitColumn": "geology_unit_analog", "similarityColumn": "geology_similarity",
+    "classes": "pipeline/geology.json",
+    "note": "Parámetro categórico de la búsqueda (pipeline/search.py): la clase litológica del sitio (Unified Geologic Map de la Luna, SIM 3292 de Marte) frente a la de cada celda de la Tierra (GLiM), con la matriz de afinidad de pipeline/geology.json. Se guarda aparte de `parameters` porque no es una diferencia numérica."
+  },
   "bodies": {
     "moon": {
       "purpose": "Estación base",
@@ -66,6 +74,8 @@
       "purpose": "Aterrizaje y recorridos",
       "why": "Aterrizar y moverse con un rover dependen sobre todo del terreno; el hielo es un objetivo científico y un recurso.",
       "weights": { "illumination": 0.5, "topography": 2, "ice": 1 },
+      "searchExclude": ["sunlight"],
+      "searchExcludeWhy": "En Marte la luz solar es un cálculo geométrico (~50 % casi en todo el planeta) y en la Tierra es día × cielo despejado de MODIS: no distingue sitios y empuja la búsqueda hacia desiertos sin nubes.",
       "requirement": {
         "key": "descent", "column": "descent_density_analog",
         "label": "Densidad del aire para el descenso", "short": "Descenso",

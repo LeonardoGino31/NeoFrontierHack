@@ -47,7 +47,7 @@ def apply_to_csv(values_path: Path, csv_path: Path) -> int:
     changed = 0
     for row in rows:
         if is_candidate_only(row):
-            continue  # valores del backend: mezclar fuentes en una fila ocultaría su procedencia
+            continue  # las escribe candidates.py; su pareja las copia, así que no se tocan aquí
         sides = {"earth": sites.get(f"earth:{row['earth_site_id']}"),
                  "analog": sites.get(f"{row['body']}:{row['candidate_id']}")}
         touched = False

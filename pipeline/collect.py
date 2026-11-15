@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from . import geology
 from .metrics import annual_sunlit_pct, ice_index, moon_near_side_earth_view_pct
 from .sources import albedo, appeears, dem, diviner, earth_grid, mars_ice, mcd, moon_maps
 
@@ -78,6 +79,7 @@ def collect_site(site, cfg: dict, cache_dir: Path, snow: dict) -> dict:
         steps.append(("ice", lambda: mars_ice.hydrogen_indicator(site, cfg, cache_dir)))
     if site.body in ("moon", "mars"):
         steps.append(("albedo", lambda: albedo.albedo(site, cfg, cache_dir)))
+        steps.append(("geology", lambda: geology.site_geology(site, cfg, cache_dir)))
     if site.body == "moon":
         steps.append(("soil", lambda: diviner.soil_stability(site, cfg, cache_dir)))
     if site.body == "earth":
