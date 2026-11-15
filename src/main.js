@@ -479,18 +479,17 @@ function diveIntoMarker(earth) {
   const head = base.clone().addScaledVector(normal, 0.14 * s); // la cabeza del pin
   const cameraEnd = head.clone().addScaledVector(normal, 0.5 * s);
   document.body.classList.add('diving'); // los paneles se desvanecen
+  const spot = { name: earth.name, subtitle: `${earth.region} · ${formatLatLon(earth)}`, lat: earth.lat, lon: earth.lon };
+  const mapReady = mapsView.preload(spot); // el mapa carga en segundo plano durante el vuelo
   startFlight(cameraEnd, head, 2.2, {
     keepLocked: true,
     at: 0.7,
-    onAt: () => {
+    // Si el mapa aún no cargó, la cámara se queda dentro del pin hasta que esté listo
+    onAt: () => mapReady.then(() => {
       // El zoom del mapa nace justo donde quedó el pin en pantalla
       const p = head.clone().project(camera);
-      mapsView.open(
-        { name: earth.name, subtitle: `${earth.region} · ${formatLatLon(earth)}`, lat: earth.lat, lon: earth.lon },
-        (p.x * 0.5 + 0.5) * window.innerWidth,
-        (-p.y * 0.5 + 0.5) * window.innerHeight,
-      );
-    },
+      mapsView.open(spot, (p.x * 0.5 + 0.5) * window.innerWidth, (-p.y * 0.5 + 0.5) * window.innerHeight);
+    }),
   });
 }
 

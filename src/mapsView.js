@@ -39,7 +39,6 @@ export function createMapsView({ onClose } = {}) {
     <div class="mv-stage">
       <iframe class="mv-frame" title="Google Maps" allowfullscreen loading="eager"
         referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="mv-loading"><span class="mv-spin"></span><span class="mv-loading-text"></span></div>
     </div>
     <header class="mv-bar">
       <span class="mv-pin">${MAPS_PIN_SVG}</span>
@@ -54,20 +53,37 @@ export function createMapsView({ onClose } = {}) {
   document.body.appendChild(root);
 
   const frame = root.querySelector('.mv-frame');
-  const loading = root.querySelector('.mv-loading');
   let place = null;
   let type = 'satellite';
   let isOpen = false;
   let closeTimer = 0;
+  let resolveLoaded = null;
 
   const setFrame = () => {
-    root.classList.add('loading');
     frame.src = embedUrl(place, type);
     for (const b of root.querySelectorAll('[data-type]')) b.classList.toggle('active', b.dataset.type === type);
   };
   frame.addEventListener('load', () => {
-    if (frame.src && frame.src !== 'about:blank') root.classList.remove('loading');
+    if (frame.src && frame.src !== 'about:blank') resolveLoaded?.();
   });
+
+  /**
+   * Empieza a cargar el mapa en segundo plano (invisible) mientras la cámara se acerca,
+   * para que al abrirlo ya esté listo y no haya pantalla de carga.
+   * @returns {Promise<void>} se resuelve al cargar (o a los 7 s, para no quedar esperando)
+   */
+  function preload(spot) {
+    clearTimeout(closeTimer);
+    place = spot;
+    type = 'satellite';
+    root.classList.remove('entered');
+    root.hidden = false; // con el círculo cerrado no se ve ni recibe clics
+    return new Promise((resolve) => {
+      resolveLoaded = resolve;
+      setTimeout(resolve, 7000);
+      setFrame();
+    });
+  }
 
   root.querySelector('.mv-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('[data-type]');
@@ -84,17 +100,14 @@ export function createMapsView({ onClose } = {}) {
   function open(spot, originX = window.innerWidth / 2, originY = window.innerHeight / 2) {
     clearTimeout(closeTimer);
     place = spot;
-    type = 'satellite';
     root.querySelector('.mv-title strong').textContent = spot.name;
     root.querySelector('.mv-title small').textContent = spot.subtitle;
     root.querySelector('.mv-external').href = `https://www.google.com/maps/@${spot.lat},${spot.lon},${ZOOM}z/data=!3m1!1e3`;
-    loading.querySelector('.mv-loading-text').textContent = `Descendiendo a ${spot.name}…`;
     root.style.setProperty('--ox', `${originX}px`);
     root.style.setProperty('--oy', `${originY}px`);
     root.classList.remove('entered');
     root.hidden = false;
     isOpen = true;
-    setFrame();
     // Dos cuadros: el primero fija el estado inicial (círculo cerrado) y el segundo anima
     requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('entered')));
     root.querySelector('.mv-close').focus({ preventScroll: true });
@@ -119,5 +132,5 @@ export function createMapsView({ onClose } = {}) {
     },
   });
 
-  return { open, close, isOpen: () => isOpen };
+  return { preload, open, close, isOpen: () => isOpen };
 }

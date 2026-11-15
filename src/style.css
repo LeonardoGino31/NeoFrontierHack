@@ -1782,6 +1782,10 @@ canvas {
   display: none;
 }
 
+#maps-view:not(.entered) {
+  pointer-events: none;
+}
+
 #maps-view.entered {
   clip-path: circle(150% at var(--ox, 50%) var(--oy, 50%));
 }
@@ -1799,45 +1803,11 @@ canvas {
 .mv-frame {
   transform: scale(2.6);
   transform-origin: var(--ox, 50%) var(--oy, 50%);
-  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #maps-view.entered .mv-frame {
   transform: scale(1);
-}
-
-#maps-view.loading .mv-frame {
-  opacity: 0;
-}
-
-.mv-loading {
-  position: absolute;
-  inset: 0;
-  display: none;
-  place-content: center;
-  justify-items: center;
-  gap: 14px;
-  font: 600 18px 'Rajdhani', sans-serif;
-  letter-spacing: 0.12em;
-  color: #e6f7ff;
-  background: radial-gradient(circle, #0b1b45, #02040d 70%);
-}
-
-#maps-view.loading .mv-loading {
-  display: grid;
-}
-
-.mv-spin {
-  width: 38px;
-  height: 38px;
-  border: 3px solid rgba(120, 220, 255, 0.25);
-  border-top-color: #7fd8ff;
-  border-radius: 50%;
-  animation: mv-spin 0.9s linear infinite;
-}
-
-@keyframes mv-spin {
-  to { transform: rotate(360deg); }
 }
 
 .mv-bar {
