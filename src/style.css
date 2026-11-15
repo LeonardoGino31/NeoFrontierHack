@@ -1412,3 +1412,105 @@ canvas {
     transition: none;
   }
 }
+
+/* ===== Análogos encontrados (búsqueda global) ===== */
+#discovery-launcher {
+  position: fixed;
+  top: 16px;
+  left: 68px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.8);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  cursor: pointer;
+  z-index: 15;
+}
+
+#discovery-launcher svg {
+  width: 22px;
+  height: 22px;
+}
+
+#discovery-panel {
+  position: fixed;
+  top: 72px;
+  left: 16px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  z-index: 14;
+}
+
+.disc-pick {
+  display: grid;
+  gap: 4px;
+  margin: 10px 12px 0;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.85);
+}
+
+.disc-pick select {
+  padding: 6px;
+  color: #e6f7ff;
+  background: rgba(6, 28, 44, 0.9);
+  border: 1px solid rgba(120, 220, 255, 0.45);
+  font: inherit;
+  text-transform: none;
+}
+
+.disc-body {
+  padding: 4px 12px 12px;
+  font-size: 13px;
+}
+
+.disc-body h4 {
+  margin: 12px 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.85);
+}
+
+.disc-origin,
+.disc-note {
+  margin: 6px 0;
+  color: rgba(230, 247, 255, 0.7);
+}
+
+.disc-values {
+  display: grid;
+  gap: 2px;
+}
+
+.disc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-top: 3px;
+  padding: 5px 8px;
+  color: #e6f7ff;
+  font: inherit;
+  text-align: left;
+  background: rgba(120, 220, 255, 0.08);
+  border: 1px solid rgba(120, 220, 255, 0.25);
+  cursor: pointer;
+}
+
+.disc-row:hover {
+  border-color: rgba(120, 220, 255, 0.8);
+}
+
+.disc-known {
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.disc-score {
+  color: rgb(110, 240, 190);
+  font-weight: 700;
+}

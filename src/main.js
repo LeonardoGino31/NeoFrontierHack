@@ -9,6 +9,7 @@ import { loadParameterModel } from './parameterModel.js';
 import { loadSiteValues } from './siteValues.js';
 import { createComparePanel } from './comparePanel.js';
 import { createStartScreen } from './startScreen.js';
+import { createDiscoveryPanel } from './discoveryPanel.js';
 
 const [parameterModel, siteValues] = await Promise.all([loadParameterModel(), loadSiteValues()]);
 const { pairs } = await loadPlanetaryData(parameterModel);
@@ -485,6 +486,7 @@ function faceTowardCamera(mesh, localPos, bodyX) {
 }
 
 function selectEarthPoint(marker) {
+  discovery?.close();
   clearSelection();
   selectedMarker = marker;
   marker.material.color.set(MARKER_ACTIVE_COLOR);
@@ -691,6 +693,28 @@ for (const mesh of Object.values(meshes)) {
   mesh.position.copy(mesh.userData.targetPosition);
   mesh.scale.setScalar(mesh.userData.targetScale);
 }
+
+/** Gira la Tierra (al centro) para mostrar un punto de frente. */
+function focusEarthPoint(lat, lon) {
+  clearSelection();
+  setBody('earth');
+  faceTowardCamera(meshes.earth, latLonToVector3(lat, lon, 1), 0);
+  meshes.earth.userData.targetRotationX = THREE.MathUtils.degToRad(lat);
+}
+
+// Resultados de la búsqueda global (si ya se ejecutó `python -m pipeline search`)
+let discovery = null;
+discovery = await createDiscoveryPanel({
+  model: parameterModel,
+  earthMesh: meshes.earth,
+  latLonToVector3,
+  formatLatLon,
+  onOpen: () => {
+    clearSelection();
+    setBody('earth');
+  },
+  focus: focusEarthPoint,
+});
 
 // Al iniciar se elige cualquier punto de la Tierra: todos tienen un análogo en la Luna o en Marte
 createStartScreen({
