@@ -429,6 +429,81 @@ def _apply_hard_filters(
     return filtered, summary
 
 
+def _ice_alternative_masks(
+    base_eligible: np.ndarray,
+    metric_values: dict[str, np.ndarray],
+    profile: dict[str, Any],
+    configured_layers: set[str],
+    confidence_derived_from_ice: bool,
+    near_miss_margin: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Find near misses just below ice threshold and cells with unknown ice data.
+
+    Near misses must have a measured ice score within ``near_miss_margin`` of
+    its threshold and satisfy every other evaluated filter. Unassessed cells
+    must lack ice coverage while satisfying the other evaluated filters.
+    """
+    shape = base_eligible.shape
+    ice_values = metric_values.get("ice", np.full(shape, np.nan, dtype=np.float32))
+    ice_valid = np.isfinite(ice_values)
+    ice_rule = next(
+        (item for item in profile.get("hard_filters", []) if item.get("key") == "ice"),
+        None,
+    )
+    if ice_rule:
+        threshold = float(ice_rule.get("threshold", 0))
+        near_miss = (
+            base_eligible
+            & ice_valid
+            & (ice_values < threshold)
+            & (ice_values >= threshold - near_miss_margin)
+        )
+    else:
+        near_miss = np.zeros(shape, dtype=bool)
+    unassessed = base_eligible & ~ice_valid
+
+    for rule in profile.get("hard_filters", []):
+        key = rule.get("key")
+        if key == "ice":
+            continue
+        if key == "iceConfidence" and confidence_derived_from_ice:
+            # This value is unavailable wherever the ice layer has no coverage.
+            values = metric_values.get(key)
+            if values is None or not np.isfinite(values).any():
+                near_miss[:] = False
+                continue
+            valid = np.isfinite(values)
+            threshold = float(rule.get("threshold", 0))
+            passed = values >= threshold if rule.get("operator") == "gte" else values <= threshold
+            near_miss &= valid & passed
+            continue
+
+        values = metric_values.get(key)
+        if values is None:
+            if rule.get("required"):
+                near_miss[:] = False
+                unassessed[:] = False
+            continue
+        valid = np.isfinite(values)
+        if not valid.any():
+            coverage_required = key in configured_layers and bool(rule.get("require_coverage"))
+            if rule.get("required") or coverage_required:
+                near_miss[:] = False
+                unassessed[:] = False
+            continue
+
+        threshold = float(rule.get("threshold", 0))
+        passed = values >= threshold if rule.get("operator") == "gte" else values <= threshold
+        must_have_data = bool(rule.get("required")) or (
+            key in configured_layers and bool(rule.get("require_coverage"))
+        )
+        condition = valid & passed if must_have_data else (~valid | passed)
+        near_miss &= condition
+        unassessed &= condition
+
+    return near_miss, unassessed
+
+
 def _window_statistics(values: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return 3x3 local min, max and valid-sample count without wrapping at edges."""
     padded = np.pad(values, 1, mode="constant", constant_values=np.nan)
@@ -643,13 +718,24 @@ def analyze(
     defaults = selection.get("candidate_defaults", {})
     grid_km = float(defaults.get("grid_km", 10) if grid_km is None else grid_km)
     limit = int(defaults.get("limit", 200) if limit is None else limit)
+    alternative_limit = int(defaults.get("alternative_limit", 50))
+    near_miss_margin = float(defaults.get("near_miss_margin_points", 5))
     minimum_separation_km = float(
         minimum_separation_km
         if minimum_separation_km is not None
         else defaults.get("minimum_separation_km", 30)
     )
-    if grid_km <= 0 or limit <= 0 or minimum_separation_km < 0:
-        raise AnalysisError("grid-km y limit deben ser positivos; separación no puede ser negativa.")
+    if (
+        grid_km <= 0
+        or limit <= 0
+        or alternative_limit <= 0
+        or near_miss_margin < 0
+        or minimum_separation_km < 0
+    ):
+        raise AnalysisError(
+            "grid-km, limit y alternative_limit deben ser positivos; "
+            "el margen y la separación no pueden ser negativos."
+        )
 
     dem_config = manifest.get("dem")
     if not isinstance(dem_config, dict):
@@ -723,14 +809,10 @@ def analyze(
         )
 
     eligible_before_hard_filters = int(np.count_nonzero(eligible))
+    base_eligible = eligible.copy()
     eligible, hard_filter_summary = _apply_hard_filters(
         eligible, metric_values, profile, configured_layers
     )
-    if not eligible.any():
-        raise AnalysisError(
-            "Ninguna celda cumple los filtros estrictos. Revisa los límites de "
-            "backend/config/site_selection.json y la cobertura de las capas."
-        )
 
     parameter_model = {item["key"]: item for item in model["parameters"]}
     metric_scores: dict[str, np.ndarray] = {}
@@ -794,10 +876,19 @@ def analyze(
         out=np.full(dem_m.shape, np.nan, dtype=np.float32),
         where=weight_sum > 0,
     )
+    confidence_derived_from_ice = (
+        layer_sources.get("iceConfidence", {}).get("derived_from") == "ice"
+    )
+    near_miss_mask, ice_unassessed_mask = _ice_alternative_masks(
+        base_eligible,
+        metric_values,
+        profile,
+        configured_layers,
+        confidence_derived_from_ice,
+        near_miss_margin,
+    )
     candidates = eligible & np.isfinite(overall)
     candidate_indices = np.flatnonzero(candidates)
-    if not candidate_indices.size:
-        raise AnalysisError("No hay celdas candidatas con suficientes métricas para puntuar.")
 
     pool_size = min(candidate_indices.size, max(limit * 100, limit))
     if candidate_indices.size > pool_size:
@@ -809,30 +900,133 @@ def analyze(
     ]
 
     chosen: list[tuple[int, int, float, float, float]] = []
+    spatially_suppressed: list[dict[str, Any]] = []
+    spatially_suppressed_count = 0
     width = dem_m.shape[1]
     for flat_index in candidate_indices:
         row, col = divmod(int(flat_index), width)
         lon, lat = _cell_coordinates(row, col, transform, crs, radius_km)
         score = float(overall[row, col])
-        if any(
-            _haversine_km(lat, lon, old_lat, old_lon, radius_km)
-            < minimum_separation_km
-            for _, _, old_lat, old_lon, _ in chosen
-        ):
+        distances = [
+            (_haversine_km(lat, lon, old_lat, old_lon, radius_km), old_index)
+            for old_index, (_, _, old_lat, old_lon, _) in enumerate(chosen, start=1)
+        ]
+        nearby = [item for item in distances if item[0] < minimum_separation_km]
+        if nearby:
+            spatially_suppressed_count += 1
+            if len(spatially_suppressed) < alternative_limit:
+                nearest_distance, nearest_index = min(nearby)
+                spatially_suppressed.append(
+                    {
+                        "row": row,
+                        "col": col,
+                        "lat": lat,
+                        "lon": lon,
+                        "score": score,
+                        "candidate_status": "passed_but_too_close",
+                        "selection_detail": {
+                            "nearest_selected_candidate": f"{body}-approx-{nearest_index:04d}",
+                            "distance_to_nearest_selected_km": round(nearest_distance, 2),
+                            "minimum_separation_km": minimum_separation_km,
+                        },
+                    }
+                )
             continue
         chosen.append((row, col, lat, lon, score))
         if len(chosen) >= limit:
             break
 
-    if not chosen:
-        raise AnalysisError("No se pudieron separar ubicaciones candidatas con la configuración actual.")
+    def select_spatially_separated(
+        mask: np.ndarray,
+        blocked_points: list[tuple[float, float]],
+        candidate_status: str,
+    ) -> list[dict[str, Any]]:
+        indices = np.flatnonzero(mask & np.isfinite(overall))
+        indices = indices[np.argsort(overall.ravel()[indices])[::-1]]
+        selected: list[dict[str, Any]] = []
+        separated_points = list(blocked_points)
+        for flat_index in indices:
+            row, col = divmod(int(flat_index), width)
+            lon, lat = _cell_coordinates(row, col, transform, crs, radius_km)
+            if minimum_separation_km > 0 and any(
+                _haversine_km(lat, lon, other_lat, other_lon, radius_km)
+                < minimum_separation_km
+                for other_lat, other_lon in separated_points
+            ):
+                continue
+            selected.append(
+                {
+                    "row": row,
+                    "col": col,
+                    "lat": lat,
+                    "lon": lon,
+                    "score": float(overall[row, col]),
+                    "candidate_status": candidate_status,
+                    "selection_detail": {},
+                }
+            )
+            separated_points.append((lat, lon))
+            if len(selected) >= alternative_limit:
+                break
+        return selected
+
+    strict_points = [(lat, lon) for _, _, lat, lon, _ in chosen]
+    near_miss_mask &= np.isfinite(overall)
+    ice_unassessed_mask &= np.isfinite(overall)
+    near_miss_specs = select_spatially_separated(
+        near_miss_mask, strict_points, "near_miss"
+    )
+    unassessed_specs = select_spatially_separated(
+        ice_unassessed_mask,
+        strict_points + [(item["lat"], item["lon"]) for item in near_miss_specs],
+        "ice_unassessed",
+    )
+
+    ice_rule = next(
+        (item for item in profile.get("hard_filters", []) if item.get("key") == "ice"),
+        None,
+    )
+    for item in near_miss_specs:
+        value = float(metric_values["ice"][item["row"], item["col"]])
+        threshold = float(ice_rule.get("threshold", 0)) if ice_rule else 0.0
+        item["selection_detail"] = {
+            "failed_filter": "ice",
+            "value": round(value, 4),
+            "threshold": threshold,
+            "shortfall": round(threshold - value, 4),
+            "near_miss_margin_points": near_miss_margin,
+        }
+    for item in unassessed_specs:
+        item["selection_detail"] = {
+            "unassessed_filter": "ice",
+            "reason": (
+                "no_ice_raster_coverage"
+                if "ice" in configured_layers
+                else "ice_layer_not_configured"
+            ),
+        }
+    # A global cap keeps the alternatives file concise. Preserve this order so
+    # measured passing sites and near misses are preferred over unassessed cells.
+    alternative_specs = (
+        spatially_suppressed + near_miss_specs + unassessed_specs
+    )[:alternative_limit]
 
     all_parameters = [item["key"] for item in model["parameters"]]
     all_group_weight = sum(float(value) for value in weights.values())
     available_score_weight = sum(present_group_weights.values())
     score_coverage = 100 * available_score_weight / all_group_weight if all_group_weight else 0
-    features = []
-    for index, (row, col, lat, lon, score) in enumerate(chosen, start=1):
+
+    def build_feature(
+        row: int,
+        col: int,
+        lat: float,
+        lon: float,
+        score: float,
+        candidate_id: str,
+        candidate_status: str,
+        is_eligible: bool,
+        selection_detail: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         raw_metrics = {
             key: _json_number(values[row, col])
             for key, values in metric_values.items()
@@ -854,7 +1048,11 @@ def analyze(
             for rule in profile.get("hard_filters", [])
         }
         feature_filter_status = (
-            "partial"
+            "near_miss"
+            if candidate_status == "near_miss"
+            else "not_evaluated"
+            if candidate_status == "ice_unassessed"
+            else "partial"
             if any(item["status"] == "not_evaluated" for item in feature_filters.values())
             else "passed"
         )
@@ -865,67 +1063,115 @@ def analyze(
             100 * evaluated_filter_count / len(feature_filters) if feature_filters else 100
         )
         cell_width_km, cell_height_km = _cell_size_km(lat, transform, crs, radius_km)
-        features.append(
-            {
-                "type": "Feature",
-                "id": f"{body}-approx-{index:04d}",
-                "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
-                "properties": {
-                    "candidate_id": f"{body}-approx-{index:04d}",
-                    "body": body,
-                    "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
-                    "mission": profile["mission"],
-                    "footprint_km_at_equator": round(
-                        float(selection.get("site_footprint_km", grid_km)), 2
-                    ),
-                    "grid_cell_width_km_at_latitude": round(cell_width_km, 3),
-                    "grid_cell_height_km": round(cell_height_km, 3),
-                    "polar_scale_warning": abs(lat) >= 75,
-                    "overall_score": round(score, 2),
-                    "score_is_partial": present_parameters < len(all_parameters),
-                    "scoring_coverage_percent": round(
-                        100 * float(weight_sum[row, col]) / all_group_weight, 1
-                    )
-                    if all_group_weight
-                    else 0,
-                    "parameter_data_coverage_percent": round(
-                        100 * present_parameters / len(all_parameters), 1
-                    ),
-                    "eligible": True,
-                    "filter_status": feature_filter_status,
-                    "hard_filter_coverage_percent": round(filter_coverage, 1),
-                    "hard_filters": feature_filters,
-                    "requirement": {
-                        "key": requirement["key"],
-                        "label": requirement["label"],
-                        "value": requirement_value,
-                        "unit": requirement_units,
-                        "minimum": min_requirement,
-                        "passed": requirement_value is not None
-                        and requirement_value >= min_requirement,
-                    },
-                    "metrics": raw_metrics,
-                    "parameter_scores": feature_scores,
-                    "group_scores": feature_groups,
-                    "ice_confidence": raw_metrics.get("iceConfidence"),
-                    "ice_confidence_type": (
-                        "local coverage and spatial coherence; not probability"
-                        if layer_sources.get("iceConfidence", {}).get("derived_from") == "ice"
-                        else "input confidence raster; consult its source metadata"
-                        if raw_metrics.get("iceConfidence") is not None
-                        else None
-                    ),
-                    "data_status": "partial" if present_parameters < len(all_parameters) else "available",
+        return {
+            "type": "Feature",
+            "id": candidate_id,
+            "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
+            "properties": {
+                "candidate_id": candidate_id,
+                "candidate_status": candidate_status,
+                "selection_detail": selection_detail or {},
+                "body": body,
+                "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+                "mission": profile["mission"],
+                "footprint_km_at_equator": round(
+                    float(selection.get("site_footprint_km", grid_km)), 2
+                ),
+                "grid_cell_width_km_at_latitude": round(cell_width_km, 3),
+                "grid_cell_height_km": round(cell_height_km, 3),
+                "polar_scale_warning": abs(lat) >= 75,
+                "overall_score": round(score, 2),
+                "score_is_partial": present_parameters < len(all_parameters),
+                "scoring_coverage_percent": round(
+                    100 * float(weight_sum[row, col]) / all_group_weight, 1
+                )
+                if all_group_weight
+                else 0,
+                "parameter_data_coverage_percent": round(
+                    100 * present_parameters / len(all_parameters), 1
+                ),
+                "eligible": is_eligible,
+                "filter_status": feature_filter_status,
+                "hard_filter_coverage_percent": round(filter_coverage, 1),
+                "hard_filters": feature_filters,
+                "requirement": {
+                    "key": requirement["key"],
+                    "label": requirement["label"],
+                    "value": requirement_value,
+                    "unit": requirement_units,
+                    "minimum": min_requirement,
+                    "passed": requirement_value is not None
+                    and requirement_value >= min_requirement,
                 },
-            }
+                "metrics": raw_metrics,
+                "parameter_scores": feature_scores,
+                "group_scores": feature_groups,
+                "ice_confidence": raw_metrics.get("iceConfidence"),
+                "ice_confidence_type": (
+                    "local coverage and spatial coherence; not probability"
+                    if layer_sources.get("iceConfidence", {}).get("derived_from") == "ice"
+                    else "input confidence raster; consult its source metadata"
+                    if raw_metrics.get("iceConfidence") is not None
+                    else None
+                ),
+                "data_status": "partial" if present_parameters < len(all_parameters) else "available",
+            },
+        }
+
+    features = [
+        build_feature(
+            row,
+            col,
+            lat,
+            lon,
+            score,
+            f"{body}-approx-{index:04d}",
+            "selected",
+            True,
+        )
+        for index, (row, col, lat, lon, score) in enumerate(chosen, start=1)
+    ]
+    alternative_features = []
+    alternative_status_counts: dict[str, int] = {}
+    for item in alternative_specs:
+        status = item["candidate_status"]
+        alternative_status_counts[status] = alternative_status_counts.get(status, 0) + 1
+        candidate_id = f"{body}-alt-{status}-{alternative_status_counts[status]:04d}"
+        alternative_features.append(
+            build_feature(
+                item["row"],
+                item["col"],
+                item["lat"],
+                item["lon"],
+                item["score"],
+                candidate_id,
+                status,
+                status == "passed_but_too_close",
+                item.get("selection_detail"),
+            )
         )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     geojson_path = output_dir / f"{body}_candidates.geojson"
+    alternatives_geojson_path = output_dir / f"{body}_candidate_alternatives.geojson"
     manifest_out_path = output_dir / f"{body}_run_manifest.json"
     feature_collection = {"type": "FeatureCollection", "features": features}
     geojson_path.write_text(
         json.dumps(feature_collection, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    alternatives_feature_collection = {
+        "type": "FeatureCollection",
+        "features": alternative_features,
+    }
+    alternatives_geojson_path.write_text(
+        json.dumps(
+            alternatives_feature_collection,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False,
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -945,7 +1191,23 @@ def analyze(
         "mission": profile["mission"],
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "result": geojson_path.name,
+        "alternatives_result": alternatives_geojson_path.name,
+        "alternatives_geojson": str(alternatives_geojson_path),
         "candidate_count": len(features),
+        "alternative_candidate_count": len(alternative_features),
+        "alternative_candidate_counts_by_status": alternative_status_counts,
+        "alternative_limits": {
+            "total_maximum": alternative_limit,
+            "selection_priority": [
+                "passed_but_too_close",
+                "near_miss",
+                "ice_unassessed",
+            ],
+            "near_miss_margin_points": near_miss_margin,
+            "near_miss_cells_before_spacing": int(np.count_nonzero(near_miss_mask)),
+            "ice_unassessed_cells_before_spacing": int(np.count_nonzero(ice_unassessed_mask)),
+            "passed_candidates_suppressed_by_spacing_encountered": spatially_suppressed_count,
+        },
         "eligible_cell_count_before_hard_filters": eligible_before_hard_filters,
         "eligible_cell_count_before_spatial_separation": int(np.count_nonzero(candidates)),
         "grid_km_at_equator": round(grid_km, 3),
@@ -972,7 +1234,7 @@ def analyze(
             ),
             1,
         )
-        if all_group_weight
+        if all_group_weight and chosen
         else round(score_coverage, 1),
         "missing_optional_layers": missing_layers,
         "scored_parameters": sorted(

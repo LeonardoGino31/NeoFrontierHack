@@ -52,6 +52,14 @@ PYTHONPATH=backend/src python3 -m planetary_backend.cli analyze --body mars
 
 El DEM se remuestrea a una malla cuyo tamaño en el ecuador se aproxima a `--grid-km` (10 km por defecto). Para una prueba más gruesa o rápida, aumenta ese valor. Las puntuaciones usan los pesos de grupos de `parameter_model.json`; los filtros de exclusión y sus límites están en `config/site_selection.json`.
 
+Los umbrales de aprobación no se relajan para aumentar el número de resultados. Además de la lista principal, cada análisis genera una lista exploratoria de hasta 12 alternativas en total. Para completar ese máximo, prioriza primero sitios que pasan los filtros, luego casi aprobados y finalmente ubicaciones sin datos de hielo:
+
+- `passed_but_too_close`: cumple los filtros activos, pero quedó demasiado cerca de un candidato principal según la separación mínima.
+- `near_miss`: cumple los demás filtros evaluables y su indicador de hielo queda hasta 5 puntos por debajo del umbral configurado. El margen se cambia con `candidate_defaults.near_miss_margin_points`.
+- `ice_unassessed`: no hay dato de hielo en esa celda; los demás filtros aplicables sí se cumplen. Es una ubicación sin evaluar para hielo, no una aprobación del filtro.
+
+Las categorías `near_miss` e `ice_unassessed` respetan la separación mínima respecto a los candidatos principales y entre sí. `passed_but_too_close` contiene precisamente sitios que no respetan esa distancia respecto a los sitios principales, por lo que pueden agruparse en una misma zona. Estos puntos no se mezclan con los candidatos aprobados: cada elemento incluye `candidate_status`, `eligible`, el estado de sus filtros y `selection_detail` con el motivo de inclusión. El GeoJSON principal conserva solo los sitios aprobados. El manifiesto registra cantidades, margen y límites utilizados.
+
 Los filtros iniciales requieren que al menos 80% del entorno analizado tenga pendiente de hasta 15° y que el desnivel local no supere 1.000 m, para ambos cuerpos. Cuando una capa está disponible también se aplican los mínimos configurados de iluminación, peligros, estabilidad e hielo. Un límite opcional se omite si no se cargó su capa; queda indicado como no evaluado en `filters_not_evaluated` y en cada candidato. La visibilidad de la Tierra en la Luna (≥50%) y la densidad marciana estimada (≥0,018 kg/m³) continúan siendo requisitos excluyentes. Todos estos valores son heurísticos para priorización exploratoria, no límites certificados de misión.
 
 Las capas `sunlight`, `albedo`, `craterFree`, `soilStability`, `ice` e `iceConfidence` se declaran en `examples/moon_manifest.json` o `examples/mars_manifest.json`. `earthView` es una capa auxiliar del requisito lunar. El lector reproyecta las capas a la malla DEM y permite combinar varias fuentes por métrica, incluidas las proyecciones estereográficas polares de LOLA. `iceConfidence` se informa aparte y nunca se mezcla con el puntaje de hielo. Si el manifiesto incluye una capa de hielo, pero no una de confianza, se calcula la confianza espacial descrita arriba; sin capa de hielo, ambas métricas quedan como `null`. No se rellenan con valores de hielo inventados.
@@ -77,7 +85,8 @@ La capa debe ser un raster del mismo cuerpo con un CRS planetario reconocido (ge
 Cada ejecución produce:
 
 - `backend/data/outputs/moon_candidates.geojson` o `mars_candidates.geojson`: hasta 200 puntos candidatos, separados por 30 km como valor inicial. Las propiedades contienen coordenadas, parámetros, puntuaciones, requisito aplicado y cobertura.
-- `backend/data/outputs/moon_run_manifest.json` o `mars_run_manifest.json`: productos y rutas usados, criterios heurísticos, cobertura, parámetros omitidos y limitaciones.
+- `backend/data/outputs/moon_candidate_alternatives.geojson` o `mars_candidate_alternatives.geojson`: lista aparte de puntos aprobados omitidos por proximidad, casi aprobados por hielo y puntos sin cobertura de hielo.
+- `backend/data/outputs/moon_run_manifest.json` o `mars_run_manifest.json`: productos y rutas usados, criterios heurísticos, cobertura, parámetros omitidos, cantidades por categoría de alternativa y limitaciones.
 
 La aplicación web aún no consume estos archivos automáticamente; son la salida del backend independiente para revisar y conectar en una etapa posterior.
 

@@ -6,7 +6,9 @@
   "candidate_defaults": {
     "grid_km": 10,
     "limit": 200,
-    "minimum_separation_km": 30
+    "minimum_separation_km": 30,
+    "alternative_limit": 12,
+    "near_miss_margin_points": 5
   },
   "bodies": {
     "moon": {

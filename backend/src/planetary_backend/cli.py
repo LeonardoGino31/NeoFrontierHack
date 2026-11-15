@@ -111,6 +111,8 @@ def main() -> int:
         )
         print(f"Candidatos exportados: {info['candidate_count']}")
         print(f"GeoJSON: {geojson_path}")
+        print(f"Candidatos alternativos exportados: {info['alternative_candidate_count']}")
+        print(f"GeoJSON de alternativas: {info['alternatives_geojson']}")
         print(f"Manifiesto: {run_manifest_path}")
         print(f"Cobertura de grupos puntuados: {info['scoring_coverage_percent']:.1f}%")
         return 0
