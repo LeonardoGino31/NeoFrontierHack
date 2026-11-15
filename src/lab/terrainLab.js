@@ -5,118 +5,30 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { icon } from './icons.js';
-import { fbm } from './noise.js';
-import { ROVERS } from './rover/roverModels.js';
+import { icon } from '../icons.js';
+import { addKeyLayer, isTyping, KEY_PRIORITY } from '../keyboard.js';
+import { fbm } from '../noise.js';
+import {
+  SIZE_KM, SEGMENTS, CELL_KM, SLOPE_LIMIT, SLIDERS, PRESETS, MODES, LEGEND_RANGE, RAMPS,
+} from './config.js';
+import { createTerrainField } from './terrainField.js';
+import { roverMenuHtml, renderDriveTelemetry } from './roverPanel.js';
 import { createDetailTile, patchCoarseMaterial, sampleGrid } from './rover/detailTile.js';
 import { createRoverDrive } from './rover/roverDrive.js';
 
-// ---------- Configuración ----------
-const SIZE_KM = 20;     // el terreno mide 20 × 20 km
-const SEGMENTS = 240;   // resolución de la malla (~83 m entre vértices)
-const CELL_KM = SIZE_KM / SEGMENTS;
-const SLOPE_LIMIT = 15; // pendiente máxima típica para aterrizar (°)
-
-// Cráteres fijos: [x, z, radio] en km
-const CRATERS = [
-  [3.6, -2.4, 2.2], [-4.8, 3.2, 1.4], [-1.2, -5.6, 0.9], [5.6, 5.2, 1.1],
-  [-6.4, -4.0, 0.8], [1.5, 6.5, 0.6], [-7.0, 6.8, 1.6], [7.2, -6.8, 0.7], [0.4, 1.2, 0.5],
-];
-
-const SLIDERS = [
-  { key: 'base',    label: 'Elevación base',        unit: 'm',    min: -4000, max: 5000, step: 50,   dec: 0 },
-  { key: 'relief',  label: 'Relieve',               unit: 'km',   min: 0,     max: 2.5,  step: 0.05, dec: 2 },
-  { key: 'rough',   label: 'Rugosidad (rocas)',     unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'craters', label: 'Cráteres',              unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'sunlight', label: 'Tiempo con luz solar', unit: '%',    min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'albedo',  label: 'Albedo',                unit: '',     min: 0.05,  max: 0.6,  step: 0.01, dec: 2 },
-  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
-  { key: 'ice',     label: 'Potencial de hielo',    unit: 'pts',  min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'iceConfidence', label: 'Confianza de evidencia', unit: '%', min: 0, max: 100, step: 1, dec: 0 },
-];
-
-// Valores ILUSTRATIVOS para comparar entornos (no son mediciones exactas).
-// `rust` solo tiñe la vista natural (polvo oxidado de Marte); no es un parámetro.
-const PRESETS = {
-  atacama: { name: 'Atacama · Tierra',      body: 'earth', base: 2500, relief: 0.9, rough: 0.35, craters: 0, sunlight: 80, albedo: 0.30, soilStability: 50, ice: 5, iceConfidence: 25, rust: 0.3 },
-  dryval:  { name: 'Valles Secos · Tierra', body: 'earth', base: 800, relief: 1.4, rough: 0.40, craters: 0, sunlight: 55, albedo: 0.35, soilStability: 55, ice: 30, iceConfidence: 45, rust: 0.15 },
-  iceland: { name: 'Islandia · Tierra',     body: 'earth', base: 400, relief: 0.6, rough: 0.85, craters: 0, sunlight: 45, albedo: 0.10, soilStability: 60, ice: 25, iceConfidence: 40, rust: 0.4 },
-  mars:    { name: 'Llanura · Marte',       body: 'mars', base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, sunlight: 50, albedo: 0.22, soilStability: 55, ice: 20, iceConfidence: 35, rust: 0.75 },
-  moon:    { name: 'Polo sur · Luna',       body: 'moon', base: 1500, relief: 1.6, rough: 0.50, craters: 1, sunlight: 70, albedo: 0.10, soilStability: 55, ice: 55, iceConfidence: 40, rust: 0 },
-};
-
-// Modos de visualización: qué color pinta el terreno y qué explica.
-// Las claves coinciden con el campo `lab` de los parámetros (public/data/parameter_model.json).
-const GOOD_BAD = ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'];
-const MODES = {
-  natural: {
-    label: 'Vista natural', icon: 'eye',
-    caption: 'Vista ilustrativa: el albedo aclara u oscurece el suelo y el hielo potencial se resalta en las zonas con menos sol. No es un mapa de depósitos reales.',
-  },
-  elevation: {
-    label: 'Desnivel', icon: 'mountain', unit: 'm',
-    caption: 'Cada color es una altura. Lo que se compara es el desnivel (máxima − mínima) dentro del recorte, no la altitud. Las líneas finas son curvas de nivel cada 250 m.',
-    stops: ['#2c1e5e', '#3b6fb6', '#3fb8a5', '#b8d86b', '#f3e9b5', '#ffffff'],
-  },
-  slope: {
-    label: 'Pendiente segura', icon: 'slope', unit: '°',
-    caption: `Inclinación del terreno. En verde, zonas aptas para aterrizar; desde ~${SLOPE_LIMIT}° (naranja) el riesgo crece. El porcentaje de área bajo ese límite es la "pendiente segura".`,
-    stops: ['#3ddc84', '#c6e85a', '#ffc94d', '#ff7a3d', '#d7301f'],
-  },
-  hazards: {
-    label: 'Cráteres y rocas', icon: 'target', unit: '',
-    caption: 'En rojo, celdas con obstáculos: dentro de un cráter o con rocas (rugosidad alta). Sube los sliders de cráteres o rugosidad y mira cómo se reduce el área libre.',
-    stops: GOOD_BAD.slice().reverse(),
-  },
-  soilStability: {
-    label: 'Estabilidad del suelo', icon: 'grid', unit: 'pts',
-    caption: 'Índice de demostración de firmeza del suelo; el polvo y la arena suelta pueden atascar un rover o hundir un aterrizador.',
-    stops: GOOD_BAD,
-  },
-  sunlight: {
-    label: 'Luz solar', icon: 'sun', unit: '%',
-    caption: 'Ilustrativo: las partes altas reciben sol más tiempo y el fondo de los cráteres queda en sombra, como en los polos lunares.',
-    stops: ['#263b75', '#468bd4', '#62cbb9', '#e9df67', '#f4954f'],
-  },
-  albedo: {
-    label: 'Albedo', icon: 'eye', unit: '',
-    caption: 'Fracción de luz que refleja el suelo: oscuro = absorbe (basalto, regolito lunar), claro = refleja (salares, hielo).',
-    stops: ['#111111', '#555555', '#aaaaaa', '#f2f2f2'],
-  },
-  ice: {
-    label: 'Potencial de hielo', icon: 'ice', unit: 'pts',
-    caption: 'Mapa procedural de demostración del potencial relativo de hielo, mayor en las zonas con menos sol. No indica depósitos observados; la confianza de evidencia se muestra por separado.',
-    stops: ['#19223d', '#315e91', '#62b9dc', '#d7f7ff', '#ffffff'],
-  },
-};
-
-// Rango de la leyenda de cada modo
-const LEGEND_RANGE = {
-  elevation: (d) => [d.minElev, d.maxElev],
-  slope: () => [0, 40],
-  hazards: () => [0, 1],
-  soilStability: () => [0, 100],
-  sunlight: () => [0, 100],
-  albedo: () => [0, 0.6],
-  ice: () => [0, 100],
-};
-
-// ---------- Utilidades de color ----------
-function makeRamp(hexStops) {
-  const cols = hexStops.map((h) => new THREE.Color(h));
-  return (t, out) => {
-    t = Math.min(1, Math.max(0, t)) * (cols.length - 1);
-    const i = Math.min(Math.floor(t), cols.length - 2);
-    return out.copy(cols[i]).lerp(cols[i + 1], t - i);
-  };
-}
-const RAMPS = Object.fromEntries(
-  Object.entries(MODES).filter(([, m]) => m.stops).map(([k, m]) => [k, makeRamp(m.stops)])
-);
-
 // ---------- Módulo ----------
-export function createTerrainLab() {
-  let renderer, scene, camera, controls, terrain, marker, scanBar, raf = null;
+/**
+ * Crea el laboratorio (oculto). Usa el renderer de la app: al abrirse mueve su canvas
+ * dentro del laboratorio y al cerrarse lo devuelve, así no se crea un segundo contexto WebGL.
+ * @param {object} o
+ * @param {THREE.WebGLRenderer} o.renderer  renderer compartido con el globo
+ * @param {HTMLElement} o.launcher  botón que abre el laboratorio (se oculta mientras está abierto)
+ * @param {() => void} [o.onClose]  se llama al cerrar, con el canvas ya devuelto
+ */
+export function createTerrainLab({ renderer, launcher, onClose }) {
+  let scene, camera, controls, terrain, marker, scanBar, raf = null;
+  let canvasHome = null;  // dónde estaba el canvas antes de abrir
+  let savedExposure = 1;  // exposición del globo, que usa otra
   const CAMERA_HOME = new THREE.Vector3(14, 12, 18);
   let cameraGoal = null;
   let targetGoal = null;    // a dónde mira la cámara al volver de un rover
@@ -174,31 +86,9 @@ export function createTerrainLab() {
         </label>`).join('')}</div>
     </aside>
     <div class="lab-readout hud" hidden></div>
-    <div class="lab-rovers hud">
-      <div class="lab-rovers-head">${icon('rover')}<span>Rovers</span></div>
-      ${['Marte', 'Luna'].map((body) => `
-        <div class="lab-rover-group"><small>${body}</small><div>${Object.entries(ROVERS)
-          .filter(([, r]) => r.body === body)
-          .map(([k, r]) => `<button data-rover="${k}" disabled
-            title="${r.agency} · velocidad real máx. ${r.realSpeed}"><span>${r.name}</span><em>${r.year}</em></button>`)
-          .join('')}</div></div>`).join('')}
-      <div class="lab-drive" hidden>
-        <div class="lab-drive-grid"></div>
-        <div class="lab-drive-status"></div>
-        <p class="lab-drive-hint">WASD conducir · Shift rápido · Espacio frenar<br>Arrastrar: cámara · C: detrás · Esc: salir</p>
-        <button class="lab-rover-exit">Salir del rover</button>
-      </div>
-    </div>`;
+    ${roverMenuHtml()}`;
   document.body.appendChild(root);
 
-  const launcher = document.createElement('button');
-  launcher.id = 'lab-launcher';
-  launcher.className = 'floating-launcher';
-  launcher.title = 'Laboratorio 3D';
-  launcher.setAttribute('aria-label', 'Abrir laboratorio 3D');
-  launcher.innerHTML = icon('cube');
-  launcher.addEventListener('click', () => open('natural'));
-  document.body.appendChild(launcher);
 
   const readout = root.querySelector('.lab-readout');
   const roverMenu = root.querySelector('.lab-rovers');
@@ -257,29 +147,24 @@ export function createTerrainLab() {
     });
   }
 
-  window.addEventListener('keydown', (e) => {
-    if (root.hidden) return;
-    if (e.key === 'Escape') {
-      e.stopImmediatePropagation();
-      // Primero se baja del rover; un segundo Esc cierra el laboratorio
-      if (drive?.isActive()) exitRover();
-      else close();
-    } else if (e.key.toLowerCase() === 'h' && e.target.tagName !== 'INPUT') {
-      togglePanels();
-    }
-  }, true);
+  addKeyLayer({
+    priority: KEY_PRIORITY.lab,
+    isActive: () => !root.hidden,
+    onKeyDown(e) {
+      if (e.key === 'Escape') {
+        // Primero se baja del rover; un segundo Esc cierra el laboratorio
+        if (drive?.isActive()) exitRover();
+        else close();
+      } else if (e.key.toLowerCase() === 'h' && !isTyping(e.target)) {
+        togglePanels();
+      }
+    },
+  });
 
   // ---------- Escena 3D (se crea la primera vez que se abre) ----------
   function initScene() {
-    // Profundidad logarítmica: con un rover de 3 m y un terreno de 20 km a la vista,
-    // la precisión lineal haría parpadear la superficie lejana
-    renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    root.prepend(renderer.domElement);
-
+    // El renderer viene de la app con profundidad logarítmica (con un rover de 3 m y un
+    // terreno de 20 km a la vista, la lineal haría parpadear la superficie lejana) y sombras
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1424);
     camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
@@ -352,7 +237,9 @@ export function createTerrainLab() {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     renderer.domElement.addEventListener('pointermove', (e) => {
-      if (drive.isActive()) return; // conduciendo, la lectura sale en la telemetría
+      // El canvas es compartido: cerrado, el laboratorio no lee el mouse.
+      // Conduciendo, la lectura sale en la telemetría.
+      if (root.hidden || drive.isActive()) return;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
       raycaster.setFromCamera(pointer, camera);
@@ -369,45 +256,17 @@ export function createTerrainLab() {
       readout.hidden = true;
     });
 
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', () => {
+      if (!root.hidden) resize();
+    });
   }
 
   // ---------- Cálculo del terreno ----------
-  let lastDetail = 0; // componente fina del último punto calculado (para la rugosidad)
-  let lastCrater = 0; // 1 si el último punto calculado cae dentro de un cráter
-
-  function heightAt(x, z) {
-    // Forma general (colinas, valles)
-    const macro = (fbm(x * 0.22 + 11.3, z * 0.22 - 4.7, 4) - 0.35) * state.relief * 1.6;
-    // Detalle fino: aquí actúa la rugosidad
-    const detail = (fbm(x * 1.7 + 3.1, z * 1.7 + 8.2, 5) - 0.5) * state.rough * 0.45;
-    lastDetail = detail;
-    // Cráteres: cuenco + borde elevado
-    let crater = 0;
-    lastCrater = 0;
-    if (state.craters > 0) {
-      for (const [cx, cz, r] of CRATERS) {
-        const d = Math.hypot(x - cx, z - cz) / r;
-        // Interior y borde del cráter cuentan como obstáculo (más claro cuanto más marcado)
-        if (d < 1.15) lastCrater = Math.max(lastCrater, state.craters);
-        if (d < 1.6) {
-          if (d < 1) crater -= (1 - d * d) * 0.25 * r;
-          crater += 0.12 * r * Math.exp(-(((d - 1) / 0.18) ** 2));
-        }
-      }
-      crater *= state.craters;
-    }
-    return macro + detail + crater; // km respecto a la base
-  }
-
-  /** Microrrelieve (km) que solo existe en el parche de detalle: lomas de ~20 m y baches de ~3 m. */
-  function microKm(x, z) {
-    return ((fbm(x * 50 + 7.3, z * 50 - 3.1, 3) - 0.5) * 0.0024
-      + (fbm(x * 300 + 1.7, z * 300 + 2.9, 3) - 0.5) * 0.0007) * (0.35 + state.rough);
-  }
-
+  const field = createTerrainField(state);
+  const parts = { h: 0, detail: 0, crater: 0 };     // reutilizado por rebuild()
+  const tileParts = { h: 0, detail: 0, crater: 0 }; // y este por el parche de detalle
   /** Altura analítica más microrrelieve (km), para el parche de detalle. */
-  const detailHeight = (x, z) => heightAt(x, z) + microKm(x, z);
+  const detailHeight = (x, z) => field.sample(x, z, tileParts).h + field.microKm(x, z);
 
   const W_GRID = SEGMENTS + 1;
   const clampKm = (v) => Math.min(SIZE_KM / 2, Math.max(-SIZE_KM / 2, v));
@@ -442,9 +301,10 @@ export function createTerrainLab() {
     const pos = terrain.geometry.attributes.position;
     for (let i = 0; i < n; i++) {
       morph.from[i] = pos.getY(i); // altura que se ve ahora
-      data.hKm[i] = heightAt(pos.getX(i), pos.getZ(i));
-      data.detail[i] = lastDetail;
-      data.crater[i] = lastCrater;
+      field.sample(pos.getX(i), pos.getZ(i), parts);
+      data.hKm[i] = parts.h;
+      data.detail[i] = parts.detail;
+      data.crater[i] = parts.crater;
     }
 
     // Pendiente con diferencias finitas sobre la grilla (no depende de la animación)
@@ -657,7 +517,7 @@ export function createTerrainLab() {
 
   // ---------- Ciclo de vida ----------
   function resize() {
-    if (!renderer) return;
+    if (!scene) return;
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -745,7 +605,7 @@ export function createTerrainLab() {
 
   // La guía abre el laboratorio con el campo `lab` de cada parámetro ('elevation', 'slope', ...)
   function open(key = 'natural') {
-    if (!renderer) {
+    if (!scene) {
       initScene();
       syncSliders();
       root.querySelector('[data-preset="atacama"]').classList.add('active');
@@ -756,6 +616,12 @@ export function createTerrainLab() {
     }
     root.hidden = false;
     launcher.hidden = true;
+    // Tomar prestado el canvas de la app (se devuelve en close)
+    canvasHome = { parent: renderer.domElement.parentNode, next: renderer.domElement.nextSibling };
+    root.prepend(renderer.domElement);
+    savedExposure = renderer.toneMappingExposure;
+    renderer.toneMappingExposure = 1;
+    controls.enabled = true;
     resize();
 
     // Entrada: la cámara llega volando desde lo alto
@@ -773,6 +639,11 @@ export function createTerrainLab() {
     readout.hidden = true;
     cancelAnimationFrame(raf); // no gastar GPU mientras está cerrado
     raf = null;
+    // OrbitControls sigue escuchando el canvas compartido: deshabilitado no reacciona
+    controls.enabled = false;
+    renderer.toneMappingExposure = savedExposure;
+    canvasHome.parent.insertBefore(renderer.domElement, canvasHome.next);
+    onClose?.();
   }
 
   // ---------- Rovers ----------
@@ -860,24 +731,9 @@ export function createTerrainLab() {
     const t = drive.telemetry();
     if (!t) return;
     const i = nearestVertex(t.x, t.z);
-    const slope = data.slope[i];
-    const risky = slope >= SLOPE_LIMIT || data.hazard[i] >= 0.5;
-    const cell = (label, value) => `<div><span>${label}</span>${value}</div>`;
-    driveBox.querySelector('.lab-drive-grid').innerHTML = `
-      ${cell('Velocidad', `${Math.abs(t.speed).toFixed(2)} m/s`)}
-      ${cell('Rumbo', `${t.heading.toFixed(0)}°`)}
-      ${cell('Cabeceo', `${t.pitch.toFixed(1)}°`)}
-      ${cell('Alabeo', `${t.roll.toFixed(1)}°`)}
-      ${cell('Pendiente', `${slope.toFixed(1)}°`)}
-      ${cell('Elevación', `${data.elev[i].toFixed(0)} m`)}
-      ${cell('Recorrido', `${t.odo.toFixed(0)} m`)}
-      ${cell('Vel. real máx.', t.realSpeed)}`;
-    const status = driveBox.querySelector('.lab-drive-status');
-    const [cls, text] = t.wall ? ['risk', 'Límite del terreno']
-      : t.steep ? ['risk', 'Pendiente excesiva']
-        : risky ? ['risk', 'Terreno: riesgo'] : ['ok', 'Terreno: transitable'];
-    status.className = `lab-drive-status lab-landing ${cls}`;
-    status.textContent = text;
+    renderDriveTelemetry(driveBox, t, {
+      slope: data.slope[i], elev: data.elev[i], risky: data.slope[i] >= SLOPE_LIMIT || data.hazard[i] >= 0.5,
+    });
   }
 
   return { open, close, isOpen: () => !root.hidden };

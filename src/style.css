@@ -1375,6 +1375,38 @@ canvas {
   outline-offset: 4px;
 }
 
+.start-btn:disabled {
+  color: rgba(11, 16, 32, 0.7);
+  background: rgba(250, 204, 21, 0.45);
+  box-shadow: none;
+  cursor: progress;
+  transform: none;
+}
+
+.start-progress {
+  width: 220px;
+  height: 3px;
+  margin: 14px auto 0;
+  background: rgba(120, 220, 255, 0.15);
+  overflow: hidden;
+  transition: opacity 0.4s;
+}
+
+.start-progress > div {
+  width: 0;
+  height: 100%;
+  background: rgb(120, 220, 255);
+  transition: width 0.25s ease-out;
+}
+
+.start-progress.done {
+  opacity: 0;
+}
+
+.start-progress.failed > div {
+  background: rgb(255, 110, 100);
+}
+
 .start-hint {
   margin-top: 16px;
   font: 13px system-ui, sans-serif;

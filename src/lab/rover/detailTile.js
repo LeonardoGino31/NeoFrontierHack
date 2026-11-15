@@ -8,7 +8,7 @@
 // se construye por tramos de pocos ms en cada cuadro; al terminar se intercambian.
 
 import * as THREE from 'three';
-import { fbm } from '../noise.js';
+import { fbm } from '../../noise.js';
 
 const SIZE = 0.16;        // km (160 m)
 const SEGS = 320;         // 0,5 m entre vértices
