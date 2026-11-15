@@ -12,6 +12,8 @@ import {
   SIZE_KM, SEGMENTS, CELL_KM, SLOPE_LIMIT, SLIDERS, PRESETS, MODES, LEGEND_RANGE, RAMPS,
 } from './config.js';
 import { createTerrainField } from './terrainField.js';
+import { createTerrainBlock } from './terrainBlock.js';
+import { createCameraPad } from './cameraPad.js';
 import { roverMenuHtml, renderDriveTelemetry } from './roverPanel.js';
 import { createDetailTile, patchCoarseMaterial, sampleGrid } from './rover/detailTile.js';
 import { createRoverDrive } from './rover/roverDrive.js';
@@ -41,6 +43,10 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
   // Estado de las animaciones
   const xs = new Float32Array((SEGMENTS + 1) ** 2);
   const morph = { from: new Float32Array((SEGMENTS + 1) ** 2), start: 0, dur: 0, active: false };
+  // Base del bloque (km): se anima junto con las alturas para que las paredes no salten
+  const bottom = { from: 0, to: 0, now: 0 };
+  let block = null; // paredes y base del terreno (solo estético)
+  let pad = null;   // control circular de cámara
   const fade = {
     from: new Float32Array((SEGMENTS + 1) ** 2 * 3), to: new Float32Array((SEGMENTS + 1) ** 2 * 3),
     start: 0, dur: 0, type: 'fade', active: false,
@@ -204,10 +210,17 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
     );
     scene.add(terrain);
 
+    // Paredes con estratos y base: el relieve se ve como un bloque recortado y no como una lámina
+    block = createTerrainBlock({ sizeKm: SIZE_KM, segments: SEGMENTS });
+    scene.add(block.group);
+
     // Parche de detalle y modo conducción (el parche solo se ve con un rover desplegado)
     tile = createDetailTile({ scene, detailHeight, coarseHeight: coarseHeightAt, coarseColor });
     patchCoarseMaterial(terrain.material, tile.uTile);
     drive = createRoverDrive({ scene, camera, controls, light: sun, tile, ground: groundHeight });
+
+    // Control circular de la cámara del rover (útil con touchpad); visible solo conduciendo
+    pad = createCameraPad({ parent: root, camera, controls, onReset: () => drive.snapBehind() });
 
     // Anillo que marca el punto bajo el mouse (verde = se puede aterrizar)
     marker = new THREE.Mesh(
@@ -337,6 +350,13 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
       }
     }
 
+    // La base queda un espesor fijo bajo el punto más bajo del relieve nuevo
+    let minH = Infinity;
+    for (let i = 0; i < n; i++) minH = Math.min(minH, data.hKm[i]);
+    bottom.from = built ? bottom.now : minH - block.depthKm;
+    bottom.to = minH - block.depthKm;
+    block.setTint(state.rust);
+
     // Primera vez: sin animación. Después: morph suave de alturas
     if (!built || duration === 0) {
       applyHeights(1);
@@ -364,6 +384,8 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
     const pos = terrain.geometry.attributes.position;
     for (let i = 0; i < n; i++) pos.setY(i, morph.from[i] + (data.hKm[i] - morph.from[i]) * t);
     pos.needsUpdate = true;
+    bottom.now = bottom.from + (bottom.to - bottom.from) * t;
+    block.update(pos.array, 3, bottom.now);
     terrain.geometry.computeVertexNormals();
     if (t === 1) terrain.geometry.computeBoundingSphere();
   }
@@ -598,6 +620,9 @@ export function createTerrainLab({ renderer, launcher, onClose }) {
         renderTelemetry();
       }
     }
+
+    // 6) Control circular: después del rover, que mueve el objetivo de la cámara
+    if (drive.isActive()) pad.update(dt);
 
     controls.update();
     renderer.render(scene, camera);

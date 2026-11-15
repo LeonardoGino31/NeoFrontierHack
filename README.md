@@ -145,6 +145,7 @@ scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y 
 | Ocultar paneles del laboratorio | `H` |
 | Conducir el rover (laboratorio) | `W` `A` `S` `D` · `Shift` más rápido · `Espacio` frenar |
 | Cámara del rover | Arrastrar / rueda · `C` vuelve detrás del rover |
+| Cámara del rover sin mouse (touchpad) | Control circular arriba a la izquierda (solo con un rover): joystick para orbitar, `−` `+` zoom, `⌂` detrás del rover |
 | Bajar del rover / cerrar el laboratorio | `Esc` (primero baja del rover, luego cierra) |
 
 ## Próximos pasos
