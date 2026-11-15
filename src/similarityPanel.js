@@ -52,7 +52,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   // Clic en una fila (o en el índice global) abre la guía en ese parámetro
   panel.addEventListener('click', (e) => {
-    if (e.target.closest('a')) return;
+    if (e.target.closest('a, details')) return;
     const row = e.target.closest('[data-key]');
     if (row) onHelp(row.dataset.key);
   });
@@ -60,6 +60,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
   // --- Arrastrar desde la cabecera ---
   let drag = null;
   let userMoved = false;
+  let mode = null; // 'pair' | 'candidate': cada modo tiene su posición por defecto
 
   header.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;
@@ -87,10 +88,21 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
     );
   }
 
-  /** Posición por defecto: centrado entre los dos planetas. */
+  /**
+   * Posición por defecto: centrado entre los dos planetas al comparar; a la izquierda
+   * con un candidato, para no tapar el cuerpo que queda en el centro.
+   */
   function placeDefault() {
-    panel.style.left = `${(window.innerWidth - panel.offsetWidth) / 2}px`;
+    const left = mode === 'candidate' ? 24 : (window.innerWidth - panel.offsetWidth) / 2;
+    panel.style.left = `${Math.max(0, left)}px`;
     panel.style.top = '76px'; // debajo de la barra de navegación
+  }
+
+  /** Cambia de modo; al cambiar, vuelve a la posición por defecto de ese modo. */
+  function setMode(next) {
+    if (mode !== next) userMoved = false;
+    mode = next;
+    panel.classList.toggle('hud-candidate', next === 'candidate');
   }
 
   /**
@@ -98,6 +110,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
    * `nav` = { index, total }: posición del punto entre los del cuerpo análogo seleccionado.
    */
   function show({ earthPoint, analogPoint, analogName, formatLatLon, data, nav: position }) {
+    setMode('pair');
     header.querySelector('span').textContent = 'Análisis de similitud';
     panel.querySelector('.hud-footer').innerHTML = 'Tierra / análogo · <span class="hud-demo">datos de demo</span>';
     const { purpose } = data.profile;
@@ -159,6 +172,7 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
 
   /** Muestra factores y filtros del candidato sin inventar una comparación terrestre. */
   function showCandidate({ candidate, bodyName, formatLatLon, data, nav: position }) {
+    setMode('candidate');
     header.querySelector('span').textContent = 'Análisis del candidato';
     panel.querySelector('.hud-footer').textContent = 'Punto candidato · sin comparación terrestre';
     const statusText = {
@@ -222,14 +236,22 @@ export function createSimilarityPanel({ onClose, onHelp, onNav }) {
         const sourceLinkText = factorMetadata?.planned_source_url || factorMetadata?.reference_source_url
           ? 'Producto de referencia (no usado)'
           : 'Abrir fuente';
+        const origin = factorMetadata?.kind === 'usgs_ice_favorability_raster' ? 'Fuente directa' : 'Estimación aproximada';
         const provenance = factorMetadata
-          ? `<small class="hud-factor-note">${factorMetadata.kind === 'usgs_ice_favorability_raster' ? 'Fuente directa' : 'Estimación aproximada'} · ${escapeMarkup(factorMetadata.method)}<br>${sourceText ? `Fuente: ${sourceText}<br>` : ''}${escapeMarkup(factorMetadata.limitation)}${sourceUrl ? `<br><a href="${escapeMarkup(sourceUrl)}" target="_blank" rel="noopener noreferrer">${sourceLinkText}</a>` : ''}</small>`
+          ? `<details class="hud-factor-note">
+              <summary>${origin} · método y fuente</summary>
+              <p><b>Método:</b> ${escapeMarkup(factorMetadata.method)}</p>
+              ${sourceText ? `<p><b>Fuente:</b> ${sourceText}</p>` : ''}
+              ${factorMetadata.limitation ? `<p><b>Limitación:</b> ${escapeMarkup(factorMetadata.limitation)}</p>` : ''}
+              ${sourceUrl ? `<a href="${escapeMarkup(sourceUrl)}" target="_blank" rel="noopener noreferrer">${sourceLinkText}</a>` : ''}
+            </details>`
           : '';
         return `
           <div class="candidate-factor" data-key="${param.key}" title="Ver explicación del factor">
             <span class="candidate-factor-icon">${icon(param.icon)}</span>
             <span class="candidate-factor-label">${param.label}</span>
-            <span class="candidate-factor-value">${value}${confidenceText}${provenance}</span>
+            <span class="candidate-factor-value">${value}${confidenceText}</span>
+            ${provenance}
           </div>`;
       }).join('');
       return groupRow + factorRows;
