@@ -1,4 +1,4 @@
-// Cada fila del CSV representa una pareja completa Tierra–análogo.
+// El CSV contiene parejas Tierra–análogo y candidatos autónomos sin pareja terrestre.
 
 import { paramSimilarity, groupResults, overallSimilarity, checkRequirement } from './similarity.js';
 
@@ -64,6 +64,29 @@ const numberFrom = (row, key, recordId) => {
   return value;
 };
 
+/** Número opcional del CSV; vacío representa que el candidato no tiene ese dato. */
+function optionalNumberFrom(row, key, recordId) {
+  if (row[key] === undefined || row[key] === '') return null;
+  const value = Number(row[key]);
+  if (!Number.isFinite(value)) throw new Error(`Valor inválido en ${key} (${recordId}).`);
+  return value;
+}
+
+/** Objeto JSON opcional serializado en una celda del CSV. */
+function jsonObjectFrom(row, key, recordId) {
+  if (!row[key]) return {};
+  let value;
+  try {
+    value = JSON.parse(row[key]);
+  } catch {
+    throw new Error(`JSON inválido en ${key} (${recordId}).`);
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`El dato ${key} debe ser un objeto (${recordId}).`);
+  }
+  return value;
+}
+
 /** Coordenada en grados dentro de [min, max]. */
 function coordinateFrom(row, key, min, max, recordId) {
   const value = numberFrom(row, key, recordId);
@@ -86,7 +109,7 @@ function sameAnalogSite(first, second) {
     .every((key) => first[key] === second[key]);
 }
 
-/** Descarga el CSV indicado por el modelo y crea las parejas Tierra–análogo de los marcadores. */
+/** Descarga el CSV indicado por el modelo y crea parejas y candidatos para los marcadores. */
 export async function loadPlanetaryData(model) {
   const response = await fetch(model.dataset);
   if (!response.ok) {
@@ -95,21 +118,72 @@ export async function loadPlanetaryData(model) {
 
   const rows = parseCsv(await response.text());
   const pairs = [];
+  const candidates = [];
   const pairIds = new Set();
+  const candidateIds = new Set();
   const sitesById = new Map();
   const earthSiteIds = new Set();
 
   for (const row of rows) {
-    const pairId = textFrom(row, 'pair_id', 'registro');
-    const earthId = textFrom(row, 'earth_site_id', pairId);
-    const candidateId = textFrom(row, 'candidate_id', pairId);
-    const body = textFrom(row, 'body', pairId);
+    const recordType = row.record_type || 'pair';
+    const recordId = recordType === 'candidate_only'
+      ? textFrom(row, 'candidate_id', 'candidato')
+      : textFrom(row, 'pair_id', 'registro');
+    const candidateId = textFrom(row, 'candidate_id', recordId);
+    const body = textFrom(row, 'body', recordId);
+    if (!['mars', 'moon'].includes(body)) {
+      throw new Error(`Cuerpo inválido en el registro ${recordId}: ${body}.`);
+    }
 
+    if (recordType === 'candidate_only') {
+      if (candidateIds.has(candidateId)) {
+        throw new Error(`El CSV repite el candidate_id ${candidateId}.`);
+      }
+      candidateIds.add(candidateId);
+      const site = {
+        id: candidateId,
+        body,
+        name: textFrom(row, 'analog_site_name', candidateId),
+        lat: coordinateFrom(row, 'analog_latitude', -90, 90, candidateId),
+        lon: coordinateFrom(row, 'analog_longitude', -180, 180, candidateId),
+        footprintKm: numberFrom(row, 'footprint_km', candidateId),
+        kind: textFrom(row, 'analog_kind', candidateId),
+        why: textFrom(row, 'analog_description', candidateId),
+        polar: booleanFrom(row, 'analog_polar', candidateId),
+      };
+      const eligible = row.candidate_eligible === 'true'
+        ? true
+        : row.candidate_eligible === 'false'
+          ? false
+          : (() => { throw new Error(`El dato candidate_eligible debe ser true o false (${candidateId}).`); })();
+      candidates.push({
+        id: candidateId,
+        body,
+        site,
+        status: textFrom(row, 'candidate_status', candidateId),
+        eligible,
+        filterStatus: row.candidate_filter_status || 'not_evaluated',
+        overallScore: numberFrom(row, 'candidate_overall_score', candidateId),
+        scoreIsPartial: row.candidate_score_is_partial === 'true',
+        scoringCoveragePercent: optionalNumberFrom(row, 'candidate_scoring_coverage_percent', candidateId),
+        parameterDataCoveragePercent: optionalNumberFrom(row, 'candidate_parameter_data_coverage_percent', candidateId),
+        hardFilterCoveragePercent: optionalNumberFrom(row, 'candidate_hard_filter_coverage_percent', candidateId),
+        groupScores: jsonObjectFrom(row, 'candidate_group_scores_json', candidateId),
+        parameterScores: jsonObjectFrom(row, 'candidate_parameter_scores_json', candidateId),
+        hardFilters: jsonObjectFrom(row, 'candidate_hard_filters_json', candidateId),
+        selectionDetail: jsonObjectFrom(row, 'candidate_selection_detail_json', candidateId),
+        row,
+      });
+      continue;
+    }
+    if (recordType !== 'pair') {
+      throw new Error(`Tipo de registro inválido en ${recordId}: ${recordType}.`);
+    }
+
+    const pairId = recordId;
+    const earthId = textFrom(row, 'earth_site_id', pairId);
     if (pairIds.has(pairId)) throw new Error(`El CSV repite el pair_id ${pairId}.`);
     pairIds.add(pairId);
-    if (!['mars', 'moon'].includes(body)) {
-      throw new Error(`Cuerpo inválido en el registro ${pairId}: ${body}.`);
-    }
 
     const earthPoint = {
       id: earthId,
@@ -151,7 +225,50 @@ export async function loadPlanetaryData(model) {
     });
   }
 
-  return { pairs };
+  return { pairs, candidates };
+}
+
+/** Prepara los factores del candidato sin crear una comparación terrestre ficticia. */
+export function candidateAnalysisDataFromCsv(model, candidate) {
+  if (!candidate) throw new Error('Falta el candidato del CSV.');
+  const { row, body } = candidate;
+  const results = model.parameters.map((param) => ({
+    param,
+    earth: null,
+    analog: optionalNumberFrom(row, param.columns.analog, candidate.id),
+    confidence: param.confidenceColumns
+      ? {
+          earth: null,
+          analog: optionalNumberFrom(row, param.confidenceColumns.analog, candidate.id),
+        }
+      : null,
+    score: candidate.parameterScores[param.key] == null
+      ? null
+      : Number(candidate.parameterScores[param.key]),
+  }));
+  const groups = model.groups.map((group) => ({
+    group,
+    items: results.filter((result) => result.param.group === group.key),
+    similarity: candidate.groupScores[group.key] != null
+      && Number.isFinite(Number(candidate.groupScores[group.key]))
+      ? Number(candidate.groupScores[group.key]) / 100
+      : null,
+  }));
+  const profile = model.bodies[body];
+  const req = profile.requirement;
+  const requirementValue = optionalNumberFrom(row, req.column, candidate.id);
+  return {
+    results,
+    groups,
+    overall: candidate.overallScore / 100,
+    profile,
+    requirement: {
+      req,
+      value: requirementValue,
+      pass: requirementValue !== null && requirementValue >= req.min,
+    },
+    candidate,
+  };
 }
 
 /**

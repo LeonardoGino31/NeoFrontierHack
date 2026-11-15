@@ -4,7 +4,7 @@
 // blanco hacia la cámara. Hay también un marcador igual (en amarillo) por cuerpo análogo.
 
 import * as THREE from 'three';
-import { similarityDataFromCsv } from '../planetaryData.js';
+import { candidateAnalysisDataFromCsv, similarityDataFromCsv } from '../planetaryData.js';
 
 const MARKER_COLORS = { mars: '#f97316', moon: '#cbd5e1' }; // naranja / gris claro
 const ACTIVE_COLOR = '#facc15'; // amarillo
@@ -102,9 +102,9 @@ function createPin({ geometry, redMaterial, scale = 1 }) {
 
 /**
  * Crea los marcadores y los cuelga de sus cuerpos (así giran y escalan con ellos).
- * @param {{ meshes: Record<string, THREE.Mesh>, pairs: Array, model: object }} o
+ * @param {{ meshes: Record<string, THREE.Mesh>, pairs: Array, candidates: Array, model: object }} o
  */
-export function createMarkers({ meshes, pairs, model }) {
+export function createMarkers({ meshes, pairs, candidates = [], model }) {
   // Un material por color (no uno por punto): al resaltar se cambia de material.
   const sectorMaterial = (color, strength) => new THREE.MeshBasicMaterial({
     map: sectorTexture(color, strength), transparent: true, depthWrite: false,
@@ -135,11 +135,44 @@ export function createMarkers({ meshes, pairs, model }) {
     const { pivot, pin } = createPin(pinParts);
     marker.add(pivot);
     marker.userData = {
-      id: i + 1, pairId, earthPoint, analog, pivot, pin, phase: Math.random() * 6.28,
+      kind: 'earth_pair',
+      id: i + 1,
+      body: analog.body,
+      pairId,
+      earthPoint,
+      analog,
+      pivot,
+      pin,
+      phase: Math.random() * 6.28,
       similarity: similarityDataFromCsv(model, comparison, analog.body),
     };
     earthMarkers.add(marker);
   });
+
+  // Candidatos autónomos sobre Luna/Marte, sin una ubicación terrestre asociada.
+  const candidateMarkers = Object.fromEntries(ANALOG_TARGETS.map((body) => {
+    const group = new THREE.Group();
+    group.name = `${body}-candidate-markers`;
+    meshes[body].add(group);
+    return [body, group];
+  }));
+  for (const candidate of candidates) {
+    const marker = new THREE.Mesh(sectorGeometry, colorMaterials[candidate.body]);
+    marker.position.copy(latLonToVector3(candidate.site.lat, candidate.site.lon, 1.02));
+    marker.quaternion.setFromUnitVectors(Z_AXIS, marker.position.clone().normalize());
+    const { pivot, pin } = createPin(pinParts);
+    marker.add(pivot);
+    marker.userData = {
+      kind: 'candidate',
+      body: candidate.body,
+      candidate,
+      pivot,
+      pin,
+      phase: Math.random() * 6.28,
+      analysis: candidateAnalysisDataFromCsv(model, candidate),
+    };
+    candidateMarkers[candidate.body].add(marker);
+  }
 
   // Un marcador de análogo por cuerpo objetivo (se reutiliza, solo se mueve)
   const analogMarkers = {};
@@ -166,25 +199,29 @@ export function createMarkers({ meshes, pairs, model }) {
 
   return {
     earthMarkers,
+    candidateMarkers,
     analogMarkers,
     /** Marcadores de la Tierra cuyo análogo está en `body`, en el orden del CSV. */
     markersFor: (body) => earthMarkers.children.filter((m) => m.userData.analog.body === body),
+    /** Candidatos lunares o marcianos autónomos, en el orden del CSV. */
+    candidatesFor: (body) => candidateMarkers[body]?.children ?? [],
     /** Resalta (o vuelve a su color) un punto de la Tierra. */
     highlight(marker, on) {
-      marker.material = on ? activeMaterial : colorMaterials[marker.userData.analog.body];
+      marker.material = on ? activeMaterial : colorMaterials[marker.userData.body];
       marker.scale.setScalar(on ? 1.5 : 1);
       selected = on ? marker : (selected === marker ? null : selected);
     },
     /** Animación: los pines flotan y miran a la cámara; el sector elegido late. */
     pulse(time, camera) {
-      if (earthMarkers.visible) {
-        for (const m of earthMarkers.children) {
+      for (const group of [earthMarkers, ...Object.values(candidateMarkers)]) {
+        if (!group.visible) continue;
+        for (const m of group.children) {
           const { pivot, phase } = m.userData;
           pivot.position.z = 0.012 + 0.01 * Math.sin(time * 2 + phase);
           faceCamera(m, pivot, camera);
         }
-        if (selected) selected.scale.setScalar(1.5 + 0.1 * Math.sin(time * 4));
       }
+      if (selected?.visible) selected.scale.setScalar(1.5 + 0.1 * Math.sin(time * 4));
       for (const group of Object.values(analogMarkers)) {
         if (!group.visible) continue;
         const { sector, pivot } = group.userData;

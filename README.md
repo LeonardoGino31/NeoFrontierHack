@@ -103,7 +103,7 @@ La pendiente y el desnivel se derivan del DEM remuestreado a una malla aproximad
 
 ### Datos de ubicaciones y similitud
 
-- `public/data/planetary_candidates.csv` es la fuente de ambas ubicaciones y de los valores usados para calcular la similitud. Cada fila representa una pareja completa Tierra–análogo.
+- `public/data/planetary_candidates.csv` es la fuente de ubicaciones y sus datos. Contiene parejas Tierra–análogo y registros autónomos de candidatos lunares/marcianos; estos últimos no tienen coordenadas terrestres ni calculan similitud.
 - El encabezado del CSV sigue este orden de bloques:
 
   1. **Identificadores:** `pair_id`, `earth_site_id`, `candidate_id`, `body`.
@@ -112,11 +112,14 @@ La pendiente y el desnivel se derivan del DEM remuestreado a una malla aproximad
   4. **Estado del registro:** `data_status`.
   5. **Valores comparados**, en este orden: `sunlight_earth`, `sunlight_analog`; `albedo_earth`, `albedo_analog`; `relief_earth`, `relief_analog`; `safe_slope_earth`, `safe_slope_analog`; `crater_free_earth`, `crater_free_analog`; `soil_stability_earth`, `soil_stability_analog`; `ice_earth`, `ice_analog`; `ice_confidence_earth`, `ice_confidence_analog`. La confianza del hielo se muestra aparte y no se incluye en el índice.
   6. **Requisito del sitio** (solo del análogo): `earth_view_analog` (% del tiempo, solo Luna) y `descent_density_analog` (kg/m³, solo Marte). La columna que no aplica al cuerpo se deja vacía.
-- Para agregar una pareja, añade una fila de datos debajo del encabezado, respetando ese orden y con un `pair_id` y un `earth_site_id` únicos. `body` debe ser `mars` o `moon`; incluye las coordenadas de ambos puntos y valores numéricos para los parámetros aplicables.
-- `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra. `analog_latitude` / `analog_longitude` posicionan su contraparte en Marte o la Luna. Al seleccionar el punto, el índice y los porcentajes se calculan con los valores de esa fila.
+  7. **Registros de candidatos** (columnas añadidas al final): `record_type`, `candidate_status`, `candidate_eligible`, `candidate_filter_status`, puntaje y cobertura, más objetos JSON con puntuaciones por grupo/parámetro, filtros y motivo de selección.
+- Las parejas existentes usan `record_type=pair` (o dejan la columna vacía). Para agregar una pareja, añade una fila debajo del encabezado con `pair_id` y `earth_site_id` únicos, ambos puntos y los valores numéricos comparados.
+- Un candidato sin contraparte terrestre usa `record_type=candidate_only`, `candidate_id` único y las columnas del sitio lunar/marciano y sus factores. Las columnas de la Tierra y `pair_id` se dejan vacías; no se inventa una coincidencia ni se calcula similitud.
+- El CSV contiene actualmente las 12 alternativas limitadas de cada cuerpo, copiadas de `backend/data/outputs/moon_candidate_alternatives.geojson` y `mars_candidate_alternatives.geojson`. Si se regeneran esas listas, el CSV no se actualiza automáticamente.
+- En una pareja, `earth_latitude` / `earth_longitude` posicionan el punto seleccionable en la Tierra y las coordenadas del análogo lo posicionan en Marte o la Luna. En un candidato autónomo solo se muestra el marcador en su cuerpo; al seleccionarlo aparecen su puntaje de selección, factores disponibles, requisito y estado de filtros.
 - Usa un `earth_site_id` único por punto seleccionable de la Tierra y un `pair_id` único por fila. Un `candidate_id` sí puede repetirse para emparejar el mismo análogo con distintos puntos terrestres; sus datos deben coincidir en todas esas filas.
 - No agregues filas de notas ni encabezados intermedios al CSV: el cargador interpreta cada fila posterior al encabezado como un registro.
-- `src/planetaryData.js` carga y valida el CSV, crea las parejas para los marcadores y entrega los valores al cálculo de similitud.
+- `src/planetaryData.js` carga y valida ambos tipos de registros; los pares alimentan la similitud y los candidatos autónomos muestran sus factores sin comparación terrestre.
 - Los valores actuales tienen `data_status=demo_fijo`: son valores de demostración fijos, no mediciones ni resultados científicos. La densidad de Marte se estimó con la elevación MOLA aproximada de cada sitio y la visibilidad de la Tierra de los sitios polares es ilustrativa. La confianza del potencial de hielo permanece en columnas separadas y no entra al índice.
 - `public/data/parameter_model.json` define el modelo: ruta del CSV (`dataset`), grupos, subparámetros (con sus columnas del CSV, `span` y rangos del simulador), y por cuerpo su objetivo, los pesos de los grupos y el requisito del sitio. `src/parameterModel.js` lo carga y valida al iniciar; `src/similarity.js` solo contiene las fórmulas. Para cambiar un peso, un umbral o añadir un subparámetro se edita el JSON (y el CSV si hacen falta columnas nuevas), no el código. `src/earthSites.js` mantiene únicamente los nombres de capas y las rutas de imágenes del panel.
 - Las imágenes recortadas del panel NASA siguen siendo recursos aparte; agregarlas no es necesario para que aparezcan los marcadores ni para calcular similitudes.
@@ -148,7 +151,7 @@ src/
 public/textures/        # Texturas de la Tierra y estrellas (+ respaldo de Marte y la Luna)
 public/textures/trek/   # Mosaicos globales y máscara PSR descargados de NASA Trek
 public/trek/sites/      # Recortes de imagen y relieve de cada sitio objetivo
-public/data/            # Modelo de parámetros (JSON) y parejas Tierra–análogo con sus valores (CSV)
+public/data/            # Modelo de parámetros y parejas Tierra–análogo/candidatos autónomos (CSV)
 scripts/fetch-trek.sh   # Descarga y ensambla las capas de Trek (Marte, Luna) y GIBS (Tierra)
 backend/                # Proceso batch independiente para candidatos lunares y marcianos
 ```

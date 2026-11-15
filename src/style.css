@@ -242,6 +242,50 @@ canvas {
   opacity: 0.85;
 }
 
+.hud-candidate-coverage {
+  grid-column: 1 / -1;
+  color: rgba(230, 247, 255, 0.65);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.candidate-factor {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(92px, auto);
+  align-items: center;
+  gap: 8px;
+  margin: 3px 10px 5px 50px;
+  padding: 5px 8px;
+  color: rgba(230, 247, 255, 0.9);
+  background: rgba(var(--hud-cyan), 0.06);
+  border-left: 1px solid rgba(var(--hud-cyan), 0.35);
+  cursor: pointer;
+}
+
+.candidate-factor:hover {
+  background: rgba(var(--hud-cyan), 0.15);
+}
+
+.candidate-factor-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.candidate-factor-label {
+  font-size: 12px;
+}
+
+.candidate-factor-value {
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.candidate-factor-value .hud-confidence {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
 .hud-big {
   font-size: 22px;
   font-weight: 700;
