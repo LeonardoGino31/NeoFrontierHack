@@ -30,7 +30,8 @@ function embedUrl({ lat, lon }, type) {
   return `https://maps.google.com/maps?q=${lat},${lon}&t=${type === 'satellite' ? 'k' : 'm'}&z=${ZOOM}&ie=UTF8&hl=es&output=embed`;
 }
 
-export function createMapsView() {
+/** @param {{ onClose?: () => void }} [o] */
+export function createMapsView({ onClose } = {}) {
   const root = document.createElement('div');
   root.id = 'maps-view';
   root.hidden = true;
@@ -103,6 +104,7 @@ export function createMapsView() {
     if (!isOpen) return;
     isOpen = false;
     root.classList.remove('entered'); // el círculo se cierra de vuelta hacia el pin
+    onClose?.();
     closeTimer = setTimeout(() => {
       root.hidden = true;
       frame.src = 'about:blank'; // detiene la carga y libera memoria

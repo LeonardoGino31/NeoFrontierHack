@@ -1917,3 +1917,21 @@ canvas {
   .mv-frame { transition: none; }
   .cmp-gmap { animation: none; }
 }
+
+/* Mientras la cámara se mete en el pin, los paneles se desvanecen para dejar ver el globo */
+.hud,
+#info,
+#compare-labels,
+#lab-launcher,
+#point-nav {
+  transition: opacity 0.5s;
+}
+
+body.diving .hud,
+body.diving #info,
+body.diving #compare-labels,
+body.diving #lab-launcher,
+body.diving #point-nav {
+  opacity: 0;
+  pointer-events: none;
+}
