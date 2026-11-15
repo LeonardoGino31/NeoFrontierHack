@@ -866,15 +866,32 @@ canvas {
   color: rgba(255, 205, 90, 0.85);
 }
 
-.lab-presets {
+.lab-site-name {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  min-width: 0;
   margin-left: auto;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
-.lab-presets button,
-.lab-modes button {
+.lab-site-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lab-site-name small {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(230, 247, 255, 0.7);
+}
+
+.lab-modes button,
+.lab-site,
+.lab-partner {
   font: 600 13px 'Rajdhani', 'Arial Narrow', sans-serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -884,19 +901,69 @@ canvas {
   cursor: pointer;
 }
 
-.lab-presets button {
-  padding: 5px 10px;
-}
-
-.lab-presets button:hover,
-.lab-modes button:hover {
+.lab-modes button:hover,
+.lab-partner:hover {
   background: rgba(120, 220, 255, 0.22);
 }
 
-.lab-presets button.active,
 .lab-modes button.active {
   background: rgba(120, 220, 255, 0.32);
   border-color: rgba(120, 220, 255, 0.9);
+}
+
+.lab-site {
+  width: 100%;
+  padding: 6px 8px;
+  text-transform: none;
+  font-size: 14px;
+}
+
+.lab-site option,
+.lab-site optgroup {
+  background: #0b1424;
+  color: #e6f7ff;
+}
+
+.lab-partner {
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.lab-partner[hidden] {
+  display: none;
+}
+
+.lab-values {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 12px;
+  margin: 10px 0 0;
+  font-size: 14px;
+}
+
+.lab-values dt {
+  color: rgba(230, 247, 255, 0.75);
+}
+
+.lab-values dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.lab-sources {
+  margin: 8px 0 0;
+  font: 12px/1.45 system-ui, sans-serif;
+  color: rgba(230, 247, 255, 0.6);
+}
+
+/* Mientras llega el recorte de otro punto */
+#terrain-lab.loading .lab-site-name::after {
+  content: 'Cargando…';
+  font-size: 12px;
+  color: rgba(255, 205, 90, 0.85);
 }
 
 /* Columna izquierda: modos arriba y rovers abajo en un mismo flujo. Si no caben, los

@@ -1,57 +1,54 @@
-// Campo de alturas procedural del laboratorio (km, relativo a la elevación base).
+// Campo de alturas del laboratorio a partir del modelo de elevación real del punto
+// (public/data/lab/<clave>.bin, escrito por `python -m pipeline lab-terrain`).
 // Lo usan la malla del laboratorio y el parche de detalle del rover, así ambos
 // producen exactamente el mismo relieve.
 
 import { fbm } from '../noise.js';
-
-// Cráteres fijos: [x, z, radio] en km
-const CRATERS = [
-  [3.6, -2.4, 2.2], [-4.8, 3.2, 1.4], [-1.2, -5.6, 0.9], [5.6, 5.2, 1.1],
-  [-6.4, -4.0, 0.8], [1.5, 6.5, 0.6], [-7.0, 6.8, 1.6], [7.2, -6.8, 0.7], [0.4, 1.2, 0.5],
-];
+import { SIZE_KM } from './config.js';
 
 /**
- * Crea el campo de alturas para el estado de sliders `state` (se lee en cada consulta,
- * así los cambios de los sliders se ven sin recrearlo).
- * @param {{ relief: number, rough: number, craters: number }} state
+ * Crea el campo de alturas. La grilla se cambia con `setGrid` al elegir otro punto.
+ * Las alturas son reales (km, relativas a la media del recorte); la exageración vertical
+ * se aplica al dibujar, no aquí.
  */
-export function createTerrainField(state) {
+export function createTerrainField() {
+  let grid = null; // { w, km: Float32Array } fila 0 = norte (z = −SIZE/2), columna 0 = oeste
+  const half = SIZE_KM / 2;
+
+  /** Altura de la grilla con índices recortados al borde. */
+  const at = (r, c) => {
+    const w = grid.w;
+    return grid.km[Math.min(w - 1, Math.max(0, r)) * w + Math.min(w - 1, Math.max(0, c))];
+  };
+
+  /** Interpolación Catmull-Rom: entre vértices (rover) el suelo es curvo y no facetado. */
+  const cubic = (p0, p1, p2, p3, t) =>
+    p1 + 0.5 * t * (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)));
+
+  /** Altura real (km) en x, z por interpolación bicúbica de la grilla. */
+  function heightKm(x, z) {
+    if (!grid) return 0;
+    const cell = SIZE_KM / (grid.w - 1);
+    const fx = (x + half) / cell, fz = (z + half) / cell;
+    const c = Math.floor(fx), r = Math.floor(fz);
+    const tx = fx - c, tz = fz - r;
+    const row = (rr) => cubic(at(rr, c - 1), at(rr, c), at(rr, c + 1), at(rr, c + 2), tx);
+    return cubic(row(r - 1), row(r), row(r + 1), row(r + 2), tz);
+  }
+
   /**
-   * Altura en x, z y sus componentes: `detail` (relieve fino, para la rugosidad) y
-   * `crater` (> 0 dentro de un cráter o su borde, para los obstáculos).
-   * @param {{h: number, detail: number, crater: number}} out  se reutiliza para no crear objetos
+   * Microrrelieve (km) que solo existe en el parche del rover: los modelos de elevación no
+   * resuelven nada por debajo de ~30–460 m, y sin esto el suelo a escala de metros sería liso.
    */
-  function sample(x, z, out) {
-    // Forma general (colinas, valles)
-    const macro = (fbm(x * 0.22 + 11.3, z * 0.22 - 4.7, 4) - 0.35) * state.relief * 1.6;
-    // Detalle fino: aquí actúa la rugosidad
-    const detail = (fbm(x * 1.7 + 3.1, z * 1.7 + 8.2, 5) - 0.5) * state.rough * 0.45;
-    // Cráteres: cuenco + borde elevado
-    let crater = 0;
-    let inCrater = 0;
-    if (state.craters > 0) {
-      for (const [cx, cz, r] of CRATERS) {
-        const d = Math.hypot(x - cx, z - cz) / r;
-        // Interior y borde del cráter cuentan como obstáculo (más claro cuanto más marcado)
-        if (d < 1.15) inCrater = Math.max(inCrater, state.craters);
-        if (d < 1.6) {
-          if (d < 1) crater -= (1 - d * d) * 0.25 * r;
-          crater += 0.12 * r * Math.exp(-(((d - 1) / 0.18) ** 2));
-        }
-      }
-      crater *= state.craters;
-    }
-    out.h = macro + detail + crater;
-    out.detail = detail;
-    out.crater = inCrater;
-    return out;
-  }
-
-  /** Microrrelieve (km) que solo existe en el parche de detalle: lomas de ~20 m y baches de ~3 m. */
   function microKm(x, z) {
-    return ((fbm(x * 50 + 7.3, z * 50 - 3.1, 3) - 0.5) * 0.0024
-      + (fbm(x * 300 + 1.7, z * 300 + 2.9, 3) - 0.5) * 0.0007) * (0.35 + state.rough);
+    return (fbm(x * 50 + 7.3, z * 50 - 3.1, 3) - 0.5) * 0.002
+      + (fbm(x * 300 + 1.7, z * 300 + 2.9, 3) - 0.5) * 0.0006;
   }
 
-  return { sample, microKm };
+  /** Cambia la grilla de alturas (km relativos, `w` × `w`). */
+  function setGrid(next) {
+    grid = next;
+  }
+
+  return { heightKm, microKm, setGrid };
 }

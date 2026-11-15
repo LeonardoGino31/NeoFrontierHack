@@ -14,6 +14,7 @@
     python -m pipeline targets          # objetivos: CSV + backend + oficiales + propuestas propias
     python -m pipeline search           # candidatos en la Tierra -> public/data/earth_candidates.json
     python -m pipeline pairs            # cada candidato del backend + su mejor análogo -> parejas del CSV
+    python -m pipeline lab-terrain      # DEM e imagen real de cada punto -> public/data/lab/ (laboratorio 3D)
 """
 
 import argparse
@@ -25,6 +26,7 @@ from .candidates import build as build_candidates
 from .collect import collect
 from .earth import permafrost, topography
 from .earth.modis import run as modis_run
+from .lab_terrain import run as lab_terrain_run
 from .output import apply_to_csv, write_values
 from .pairs import build as build_pairs
 from .search import run as search_run
@@ -60,6 +62,8 @@ def main() -> None:
     pairs_cmd = sub.add_parser("pairs", help="crea una pareja por candidato del backend con su mejor análogo")
     pairs_cmd.add_argument("--min-km", type=float, default=150,
                            help="separación mínima entre los puntos terrestres elegidos")
+    lab = sub.add_parser("lab-terrain", help="recortes de DEM e imagen de cada punto para el laboratorio 3D")
+    lab.add_argument("--workers", type=int, default=4, help="lecturas remotas en paralelo")
     search = sub.add_parser("search", help="busca análogos en la Tierra para cada objetivo")
     search.add_argument("--targets", help="ids separados por comas (por defecto, todos)")
     search.add_argument("--top", type=int, default=25, help="candidatos por objetivo")
@@ -78,6 +82,10 @@ def main() -> None:
 
     if args.command == "earth-modis":
         print(f"Malla escrita en {modis_run(cfg, cache_dir, args.year)}")
+        return
+
+    if args.command == "lab-terrain":
+        print(f"Índice escrito en {lab_terrain_run(cfg, cache_dir, csv_path, Path('public/data/lab'), args.workers)}")
         return
 
     if args.command == "earth-permafrost":

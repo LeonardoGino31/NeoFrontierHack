@@ -128,7 +128,15 @@ labLauncher.addEventListener('pointerenter', prefetchLab);
 labLauncher.addEventListener('focus', prefetchLab);
 labLauncher.addEventListener('click', () => openLab('natural'));
 
-/** Abre el laboratorio en el modo `key`, creándolo la primera vez. */
+/** Punto del CSV seleccionado en el globo ({ body, id }), para abrir el laboratorio en él. */
+function selectedSiteRef() {
+  const d = selectedMarker?.userData;
+  if (d?.kind === 'earth_pair') return { body: 'earth', id: d.earthPoint.id };
+  if (d?.kind === 'candidate') return { body: d.candidate.body, id: d.candidate.id };
+  return null;
+}
+
+/** Abre el laboratorio en el modo `key` y en el punto seleccionado, creándolo la primera vez. */
 async function openLab(key) {
   if (!lab) {
     const { createTerrainLab } = await prefetchLab();
@@ -148,7 +156,7 @@ async function openLab(key) {
     });
   }
   controls.enabled = false; // comparten el canvas: los controles del globo no deben reaccionar
-  lab.open(key);
+  lab.open(key, selectedSiteRef());
   updateMusic();
 }
 

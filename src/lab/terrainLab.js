@@ -1,15 +1,16 @@
 // Laboratorio de terreno: un entorno 3D para VER qué significa cada parámetro.
-// Genera un terreno procedural de 20 × 20 km y lo colorea según el parámetro elegido.
-// Los sliders cambian el terreno en vivo y al pasar el mouse se leen los valores.
+// Muestra un recorte de 20 × 20 km de cada punto del CSV (candidato o análogo terrestre) con
+// su modelo de elevación y su imagen orbital reales, y lo colorea según el parámetro elegido.
+// Al pasar el mouse se leen los valores.
 // Desde el menú de rovers se puede desplegar uno y conducirlo a escala real.
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { icon } from '../icons.js';
 import { addKeyLayer, isTyping, KEY_PRIORITY } from '../keyboard.js';
-import { fbm } from '../noise.js';
 import {
-  SIZE_KM, SEGMENTS, CELL_KM, SLOPE_LIMIT, SLIDERS, PRESETS, MODES, LEGEND_RANGE, RAMPS,
+  SIZE_KM, SEGMENTS, CELL_KM, SLOPE_LIMIT, SLIDERS, MODES, LEGEND_RANGE, RAMPS, OBSTACLE_M, SKY,
+  SITE_VALUES,
 } from './config.js';
 import { createTerrainField } from './terrainField.js';
 import { createTerrainBlock } from './terrainBlock.js';
@@ -27,8 +28,9 @@ import { createRoverDrive } from './rover/roverDrive.js';
  * @param {HTMLElement} o.launcher  botón que abre el laboratorio (se oculta mientras está abierto)
  * @param {() => void} [o.onClose]  se llama al cerrar, con el canvas ya devuelto
  * @param {(active: boolean) => void} [o.onRoverChange]  se llama al desplegar o retirar un rover
+ * @param {string} [o.dataUrl]  carpeta con index.json y los recortes de cada punto
  */
-export function createTerrainLab({ renderer, launcher, onClose, onRoverChange }) {
+export function createTerrainLab({ renderer, launcher, onClose, onRoverChange, dataUrl = '/data/lab' }) {
   let scene, camera, controls, terrain, marker, scanBar, raf = null;
   let canvasHome = null;  // dónde estaba el canvas antes de abrir
   let savedExposure = 1;  // exposición del globo, que usa otra
@@ -55,17 +57,29 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
   let built = false;
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
   let mode = 'natural';
-  const state = { ...PRESETS.atacama };
+  const state = { exag: 1 };
   const n = (SEGMENTS + 1) ** 2;
 
-  // Datos por vértice (se recalculan con los sliders)
+  // Puntos disponibles (index.json) y el que se ve
+  let sites = [];
+  let indexPromise = null;
+  let site = null;       // entrada del índice del punto actual
+  let image = null;      // { texture, pixels, w, h, mean: THREE.Color } del punto actual
+  let shownImage = null; // imagen puesta como textura de la malla (vista natural)
+  let loadToken = 0;     // descarta cargas que terminan después de elegir otro punto
+
+  // Datos por vértice (se recalculan al cambiar de punto)
   const data = {
-    hKm: new Float32Array(n), detail: new Float32Array(n), crater: new Float32Array(n),
-    elev: new Float32Array(n), slope: new Float32Array(n), rough: new Float32Array(n),
-    hazard: new Float32Array(n), sun: new Float32Array(n), albedo: new Float32Array(n),
+    hKm: new Float32Array(n), local: new Float32Array(n),
+    elev: new Float32Array(n), slope: new Float32Array(n),
+    hazard: new Float32Array(n), aspect: new Float32Array(n), sun: new Float32Array(n), albedo: new Float32Array(n),
     soilStability: new Float32Array(n), ice: new Float32Array(n), iceConfidence: new Float32Array(n),
-    minElev: 0, maxElev: 1, meanH: 0,
+    image: new Float32Array(n * 3), // color de la imagen en cada vértice (sRGB lineal)
+    minElev: 0, maxElev: 1, meanM: 0,
   };
+
+  /** Texto del CSV listo para insertar en HTML. */
+  const escapeHtml = (t) => String(t).replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 
   // ---------- DOM ----------
   const root = document.createElement('div');
@@ -73,9 +87,8 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
   root.hidden = true;
   root.innerHTML = `
     <div class="lab-top hud">
-      <div class="lab-title">${icon('cube')}<span>Laboratorio de terreno</span><small>20 × 20 km · datos ilustrativos</small></div>
-      <div class="lab-presets">${Object.entries(PRESETS)
-        .map(([k, p]) => `<button data-preset="${k}">${p.name}</button>`).join('')}</div>
+      <div class="lab-title">${icon('cube')}<span>Laboratorio de terreno</span><small>20 × 20 km · relieve e imagen reales</small></div>
+      <div class="lab-site-name"></div>
       <button class="lab-toggle" title="Ocultar/mostrar paneles (H)">◧</button>
       <button class="hud-close" title="Cerrar (Esc)">✕</button>
     </div>
@@ -88,7 +101,12 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
       <h3 class="lab-mode-title"></h3>
       <p class="lab-caption"></p>
       <div class="lab-legend"></div>
-      <h4>Ajustes del terreno</h4>
+      <h4>Punto</h4>
+      <select class="lab-site" aria-label="Punto a mostrar"></select>
+      <button class="lab-partner" hidden></button>
+      <dl class="lab-values"></dl>
+      <p class="lab-sources"></p>
+      <h4>Vista</h4>
       <div class="lab-sliders">${SLIDERS.map((s) => `
         <label data-slider="${s.key}">
           <span>${s.label}</span><output></output>
@@ -122,25 +140,18 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     const b = e.target.closest('[data-mode]');
     if (b) setMode(b.dataset.mode);
   });
-  root.querySelector('.lab-presets').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-preset]');
-    if (!b) return;
-    Object.assign(state, PRESETS[b.dataset.preset]);
-    syncSliders();
-    rebuild(1100); // el terreno se transforma en ~1 s
-    root.querySelectorAll('[data-preset]').forEach((x) => x.classList.toggle('active', x === b));
-  });
+  const siteSelect = root.querySelector('.lab-site');
+  const partnerBtn = root.querySelector('.lab-partner');
+  siteSelect.addEventListener('change', () => loadSite(siteSelect.value));
+  partnerBtn.addEventListener('click', () => site?.partner && loadSite(site.partner));
 
-  // Sliders: los de forma del terreno regeneran la malla; los demás solo recolorean
-  const SHAPE_KEYS = ['relief', 'rough', 'craters'];
+  // La exageración solo cambia el dibujo: las lecturas siguen usando las alturas reales
   root.querySelectorAll('[data-slider]').forEach((label) => {
     const key = label.dataset.slider;
     label.querySelector('input').addEventListener('input', (e) => {
       state[key] = Number(e.target.value);
       updateOutput(label);
-      root.querySelectorAll('[data-preset]').forEach((x) => x.classList.remove('active'));
-      if (SHAPE_KEYS.includes(key)) rebuild(350);
-      else { computeAttributes(); paint('fade', 250); }
+      if (site) rebuild(350, false);
     });
   });
 
@@ -278,11 +289,9 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
   }
 
   // ---------- Cálculo del terreno ----------
-  const field = createTerrainField(state);
-  const parts = { h: 0, detail: 0, crater: 0 };     // reutilizado por rebuild()
-  const tileParts = { h: 0, detail: 0, crater: 0 }; // y este por el parche de detalle
-  /** Altura analítica más microrrelieve (km), para el parche de detalle. */
-  const detailHeight = (x, z) => field.sample(x, z, tileParts).h + field.microKm(x, z);
+  const field = createTerrainField();
+  /** Altura real más microrrelieve (km, ya exagerada), para el parche de detalle. */
+  const detailHeight = (x, z) => (field.heightKm(x, z) + field.microKm(x, z)) * state.exag;
 
   const W_GRID = SEGMENTS + 1;
   const clampKm = (v) => Math.min(SIZE_KM / 2, Math.max(-SIZE_KM / 2, v));
@@ -293,11 +302,26 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     return sampleGrid((i) => arr[i * 3 + 1], W_GRID, CELL_KM, -SIZE_KM / 2, -SIZE_KM / 2, clampKm(x), clampKm(z));
   }
 
-  /** Color actual de la malla gruesa en x, z (para pintar el parche con el mismo modo). */
+  /** Color actual del suelo en x, z (para pintar el parche del rover con el mismo modo). */
   function coarseColor(x, z, out) {
+    // Con la imagen como textura los vértices son blancos: el color sale de la imagen
+    if (terrain.material.map && shownImage) return imageColor(shownImage, x, z, out);
     const arr = terrain.geometry.attributes.color.array;
     const at = (ch) => sampleGrid((i) => arr[i * 3 + ch], W_GRID, CELL_KM, -SIZE_KM / 2, -SIZE_KM / 2, clampKm(x), clampKm(z));
     return out.setRGB(at(0), at(1), at(2));
+  }
+
+  /** Color de la imagen `img` en x, z (km), interpolado, en sRGB lineal. */
+  function imageColor(img, x, z, out) {
+    const fx = Math.min(img.w - 1.001, Math.max(0, ((x + SIZE_KM / 2) / SIZE_KM) * img.w - 0.5));
+    const fy = Math.min(img.h - 1.001, Math.max(0, ((z + SIZE_KM / 2) / SIZE_KM) * img.h - 0.5));
+    const ix = Math.floor(fx), iy = Math.floor(fy), u = fx - ix, v = fy - iy;
+    const px = img.pixels, w = img.w;
+    const ch = (k) => {
+      const i00 = (iy * w + ix) * 4 + k, i10 = i00 + 4, i01 = i00 + w * 4, i11 = i01 + 4;
+      return ((px[i00] * (1 - u) + px[i10] * u) * (1 - v) + (px[i01] * (1 - u) + px[i11] * u) * v) / 255;
+    };
+    return out.setRGB(ch(0), ch(1), ch(2), THREE.SRGBColorSpace);
   }
 
   /** Suelo sobre el que apoya el rover: el parche si cubre el punto, si no la malla gruesa. */
@@ -312,53 +336,192 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     return r * W_GRID + c;
   }
 
-  // Recalcula el terreno objetivo y anima la transición desde el actual
-  function rebuild(duration = 0) {
+  // ---------- Datos de cada punto ----------
+  /** Descarga el índice de puntos (una sola vez) y arma el selector. */
+  function loadIndex() {
+    indexPromise ??= fetch(`${dataUrl}/index.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((index) => {
+        sites = index.sites;
+        renderSiteOptions();
+        return sites;
+      });
+    return indexPromise;
+  }
+
+  const BODY_GROUPS = [
+    ['moon', 'Luna · candidatos'], ['mars', 'Marte · candidatos'], ['earth', 'Tierra · análogos'],
+  ];
+
+  /** Nombre corto del punto para el selector y la barra superior. */
+  function siteLabel(s) {
+    return s.body === 'earth' ? `${s.name}${s.region ? `, ${s.region}` : ''}` : s.name;
+  }
+
+  function renderSiteOptions() {
+    siteSelect.innerHTML = BODY_GROUPS.map(([body, label]) => {
+      const options = sites.filter((s) => s.body === body)
+        .map((s) => `<option value="${s.key}">${escapeHtml(siteLabel(s))}</option>`).join('');
+      return options ? `<optgroup label="${label}">${options}</optgroup>` : '';
+    }).join('');
+  }
+
+  /** Busca un punto por cuerpo e id del CSV. */
+  function findSite(ref) {
+    if (!ref) return null;
+    return sites.find((s) => s.key === ref || (s.body === ref.body && s.id === ref.id)) ?? null;
+  }
+
+  /** Descarga la imagen del recorte y lee sus píxeles (hacen falta para el albedo y el rover). */
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const g = canvas.getContext('2d', { willReadFrequently: true });
+        g.drawImage(img, 0, 0);
+        const pixels = g.getImageData(0, 0, img.width, img.height).data;
+        const texture = new THREE.Texture(img);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        texture.needsUpdate = true;
+        let r = 0, gr = 0, b = 0;
+        for (let i = 0; i < pixels.length; i += 4) { r += pixels[i]; gr += pixels[i + 1]; b += pixels[i + 2]; }
+        const k = pixels.length / 4 * 255;
+        resolve({ texture, pixels, w: img.width, h: img.height,
+          mean: new THREE.Color().setRGB(r / k, gr / k, b / k, THREE.SRGBColorSpace) });
+      };
+      img.onerror = () => reject(new Error(`No se pudo cargar ${url}`));
+      img.src = url;
+    });
+  }
+
+  /** Carga el punto `ref` (clave del índice o { body, id }) y transforma el terreno hacia él. */
+  async function loadSite(ref) {
+    const token = ++loadToken;
+    await loadIndex();
+    const next = findSite(ref) ?? site ?? sites[0];
+    if (!next) return;
+    root.classList.add('loading');
+    try {
+      const [heights, img] = await Promise.all([
+        fetch(`${dataUrl}/${next.key}.bin`).then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.arrayBuffer();
+        }),
+        loadImage(`${dataUrl}/${next.key}.jpg`),
+      ]);
+      if (token !== loadToken) return; // el usuario ya eligió otro punto
+      const q = new Uint16Array(heights);
+      const meters = new Float32Array(q.length);
+      const span = next.maxM - next.minM;
+      let sum = 0;
+      for (let i = 0; i < q.length; i++) { meters[i] = next.minM + (q[i] / 65535) * span; sum += meters[i]; }
+      const mean = sum / q.length;
+      const km = new Float32Array(q.length);
+      for (let i = 0; i < q.length; i++) km[i] = (meters[i] - mean) / 1000;
+      field.setGrid({ w: Math.round(Math.sqrt(q.length)), km });
+      data.meanM = mean;
+      if (image && image !== shownImage) image.texture.dispose();
+      image = img;
+      site = next;
+      showSiteInfo();
+      rebuild(built ? 1100 : 0); // el terreno se transforma en ~1 s
+    } catch (err) {
+      console.error(err);
+      root.querySelector('.lab-sources').textContent = `No se pudo cargar el punto: ${err.message}`;
+    } finally {
+      if (token === loadToken) root.classList.remove('loading');
+    }
+  }
+
+  /** Barra superior, selector, botón de pareja, valores medidos y fuentes del punto actual. */
+  function showSiteInfo() {
+    const fmt = (v, dec) => (v === null || v === undefined ? 'sin dato' : Number(v).toFixed(dec));
+    const lat = `${Math.abs(site.lat).toFixed(2)}° ${site.lat >= 0 ? 'N' : 'S'}`;
+    const lon = `${Math.abs(site.lon).toFixed(2)}° ${site.lon >= 0 ? 'E' : 'O'}`;
+    const bodyName = { earth: 'Tierra', moon: 'Luna', mars: 'Marte' }[site.body];
+    root.querySelector('.lab-site-name').innerHTML =
+      `<span>${escapeHtml(siteLabel(site))}</span><small>${bodyName} · ${lat}, ${lon}</small>`;
+    siteSelect.value = site.key;
+
+    const partner = sites.find((s) => s.key === site.partner);
+    partnerBtn.hidden = !partner;
+    if (partner) {
+      partnerBtn.textContent = site.body === 'earth'
+        ? `Ver el candidato en ${{ moon: 'la Luna', mars: 'Marte' }[partner.body]}`
+        : `Ver su análogo en la Tierra: ${partner.name}`;
+    }
+
+    const values = site.values ?? {};
+    root.querySelector('.lab-values').innerHTML = SITE_VALUES.map((v) =>
+      `<dt>${v.label}</dt><dd>${fmt(values[v.key], v.dec)}${values[v.key] == null ? '' : ` ${v.unit}`}</dd>`).join('');
+    root.querySelector('.lab-sources').innerHTML =
+      `Valores del punto en un recorte de ${site.body === 'moon' || partner?.body === 'moon' ? '5' : '20'} km
+       (planetary_candidates.csv). Relieve: ${escapeHtml(site.demDataset)}. Imagen: ${escapeHtml(site.imageDataset)}.`;
+
+    scene.background.setHex(SKY[site.body] ?? SKY.earth);
+  }
+
+  // Recalcula el terreno objetivo y anima la transición desde el actual.
+  // `full` = false: solo cambió la exageración (las alturas reales y los colores no cambian)
+  function rebuild(duration = 0, full = true) {
     const pos = terrain.geometry.attributes.position;
     for (let i = 0; i < n; i++) {
       morph.from[i] = pos.getY(i); // altura que se ve ahora
-      field.sample(pos.getX(i), pos.getZ(i), parts);
-      data.hKm[i] = parts.h;
-      data.detail[i] = parts.detail;
-      data.crater[i] = parts.crater;
+      if (full) data.hKm[i] = field.heightKm(pos.getX(i), pos.getZ(i));
     }
 
-    // Pendiente con diferencias finitas sobre la grilla (no depende de la animación)
-    const W = SEGMENTS + 1;
-    const H = (r, c) => data.hKm[Math.min(W - 1, Math.max(0, r)) * W + Math.min(W - 1, Math.max(0, c))];
-    for (let r = 0; r < W; r++) {
-      for (let c = 0; c < W; c++) {
-        const gx = (H(r, c + 1) - H(r, c - 1)) / (2 * CELL_KM);
-        const gz = (H(r + 1, c) - H(r - 1, c)) / (2 * CELL_KM);
-        data.slope[r * W + c] = THREE.MathUtils.radToDeg(Math.atan(Math.hypot(gx, gz)));
-      }
-    }
-
-    // Rugosidad: desviación estándar del detalle fino en la vecindad 3×3, normalizada.
-    // Se usa solo el detalle para que una ladera lisa no cuente como "rugosa".
-    for (let r = 0; r < W; r++) {
-      for (let c = 0; c < W; c++) {
-        let sum = 0, sum2 = 0, k = 0;
-        for (let dr = -1; dr <= 1; dr++) {
-          for (let dc = -1; dc <= 1; dc++) {
-            const rr = r + dr, cc = c + dc;
-            if (rr < 0 || cc < 0 || rr >= W || cc >= W) continue;
-            const h = data.detail[rr * W + cc];
-            sum += h; sum2 += h * h; k++;
-          }
+    if (full) {
+      // Pendiente con diferencias finitas sobre la grilla (alturas reales, sin exagerar)
+      const W = SEGMENTS + 1;
+      const H = (r, c) => data.hKm[Math.min(W - 1, Math.max(0, r)) * W + Math.min(W - 1, Math.max(0, c))];
+      for (let r = 0; r < W; r++) {
+        for (let c = 0; c < W; c++) {
+          const gx = (H(r, c + 1) - H(r, c - 1)) / (2 * CELL_KM);
+          const gz = (H(r + 1, c) - H(r - 1, c)) / (2 * CELL_KM);
+          data.slope[r * W + c] = THREE.MathUtils.radToDeg(Math.atan(Math.hypot(gx, gz)));
+          // Ladera hacia el ecuador: el sol pasa por ese lado del cielo (+z es el sur)
+          data.aspect[r * W + c] = site.lat >= 0 ? -gz : gz;
         }
-        const mean = sum / k;
-        const std = Math.sqrt(Math.max(0, sum2 / k - mean * mean));
-        data.rough[r * W + c] = Math.min(1, std / 0.036);
+      }
+
+      // Desnivel local 3 × 3: la misma regla que mide "libre de obstáculos" en el pipeline
+      for (let r = 0; r < W; r++) {
+        for (let c = 0; c < W; c++) {
+          let lo = Infinity, hi = -Infinity;
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const h = H(r + dr, c + dc);
+              lo = Math.min(lo, h);
+              hi = Math.max(hi, h);
+            }
+          }
+          data.local[r * W + c] = (hi - lo) * 1000;
+        }
+      }
+
+      // Color de la imagen en cada vértice: para el albedo y las transiciones de la vista natural
+      const c = new THREE.Color();
+      for (let i = 0; i < n; i++) {
+        imageColor(image, pos.getX(i), pos.getZ(i), c);
+        data.image[i * 3] = c.r;
+        data.image[i * 3 + 1] = c.g;
+        data.image[i * 3 + 2] = c.b;
       }
     }
 
     // La base queda un espesor fijo bajo el punto más bajo del relieve nuevo
     let minH = Infinity;
-    for (let i = 0; i < n; i++) minH = Math.min(minH, data.hKm[i]);
+    for (let i = 0; i < n; i++) minH = Math.min(minH, data.hKm[i] * state.exag);
     bottom.from = built ? bottom.now : minH - block.depthKm;
     bottom.to = minH - block.depthKm;
-    block.setTint(state.rust);
+    block.setTint(image.mean);
 
     // Primera vez: sin animación. Después: morph suave de alturas
     if (!built || duration === 0) {
@@ -368,8 +531,10 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
       Object.assign(morph, { start: performance.now(), dur: duration, active: true });
     }
 
-    computeAttributes();
-    paint('fade', duration || 0);
+    if (full) {
+      computeAttributes();
+      paint('fade', duration || 0);
+    }
 
     if (!terrainCreated) {
       terrainCreated = true;
@@ -382,10 +547,12 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     }
   }
 
-  // Mezcla alturas: t = 0 → anterior, t = 1 → nueva
+  // Mezcla alturas: t = 0 → anterior, t = 1 → nueva (exagerada)
   function applyHeights(t) {
     const pos = terrain.geometry.attributes.position;
-    for (let i = 0; i < n; i++) pos.setY(i, morph.from[i] + (data.hKm[i] - morph.from[i]) * t);
+    for (let i = 0; i < n; i++) {
+      pos.setY(i, morph.from[i] + (data.hKm[i] * state.exag - morph.from[i]) * t);
+    }
     pos.needsUpdate = true;
     bottom.now = bottom.from + (bottom.to - bottom.from) * t;
     block.update(pos.array, 3, bottom.now);
@@ -393,67 +560,112 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     if (t === 1) terrain.geometry.computeBoundingSphere();
   }
 
-  // Atributos ilustrativos que no cambian la forma del terreno.
+  /**
+   * Reparte un valor medido en el recorte: `shape` da la forma y el promedio queda igual
+   * al valor del punto (salvo lo que recorta el rango).
+   */
+  function distribute(out, value, shape, lo, hi) {
+    let mean = 0;
+    for (let i = 0; i < n; i++) mean += shape[i];
+    mean /= n;
+    for (let i = 0; i < n; i++) out[i] = THREE.MathUtils.clamp(value + shape[i] - mean, lo, hi);
+  }
+
+  // Atributos por vértice. Elevación, pendiente y obstáculos salen del modelo de elevación;
+  // los demás solo tienen un valor por punto y se reparten según el relieve o la imagen.
+  const shape = new Float32Array(n);
   function computeAttributes() {
-    const pos = terrain.geometry.attributes.position;
-    let minE = Infinity, maxE = -Infinity, sumH = 0;
+    const v = site.values ?? {};
+    let minE = Infinity, maxE = -Infinity, sumH = 0, sumLum = 0;
     for (let i = 0; i < n; i++) sumH += data.hKm[i];
     const meanH = sumH / n;
+    const lum = (i) => 0.2126 * data.image[i * 3] + 0.7152 * data.image[i * 3 + 1] + 0.0722 * data.image[i * 3 + 2];
+    for (let i = 0; i < n; i++) sumLum += lum(i);
+    const meanLum = sumLum / n || 1;
+
     for (let i = 0; i < n; i++) {
-      const x = pos.getX(i), z = pos.getZ(i), h = data.hKm[i];
-      const e = state.base + h * 1000;
+      const e = data.meanM + data.hKm[i] * 1000;
       data.elev[i] = e;
       minE = Math.min(minE, e);
       maxE = Math.max(maxE, e);
-      const v = fbm(x * 0.6 - 20, z * 0.6 + 7, 3) - 0.5; // variación local
-      // Obstáculo: dentro de un cráter o con rocas (rugosidad alta)
-      data.hazard[i] = Math.max(data.crater[i], data.rough[i] > 0.6 ? data.rough[i] : 0);
-      // Luz solar: las zonas altas ven el sol más tiempo; el fondo de los cráteres, menos
-      data.sun[i] = THREE.MathUtils.clamp(state.sunlight + (h - meanH) * 45 - data.crater[i] * 15 + v * 15, 0, 100);
-      data.albedo[i] = THREE.MathUtils.clamp(state.albedo + v * 0.08, 0.02, 0.9);
-      data.soilStability[i] = THREE.MathUtils.clamp(state.soilStability + v * 28, 0, 100);
-      // Hielo: más potencial donde hay menos sol (trampas frías)
-      const iceVariation = fbm(x * 0.34 + 13, z * 0.34 - 9, 3) - 0.5;
-      data.ice[i] = THREE.MathUtils.clamp(state.ice + iceVariation * 40 + (state.sunlight - data.sun[i]) * 0.8, 0, 100);
-      data.iceConfidence[i] = state.iceConfidence;
+      data.hazard[i] = Math.min(1, data.local[i] / (2 * OBSTACLE_M)); // ≥ 0.5 = obstáculo
+      // Albedo: proporcional al brillo de la imagen, con el promedio medido
+      data.albedo[i] = THREE.MathUtils.clamp((v.albedo ?? 0.2) * (lum(i) / meanLum), 0.02, 0.9);
     }
+
+    // Luz solar: las partes altas y las laderas al ecuador ven más sol
+    for (let i = 0; i < n; i++) shape[i] = (data.hKm[i] - meanH) * 45 + data.aspect[i] * 60;
+    distribute(data.sun, v.sunlight ?? 50, shape, 0, 100);
+    // Suelo: menos firme en laderas empinadas y terreno abrupto
+    for (let i = 0; i < n; i++) shape[i] = -data.slope[i] * 1.2 - data.hazard[i] * 20;
+    distribute(data.soilStability, v.soil_stability ?? 50, shape, 0, 100);
+    // Hielo: más potencial donde hay menos sol (trampas frías)
+    for (let i = 0; i < n; i++) shape[i] = -data.sun[i] * 0.8;
+    distribute(data.ice, v.ice ?? 0, shape, 0, 100);
+    data.iceConfidence.fill(v.ice_confidence ?? 0);
+
     data.minElev = minE;
     data.maxElev = maxE;
   }
 
   // ---------- Coloreado ----------
-  const rust = new THREE.Color(0x8a3418);
-  const dark = new THREE.Color(0x2a2724);
-  const light = new THREE.Color(0xe9e2d2);
-  const frost = new THREE.Color(0xf4f8ff);
+  /** Curvas de nivel: unas 8 en el desnivel del recorte, con un paso "redondo". */
+  function contourStep() {
+    const span = Math.max(1, data.maxElev - data.minElev) / 8;
+    const p = 10 ** Math.floor(Math.log10(span));
+    return [1, 2, 5, 10].map((k) => k * p).find((s) => s >= span);
+  }
+
+  /** Quita la imagen de la malla y deja su color en los vértices (para animar desde ahí). */
+  function unbakeImage() {
+    if (!terrain.material.map) return;
+    const col = terrain.geometry.attributes.color;
+    const c = new THREE.Color();
+    const pos = terrain.geometry.attributes.position;
+    for (let i = 0; i < n; i++) {
+      imageColor(shownImage, pos.getX(i), pos.getZ(i), c);
+      col.setXYZ(i, c.r, c.g, c.b);
+    }
+    col.needsUpdate = true;
+    terrain.material.map = null;
+    terrain.material.needsUpdate = true;
+    if (shownImage !== image) shownImage.texture.dispose();
+    shownImage = null;
+  }
+
+  /** Pone la imagen del punto como textura: a 20–40 m/px se ve mucho más que en los vértices. */
+  function bakeImage() {
+    const col = terrain.geometry.attributes.color;
+    col.array.fill(1);
+    col.needsUpdate = true;
+    terrain.material.map = image.texture;
+    terrain.material.needsUpdate = true;
+    shownImage = image;
+    if (drive?.isActive()) tile.repaint();
+  }
 
   // type: 'fade' (fundido) o 'sweep' (barrido de escaneo); duration en ms
   function paint(type = 'fade', duration = 0) {
+    unbakeImage(); // las transiciones se animan con los colores de los vértices
     const col = terrain.geometry.attributes.color;
     fade.from.set(col.array); // colores que se ven ahora
     const c = new THREE.Color();
     const ramp = RAMPS[mode];
     const range = LEGEND_RANGE[mode]?.(data);
+    const step = contourStep();
 
     for (let i = 0; i < n; i++) {
       if (mode === 'natural') {
-        c.copy(dark).lerp(light, (data.albedo[i] - 0.05) / 0.55);
-        c.lerp(rust, state.rust * 0.75);
-        // Resalte visual didáctico del potencial de hielo en zonas con poco sol (no es detección)
-        const f = (data.ice[i] / 100) * Math.max(0, 1 - data.sun[i] / 60);
-        if (f > 0) c.lerp(frost, Math.min(1, f) * 0.85);
-        // Las paredes muy empinadas se ven más oscuras (roca expuesta)
-        c.multiplyScalar(1 - Math.min(0.35, data.slope[i] / 120));
+        c.setRGB(data.image[i * 3], data.image[i * 3 + 1], data.image[i * 3 + 2]);
       } else {
         const value = {
           elevation: data.elev, slope: data.slope, hazards: data.hazard, soilStability: data.soilStability,
           sunlight: data.sun, albedo: data.albedo, ice: data.ice,
         }[mode][i];
         ramp((value - range[0]) / (range[1] - range[0]), c);
-        // Curvas de nivel cada 250 m en el modo elevación
         if (mode === 'elevation') {
-          const f = ((data.elev[i] % 250) + 250) % 250;
-          if (f < 12) c.multiplyScalar(0.55);
+          const f = (((data.elev[i] - data.minElev) % step) + step) % step;
+          if (f < step * 0.05) c.multiplyScalar(0.55);
         }
       }
       fade.to[i * 3] = c.r;
@@ -467,9 +679,15 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
       col.array.set(fade.to);
       col.needsUpdate = true;
       fade.active = false;
-      if (drive?.isActive()) tile.repaint();
+      finishPaint();
     }
     renderLegend();
+  }
+
+  /** Al terminar una transición: en la vista natural entra la imagen a resolución completa. */
+  function finishPaint() {
+    if (mode === 'natural') bakeImage();
+    else if (drive?.isActive()) tile.repaint();
   }
 
   // ---------- Panel ----------
@@ -517,12 +735,12 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     readout.innerHTML = `
       ${row('elevation', 'Elevación', `${data.elev[best].toFixed(0)} m`)}
       ${row('slope', 'Pendiente', `${slope.toFixed(1)}°`)}
-      ${row('hazards', 'Cráteres y rocas', obstacle ? 'Obstáculo' : 'Libre')}
-      ${row('soilStability', 'Estabilidad del suelo (demo)', `${data.soilStability[best].toFixed(0)} pts`)}
-      ${row('sunlight', 'Luz solar (demo)', `${data.sun[best].toFixed(0)} %`)}
-      ${row('albedo', 'Albedo', data.albedo[best].toFixed(2))}
-      ${row('ice', 'Potencial de hielo (demo)', `${data.ice[best].toFixed(0)} pts`)}
-      ${row('ice', 'Confianza (demo)', `${data.iceConfidence[best].toFixed(0)} %`)}
+      ${row('hazards', 'Desnivel local', `${data.local[best].toFixed(0)} m · ${obstacle ? 'obstáculo' : 'libre'}`)}
+      ${row('soilStability', 'Estabilidad del suelo (repartida)', `${data.soilStability[best].toFixed(0)} pts`)}
+      ${row('sunlight', 'Luz solar (repartida)', `${data.sun[best].toFixed(0)} %`)}
+      ${row('albedo', 'Albedo (según imagen)', data.albedo[best].toFixed(2))}
+      ${row('ice', 'Potencial de hielo (repartido)', `${data.ice[best].toFixed(0)} pts`)}
+      ${row('ice', 'Confianza del punto', `${data.iceConfidence[best].toFixed(0)} %`)}
       <div class="lab-landing ${safe ? 'ok' : 'risk'}">Aterrizaje: ${safe ? 'APTO' : 'RIESGO'}</div>`;
     readout.hidden = false;
   }
@@ -596,7 +814,7 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
       if (t === 1) {
         fade.active = false;
         scanBar.visible = false;
-        if (drive.isActive()) tile.repaint();
+        finishPaint();
       }
     }
 
@@ -631,17 +849,18 @@ export function createTerrainLab({ renderer, launcher, onClose, onRoverChange })
     renderer.render(scene, camera);
   }
 
-  // La guía abre el laboratorio con el campo `lab` de cada parámetro ('elevation', 'slope', ...)
-  function open(key = 'natural') {
+  /**
+   * Abre el laboratorio. La guía pasa el campo `lab` de cada parámetro ('elevation', 'slope', ...);
+   * `siteRef` ({ body, id } del CSV) elige el punto, por ejemplo el seleccionado en el globo.
+   */
+  function open(key = 'natural', siteRef = null) {
     if (!scene) {
       initScene();
       syncSliders();
-      root.querySelector('[data-preset="atacama"]').classList.add('active');
-      setMode(key);
-      rebuild();
-    } else {
-      setMode(key);
     }
+    setMode(key);
+    const wanted = findSite(siteRef);
+    if (!site || (wanted && wanted !== site)) loadSite(siteRef);
     root.hidden = false;
     launcher.hidden = true;
     // Tomar prestado el canvas de la app (se devuelve en close)

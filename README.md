@@ -13,8 +13,8 @@ Plataforma interactiva para encontrar y comparar **análogos terrestres** de reg
 - **Comparación Tierra | análogo**: el panel inferior muestra ambos con imagen y relieve reales al **mismo ancho en km** (Tierra: Blue Marble NG y ASTER GDEM de [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api)), y explica dónde falla la analogía. Las imágenes locales solo existen para los sitios conocidos; las parejas nuevas aún no tienen recorte.
 - **Navegación**: botones Marte / Luna para cambiar de cuerpo, flechas ‹ › (o ← →) para recorrer sus puntos, y arrastre de cada cuerpo por separado en el modo comparación.
 - **Sombra permanente del polo sur lunar**: capa de LRO LOLA con las regiones donde nunca da el sol (posible hielo), activable al ver la Luna.
-- **Laboratorio 3D**: terreno procedural de 20 × 20 km donde cada parámetro se visualiza sobre el relieve y se puede modificar en vivo.
-- **Rovers en el laboratorio**: Perseverance, Sojourner (Marte), Apollo LRV y Yutu-2 (Luna) modelados en 3D a escala real, con ruedas que giran y se orientan y suspensión que copia el suelo; se conducen sobre el terreno que se haya ajustado.
+- **Laboratorio 3D**: recorte real de 20 × 20 km de cada punto (candidatos de la Luna y Marte y sus análogos en la Tierra): relieve de MOLA, LOLA o Copernicus DEM con la imagen orbital encima (Viking + THEMIS, LRO WAC, Sentinel-2 cloudless). Cada parámetro se visualiza sobre ese relieve; se elige el punto en el panel o se abre directamente en el punto seleccionado del globo.
+- **Rovers en el laboratorio**: Perseverance, Sojourner (Marte), Apollo LRV y Yutu-2 (Luna) modelados en 3D a escala real, con ruedas que giran y se orientan y suspensión que copia el suelo; se conducen sobre el terreno del punto elegido.
 - **Backend experimental de sitios**: proceso Python separado para priorizar ubicaciones aproximadas en Luna y Marte desde DEM científicos y capas raster opcionales. Exporta candidatos con coordenadas y métricas a GeoJSON; `python -m pipeline candidates` los pasa al CSV de la app.
 
 > Estado actual: los sitios, sus parejas y casi todos los valores (209 de 225 en las parejas) vienen de datos abiertos medidos por el pipeline; lo que falta (suelo de Marte y del polo lunar) se marca como *Demo*. Las fichas de los análogos destacados están en [`docs/fichas-analogos.md`](docs/fichas-analogos.md).
@@ -202,11 +202,11 @@ docs/                   # Fichas de los análogos destacados
 
 ## Próximos pasos
 
-- Recortes de DEM reales (MOLA, LOLA, Copernicus) en el laboratorio.
 - Asistente de IA que explique los resultados a partir de los valores calculados.
 
 ## Créditos
 
+- Laboratorio 3D: MGS MOLA, LRO LOLA y LRO WAC, Viking MDIM 2.1 y THEMIS (USGS Astrogeology); Copernicus DEM GLO-30 (ESA); Sentinel-2 cloudless 2020 de [EOX IT Services](https://s2maps.eu) (CC BY-NC-SA 4.0, datos Copernicus Sentinel modificados).
 - Imágenes de la Tierra en el panel de comparación: [NASA GIBS](https://gibs.earthdata.nasa.gov/) (Blue Marble Next Generation, ASTER GDEM).
 - Imágenes de Marte y la Luna: [NASA Solar System Treks](https://trek.nasa.gov/) (NASA/JPL-Caltech). Capas: Viking MDIM 2.1, MGS MOLA, LRO WAC y LRO LOLA (incluida la de sombra permanente del polo sur).
 - Texturas de la Tierra y de respaldo: [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0), basadas en datos de la NASA.

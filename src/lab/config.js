@@ -8,27 +8,30 @@ export const SEGMENTS = 240;   // resolución de la malla (~83 m entre vértices
 export const CELL_KM = SIZE_KM / SEGMENTS;
 export const SLOPE_LIMIT = 15; // pendiente máxima típica para aterrizar (°)
 
+// Único ajuste: la forma y los valores salen de los datos de cada punto. La exageración
+// solo cambia cómo se dibuja; pendiente, obstáculos y lecturas usan las alturas reales.
 export const SLIDERS = [
-  { key: 'base',    label: 'Elevación base',        unit: 'm',    min: -4000, max: 5000, step: 50,   dec: 0 },
-  { key: 'relief',  label: 'Relieve',               unit: 'km',   min: 0,     max: 2.5,  step: 0.05, dec: 2 },
-  { key: 'rough',   label: 'Rugosidad (rocas)',     unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'craters', label: 'Cráteres',              unit: '',     min: 0,     max: 1,    step: 0.01, dec: 2 },
-  { key: 'sunlight', label: 'Tiempo con luz solar', unit: '%',    min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'albedo',  label: 'Albedo',                unit: '',     min: 0.05,  max: 0.6,  step: 0.01, dec: 2 },
-  { key: 'soilStability', label: 'Estabilidad del suelo', unit: 'pts', min: 0, max: 100, step: 1, dec: 0 },
-  { key: 'ice',     label: 'Potencial de hielo',    unit: 'pts',  min: 0,     max: 100,  step: 1,    dec: 0 },
-  { key: 'iceConfidence', label: 'Confianza de evidencia', unit: '%', min: 0, max: 100, step: 1, dec: 0 },
+  { key: 'exag', label: 'Exageración vertical', unit: '×', min: 1, max: 10, step: 0.5, dec: 1 },
 ];
 
-// Valores ILUSTRATIVOS para comparar entornos (no son mediciones exactas).
-// `rust` solo tiñe la vista natural (polvo oxidado de Marte); no es un parámetro.
-export const PRESETS = {
-  atacama: { name: 'Atacama · Tierra',      body: 'earth', base: 2500, relief: 0.9, rough: 0.35, craters: 0, sunlight: 80, albedo: 0.30, soilStability: 50, ice: 5, iceConfidence: 25, rust: 0.3 },
-  dryval:  { name: 'Valles Secos · Tierra', body: 'earth', base: 800, relief: 1.4, rough: 0.40, craters: 0, sunlight: 55, albedo: 0.35, soilStability: 55, ice: 30, iceConfidence: 45, rust: 0.15 },
-  iceland: { name: 'Islandia · Tierra',     body: 'earth', base: 400, relief: 0.6, rough: 0.85, craters: 0, sunlight: 45, albedo: 0.10, soilStability: 60, ice: 25, iceConfidence: 40, rust: 0.4 },
-  mars:    { name: 'Llanura · Marte',       body: 'mars', base: -2500, relief: 0.5, rough: 0.30, craters: 0.6, sunlight: 50, albedo: 0.22, soilStability: 55, ice: 20, iceConfidence: 35, rust: 0.75 },
-  moon:    { name: 'Polo sur · Luna',       body: 'moon', base: 1500, relief: 1.6, rough: 0.50, craters: 1, sunlight: 70, albedo: 0.10, soilStability: 55, ice: 55, iceConfidence: 40, rust: 0 },
-};
+// Obstáculo: desnivel local 3 × 3 mayor que este límite (misma regla que el pipeline,
+// pipeline/config.json → obstacleLocalReliefM para resoluciones ≤ 120 m)
+export const OBSTACLE_M = 60;
+
+// Fondo de la escena según el cuerpo (cielo de la Tierra, polvo de Marte, vacío lunar)
+export const SKY = { earth: 0x0b1424, mars: 0x1d1310, moon: 0x05070b };
+
+// Valores medidos del punto (columnas del CSV) que se listan en el panel
+export const SITE_VALUES = [
+  { key: 'relief', label: 'Desnivel', unit: 'm', dec: 0 },
+  { key: 'safe_slope', label: 'Pendiente segura', unit: '%', dec: 1 },
+  { key: 'crater_free', label: 'Libre de obstáculos', unit: '%', dec: 1 },
+  { key: 'sunlight', label: 'Luz solar', unit: '%', dec: 1 },
+  { key: 'albedo', label: 'Albedo', unit: '', dec: 3 },
+  { key: 'soil_stability', label: 'Estabilidad del suelo', unit: 'pts', dec: 0 },
+  { key: 'ice', label: 'Potencial de hielo', unit: 'pts', dec: 0 },
+  { key: 'ice_confidence', label: 'Confianza de evidencia', unit: '%', dec: 0 },
+];
 
 // Modos de visualización: qué color pinta el terreno y qué explica.
 // Las claves coinciden con el campo `lab` de los parámetros (public/data/parameter_model.json).
@@ -36,11 +39,11 @@ export const GOOD_BAD = ['#a81824', '#f07839', '#f7cf54', '#b6e66d', '#39cf88'];
 export const MODES = {
   natural: {
     label: 'Vista natural', icon: 'eye',
-    caption: 'Vista ilustrativa: el albedo aclara u oscurece el suelo y el hielo potencial se resalta en las zonas con menos sol. No es un mapa de depósitos reales.',
+    caption: 'Imagen orbital real del recorte sobre el modelo de elevación real del punto (fuentes abajo). La luz de la escena es fija; las sombras propias de la imagen son las del momento en que se tomó.',
   },
   elevation: {
     label: 'Desnivel', icon: 'mountain', unit: 'm',
-    caption: 'Cada color es una altura. Lo que se compara es el desnivel (máxima − mínima) dentro del recorte, no la altitud. Las líneas finas son curvas de nivel cada 250 m.',
+    caption: 'Cada color es una altura del modelo de elevación. Lo que se compara es el desnivel (máxima − mínima) dentro del recorte, no la altitud. Las líneas finas son curvas de nivel.',
     stops: ['#2c1e5e', '#3b6fb6', '#3fb8a5', '#b8d86b', '#f3e9b5', '#ffffff'],
   },
   slope: {
@@ -50,27 +53,27 @@ export const MODES = {
   },
   hazards: {
     label: 'Cráteres y rocas', icon: 'target', unit: '',
-    caption: 'En rojo, celdas con obstáculos: dentro de un cráter o con rocas (rugosidad alta). Sube los sliders de cráteres o rugosidad y mira cómo se reduce el área libre.',
+    caption: `Desnivel local (vecindad 3 × 3) del modelo de elevación. En rojo, celdas que superan ${OBSTACLE_M} m: bordes de cráter, escarpes o bloques; es la misma regla con la que se mide el "libre de obstáculos".`,
     stops: GOOD_BAD.slice().reverse(),
   },
   soilStability: {
     label: 'Estabilidad del suelo', icon: 'grid', unit: 'pts',
-    caption: 'Índice de demostración de firmeza del suelo; el polvo y la arena suelta pueden atascar un rover o hundir un aterrizador.',
+    caption: 'El promedio es el valor del punto; el reparto dentro del recorte es ilustrativo (menos firme en laderas empinadas y terreno abrupto). El polvo y la arena suelta pueden atascar un rover.',
     stops: GOOD_BAD,
   },
   sunlight: {
     label: 'Luz solar', icon: 'sun', unit: '%',
-    caption: 'Ilustrativo: las partes altas reciben sol más tiempo y el fondo de los cráteres queda en sombra, como en los polos lunares.',
+    caption: 'El promedio es el valor del punto; el reparto es ilustrativo y usa el relieve real: las partes altas y las laderas que miran al ecuador reciben más sol, los fondos quedan en sombra.',
     stops: ['#263b75', '#468bd4', '#62cbb9', '#e9df67', '#f4954f'],
   },
   albedo: {
     label: 'Albedo', icon: 'eye', unit: '',
-    caption: 'Fracción de luz que refleja el suelo: oscuro = absorbe (basalto, regolito lunar), claro = refleja (salares, hielo).',
+    caption: 'Fracción de luz que refleja el suelo: oscuro = absorbe (basalto, regolito lunar), claro = refleja (salares, hielo). Se reparte según el brillo de la imagen orbital y su promedio es el albedo medido del punto.',
     stops: ['#111111', '#555555', '#aaaaaa', '#f2f2f2'],
   },
   ice: {
     label: 'Potencial de hielo', icon: 'ice', unit: 'pts',
-    caption: 'Mapa procedural de demostración del potencial relativo de hielo, mayor en las zonas con menos sol. No indica depósitos observados; la confianza de evidencia se muestra por separado.',
+    caption: 'El promedio es el potencial de hielo del punto; el reparto es ilustrativo (más en las zonas con menos sol). No indica depósitos observados; la confianza de evidencia se muestra por separado.',
     stops: ['#19223d', '#315e91', '#62b9dc', '#d7f7ff', '#ffffff'],
   },
 };

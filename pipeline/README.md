@@ -129,6 +129,14 @@ Lo que falta está en el catálogo de fuentes del backend (`backend/config/sourc
 - **Hielo de Marte.** GRS mide los primeros ~50 cm en celdas de 5° y solo cubre de ~55° S a ~55° N. Dentro de esa franja el agua viene de minerales hidratados (máximo en el ecuador), así que el indicador solo es positivo en la región polar que GRS excluye, o con ≥ 10 % de agua. Por eso los objetivos actuales de Marte salen sin hielo.
 - **Confianza del hielo.** Es la fracción de indicadores medidos: 33 % en la Luna (1 de 3), 50 % en Marte (1 de 2) y en la Tierra 100 % donde hay mapa de permafrost (nieve y permafrost) o 50 % fuera de él.
 
+## Terreno del laboratorio 3D
+
+```bash
+python -m pipeline lab-terrain --workers 6   # -> public/data/lab/ (index.json, <punto>.bin, <punto>.jpg)
+```
+
+Para cada punto del CSV (las dos mitades de cada pareja y los candidatos que aún no tienen pareja) lee un recorte de 20 × 20 km del modelo de elevación (el mismo que usa `fetch`) y de la imagen orbital (LRO WAC en la Luna; Viking MDIM con el detalle de THEMIS en Marte; Sentinel-2 cloudless en la Tierra), ambos reproyectados a la malla local del laboratorio (241 × 241, norte arriba). Las alturas se guardan en uint16 entre `minM` y `maxM` del índice. `index.json` copia además los valores del CSV de cada punto, así que hay que volver a ejecutarlo después de `candidates`, `pairs` o `apply`; los recortes de puntos que ya no están en el CSV se borran. Las imágenes ya generadas no se vuelven a descargar (bórralas para regenerarlas); los mosaicos de USGS no son COG y la primera ejecución tarda varios minutos.
+
 ## Estructura
 
 ```text
@@ -146,6 +154,7 @@ pipeline/
 ├── metrics.py       # cálculos puros (desnivel, pendiente, luz, hielo)
 ├── collect.py       # qué fuente usa cada sitio
 ├── output.py        # site_values.json y volcado al CSV
+├── lab_terrain.py   # recortes de DEM e imagen de cada punto para el laboratorio 3D
 ├── earth/           # malla de la Tierra: topografía, MODIS y permafrost
 ├── sources/         # un módulo por proveedor (DEM, mapas lunares, albedo, Diviner, MCD, AppEEARS)
 └── tests/
