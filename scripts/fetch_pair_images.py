@@ -4,8 +4,9 @@ La app muestra, para cada pareja Tierra–análogo, un recorte de imagen y otro 
 cada lado. Este script los genera a partir de `public/data/planetary_candidates.csv` y los deja
 en `public/trek/sites/`, para que la demo no dependa de que Trek o GIBS respondan ese día.
 
-  Marte  : Viking MDIM 2.1 (imagen) y MGS MOLA (relieve)    — Mars Trek
-  Luna   : LRO WAC (imagen) y LRO LOLA (relieve)            — Moon Trek
+  Marte  : Viking MDIM 2.1 (imagen, Mars Trek) y relieve sombreado del DEM MGS MOLA
+  Luna   : LRO WAC (imagen, Moon Trek) y relieve sombreado del DEM LRO LOLA
+           (los DEM son los mismos que lee pipeline/; si no están disponibles se usa el relieve de Trek)
   Tierra : Landsat 31 m (imagen; Blue Marble NG en la Antártida) y ASTER GDEM (relieve) — NASA GIBS
 
 Nombres de archivo (los que espera la app):
@@ -15,7 +16,7 @@ Nombres de archivo (los que espera la app):
 Cada recorte se proyecta en azimutal equidistante centrado en el sitio, con el norte arriba:
 así no sale estirado ni cerca de los polos. Los sitios polares solo tienen relieve.
 
-Requisitos: python3 con numpy y Pillow.
+Requisitos: python3 con numpy y Pillow (y rasterio, pyproj y requests para el relieve de Marte y la Luna).
 Uso (desde la raíz del repo):
   python3 scripts/fetch_pair_images.py              # solo las imágenes que faltan
   python3 scripts/fetch_pair_images.py --force      # vuelve a generarlas todas
@@ -27,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import io
 import math
 import sys
@@ -36,7 +38,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 CSV_PATH = ROOT / "public/data/planetary_candidates.csv"
@@ -59,7 +61,12 @@ LAYERS = {
     ("earth", "visible-fallback"): ("gibs", f"{GIBS}/BlueMarble_NextGeneration/default/default/500m", "jpeg", 7),
     ("earth", "relief"): ("gibs", f"{GIBS}/ASTER_GDEM_Color_Shaded_Relief/default/default/31.25m", "jpeg", 11),
 }
-COLOR_SHADED = {("mars", "relief"), ("earth", "relief")}
+COLOR_SHADED = {("earth", "relief")}
+# El relieve de Marte codifica la altura en el color: en una llanura sale de un solo tono. Se pasa a
+# gris y se resta el promedio local, para que se vea el sombreado fino del terreno.
+HIGHPASS = {("mars", "relief")}
+# A 30 km las capas de relieve (Marte 463 m, Luna 330 m por píxel) quedan ampliadas: se afinan un poco
+SHARPEN = {("mars", "relief"), ("moon", "relief")}
 RADIUS_KM = {"earth": 6371.0, "mars": 3389.5, "moon": 1737.4}
 GRID = {"trek": (256, 180.0), "gibs": (512, 288.0)}  # (px por tesela, grados del nivel 0 por tesela)
 
@@ -170,6 +177,13 @@ def _render(layer: tuple, body: str, kind: str, lat0: float, lon0: float, km: fl
     if (alpha > 0.5).mean() < 0.5 or out[..., :3].mean() < 6:  # sin cobertura, o tesela en blanco  # la capa no cubre este sitio (p. ej. ASTER pasa de ±83°)
         return None
     rgb = out[..., :3] * alpha[..., None]  # lo transparente queda negro
+    if (body, kind) in HIGHPASS:
+        lum = rgb @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+        blur = np.asarray(Image.fromarray(np.clip(lum, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(40)))
+        detail = lum - blur.astype(np.float32)
+        lo, hi = np.percentile(detail, (1, 99))
+        rgb = np.repeat(np.clip((detail - lo) / max(hi - lo, 1e-6) * 255, 0, 255)[..., None], 3, axis=2)
+        flat = True
     flat = flat or (body, kind) in COLOR_SHADED  # el relieve ya viene coloreado: estirarlo solo amplifica el ruido
     if not flat:  # estiramiento de contraste: solo para verlo mejor, no se usa para medir
         valid = alpha > 0.5
@@ -177,11 +191,83 @@ def _render(layer: tuple, body: str, kind: str, lat0: float, lon0: float, km: fl
             lo, hi = np.percentile(rgb[..., ch][valid], (0.5, 99.5))
             if hi > lo:
                 rgb[..., ch] = np.clip((rgb[..., ch] - lo) / (hi - lo) * 255, 0, 255)
-    return Image.fromarray(rgb.astype(np.uint8))
+    img = Image.fromarray(rgb.astype(np.uint8))
+    if (body, kind) in SHARPEN:
+        img = img.filter(ImageFilter.UnsharpMask(radius=3, percent=140, threshold=2))
+    return img
+
+
+# --- Relieve de Marte y la Luna a partir del DEM real (mismos modelos que usa el pipeline) ---------------
+# Las capas de relieve de Trek codifican la altura en el color y llegan a 330–463 m por píxel: a 30 km
+# salen planas o en bloques. El DEM trae la altura en metros, así que se sombrea aquí.
+DEM_SOURCES = {  # claves de pipeline/config.json
+    "mars": ("molaDem", "MGS MOLA 463 m"),
+    "moon": ("lolaGlobalDem", "LRO LOLA 118 m"),
+}
+DEM_RES_M = {"mars": 200, "moon": 120}
+TINT = [(0.0, (43, 74, 122)), (0.35, (78, 138, 120)), (0.65, (201, 184, 130)), (1.0, (245, 240, 230))]
+
+
+def _gauss(a: np.ndarray, sigma: float) -> np.ndarray:
+    """Desenfoque gaussiano separable (Pillow no lo hace sobre imágenes de coma flotante)."""
+    r = np.arange(-int(3 * sigma), int(3 * sigma) + 1)
+    k = np.exp(-(r ** 2) / (2 * sigma ** 2))
+    k /= k.sum()
+    pad = len(k) // 2
+    for axis in (0, 1):
+        padded = np.pad(a, [(pad, pad) if i == axis else (0, 0) for i in range(2)], mode="edge")
+        a = np.apply_along_axis(lambda v: np.convolve(v, k, mode="valid"), axis, padded)
+    return a.astype(np.float32)
+
+
+def dem_relief(body: str, lat0: float, lon0: float, km: float) -> Image.Image:
+    """Relieve sombreado (luz del NO) y teñido según la altura dentro del recorte, a partir del DEM."""
+    sys.path.insert(0, str(ROOT))
+    from rasterio.enums import Resampling
+    from pipeline.raster import read_window
+
+    cfg = json.loads((ROOT / "pipeline/config.json").read_text())
+    key = DEM_SOURCES[body][0]
+    if body == "moon" and lat0 < cfg["thresholds"]["moonPolarBelowLatDeg"]:
+        key = "lolaPolarDem"  # el DEM polar tiene mejor cobertura cerca del polo sur
+    dem = read_window([cfg["sources"][key]["url"]], lat0, lon0, km, DEM_RES_M[body], ROOT / ".data-cache",
+                      resampling=Resampling.bilinear)
+    if np.isnan(dem).mean() > 0.2:
+        raise ValueError("el DEM no cubre el sitio")
+    dem = np.where(np.isnan(dem), np.nanmean(dem), dem).astype(np.float32)
+
+    # Ampliar con suavidad a SITE_PX y quitar el escalón de los metros enteros
+    z = np.asarray(Image.fromarray(dem, mode="F").resize((SITE_PX, SITE_PX), Image.BICUBIC), dtype=np.float32)
+    # Marte: el DEM va en metros enteros y a 463 m, así que en llanuras queda escalonado; se suaviza más.
+    # En los polos el DEM equirectangular casi no tiene información en longitud (salen rayas): se difumina.
+    z = _gauss(z, 30 if abs(lat0) > 85 else (10 if body == "mars" else 4))
+
+    px_m = km * 1000 / SITE_PX
+    # Un mínimo de 120 m: en una llanura casi plana no se amplifican los escalones del modelo
+    relief = max(float(np.ptp(z)), 120.0)
+    exaggeration = float(np.clip(0.04 * km * 1000 / relief, 1, 6))
+    gy, gx = np.gradient(z * exaggeration, px_m)
+    az, alt = math.radians(315), math.radians(40)
+    slope, aspect = np.arctan(np.hypot(gx, gy)), np.arctan2(-gx, gy)
+    shade = np.sin(alt) * np.cos(slope) + np.cos(alt) * np.sin(slope) * np.cos(az - aspect)
+    lo, hi = np.percentile(shade, (1, 99))
+    shade = np.clip((shade - lo) / max(hi - lo, 1e-6), 0, 1)
+
+    t = np.clip((z - z.min()) / relief, 0, 1)
+    xs, cols = [p[0] for p in TINT], np.array([p[1] for p in TINT], dtype=np.float32)
+    tint = np.stack([np.interp(t, xs, cols[:, ch]) for ch in range(3)], axis=-1) / 255
+    rgb = tint * (0.45 + 0.75 * shade[..., None])
+    return Image.fromarray(np.clip(rgb * 255, 0, 255).astype(np.uint8))
 
 
 def render_with_fallback(body: str, kind: str, lat0: float, lon0: float, km: float) -> Image.Image | None:
     """Como `render_patch`, pero si la capa principal no cubre el sitio prueba la de respaldo."""
+    img = None
+    if kind == "relief" and body in DEM_SOURCES:
+        try:
+            return dem_relief(body, lat0, lon0, km)
+        except Exception as e:  # sin DEM (red, cobertura): se usa la capa de Trek
+            print(f"  · DEM no disponible ({e}); se usa la capa de Trek", file=sys.stderr)
     img = render_patch(body, kind, lat0, lon0, km)
     if img is None and (body, f"{kind}-fallback") in LAYERS:
         img = _render(LAYERS[(body, f"{kind}-fallback")], body, kind, lat0, lon0, km, False)
