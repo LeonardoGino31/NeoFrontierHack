@@ -34,7 +34,9 @@ def _download(key: str, year: int, cache_dir: Path, days: list[str] | None = Non
     import earthaccess  # solo hace falta en este comando
 
     folder = cache_dir / "earth" / "modis" / key
-    existing = sorted(folder.glob("*.hdf"))
+    # El buscador de CMR también devuelve el granulo que se solapa con el año (p. ej. dic. del
+    # anterior en MOD08_M3); filtrar por el año del nombre evita correr los meses en uno.
+    existing = sorted(folder.glob(f"*.A{year}*.hdf"))
     if existing and len(existing) >= (len(days) if days else 12):
         return existing
     earthaccess.login()
@@ -48,7 +50,8 @@ def _download(key: str, year: int, cache_dir: Path, days: list[str] | None = Non
         granules = earthaccess.search_data(short_name=product["short_name"], version=product["version"],
                                            temporal=(f"{year}-01-01", f"{year}-12-31"))
     folder.mkdir(parents=True, exist_ok=True)
-    return sorted(Path(p) for p in earthaccess.download(granules, str(folder)))
+    earthaccess.download(granules, str(folder))
+    return sorted(folder.glob(f"*.A{year}*.hdf"))
 
 
 def _read(path: Path, sds_name: str) -> np.ndarray:
