@@ -60,14 +60,18 @@ export function createComparePanel({ formatLatLon, onOpenMaps }) {
     }
   });
 
-  /** HTML de una mitad: imagen + textos. `img` es null si esa vista no existe. */
-  function sideHtml({ img, caption, title, subtitle, body, footer }) {
+  /**
+   * HTML de una mitad: imagen + textos. `img` es null si esa vista no existe.
+   * `corner` va fijo en la esquina superior derecha del texto (el pin de Google Maps).
+   */
+  function sideHtml({ img, caption, title, subtitle, body, footer, corner }) {
     return `
       <figure>
         <img src="${img}" alt="${title}" loading="lazy" />
         <figcaption>${caption}</figcaption>
       </figure>
-      <div class="cmp-text">
+      <div class="cmp-text${corner ? ' has-corner' : ''}">
+        ${corner ?? ''}
         <strong>${title}</strong>
         <span class="cmp-sub">${subtitle}</span>
         ${body}
@@ -84,8 +88,8 @@ export function createComparePanel({ formatLatLon, onOpenMaps }) {
       img: earthImages(earth)[view],
       caption: `${EARTH_LAYERS[view]} · ~${km} km`,
       title: earth.name,
-      subtitle: `Tierra · ${earth.region} · ${formatLatLon(earth)}
-        <button class="cmp-gmap" type="button" title="Ver este lugar en Google Maps" aria-label="Ver ${earth.name} en Google Maps">${MAPS_PIN_SVG}</button>`,
+      subtitle: `Tierra · ${earth.region} · ${formatLatLon(earth)}`,
+      corner: `<button class="cmp-gmap" type="button" title="Ver este lugar en Google Maps" aria-label="Ver ${earth.name} en Google Maps">${MAPS_PIN_SVG}</button>`,
       body: `<p>${earth.why}</p>
         <p class="cmp-limits"><b>Dónde falla:</b> ${earth.limits}</p>`,
     });

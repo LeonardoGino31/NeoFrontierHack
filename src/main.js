@@ -493,7 +493,8 @@ function stepSelectedPoint(dir) {
 
 /** Cambia el análogo a otro cuerpo, saltando al primer punto de la Tierra emparejado con él. */
 function switchAnalogBody(body) {
-  if (!selectedMarker || selectedMarker.userData.analog.body === body) return;
+  // `body` y no `analog.body`: un candidato seleccionado no tiene pareja en la Tierra
+  if (!selectedMarker || selectedMarker.userData.body === body) return;
   const [first] = markers.markersFor(body);
   if (first) selectEarthPoint(first);
 }
@@ -551,14 +552,14 @@ function updateFlight(delta) {
   }
 }
 
-/** Se mete dentro del pin rojo del globo y, cuando ya lo llena, se abre Google Maps desde él. */
+/** Se mete en el cruce de la cruz roja del globo y, cuando ya lo llena, abre Google Maps desde ahí. */
 function diveIntoMarker(earth) {
   if (!selectedMarker || flight) return;
   const center = meshes.earth.getWorldPosition(new THREE.Vector3());
   const base = selectedMarker.getWorldPosition(new THREE.Vector3());
   const normal = base.clone().sub(center).normalize();
   const s = meshes.earth.scale.x;
-  const head = base.clone().addScaledVector(normal, 0.14 * s); // la cabeza del pin
+  const head = base.clone().addScaledVector(normal, 0.14 * s); // el travesaño de la cruz
   const cameraEnd = head.clone().addScaledVector(normal, 0.5 * s);
   document.body.classList.add('diving'); // los paneles se desvanecen
   const spot = { name: earth.name, subtitle: `${earth.region} · ${formatLatLon(earth)}`, lat: earth.lat, lon: earth.lon };
