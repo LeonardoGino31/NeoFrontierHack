@@ -1,14 +1,33 @@
 // Guía de parámetros: pantalla dedicada que explica cada parámetro de similitud,
 // de dónde salen los datos y cómo se calcula, con un simulador interactivo.
 
-import { PARAMS, paramSimilarity } from './similarity.js';
+import { paramSimilarity } from './similarity.js';
+import { addKeyLayer, KEY_PRIORITY } from './keyboard.js';
+import { requirementsOf } from './parameterModel.js';
 import { PARAM_INFO, OVERALL_INFO } from './paramInfo.js';
+import { STATUS_LABELS } from './siteValues.js';
 import { icon } from './icons.js';
 
 const BODY_NAMES = { earth: 'Tierra', mars: 'Marte', moon: 'Luna' };
 const level = (s) => (s >= 0.75 ? 'high' : s >= 0.5 ? 'mid' : 'low');
 
-export function createParamGuide({ onOpenLab } = {}) {
+/** Etiqueta de procedencia de un valor: estado y, si es real, el dataset enlazado. */
+function provenanceTag(provenance) {
+  const label = STATUS_LABELS[provenance.status];
+  const source = provenance.source;
+  if (!source) return `<small class="prov prov-${provenance.status}">${label}</small>`;
+  const url = typeof source.url === 'string' ? source.url : null;
+  const dataset = url ? `<a href="${url}" target="_blank" rel="noopener">${source.dataset}</a>` : source.dataset;
+  const note = provenance.note ? ` · ${provenance.note}` : '';
+  return `<small class="prov prov-${provenance.status}"><b>${label}</b> · ${dataset}${note}</small>`;
+}
+
+/**
+ * Crea la guía de parámetros (oculta) a partir del modelo de parámetros.
+ * onOpenLab(modo) abre el laboratorio 3D en el modo que ilustra un parámetro.
+ */
+export function createParamGuide({ model, onOpenLab }) {
+  const { groups, parameters, bodies } = model;
   // --- Estructura base ---
   const overlay = document.createElement('div');
   overlay.id = 'param-guide';
@@ -26,28 +45,27 @@ export function createParamGuide({ onOpenLab } = {}) {
     </div>`;
   document.body.appendChild(overlay);
 
-  // Botón fijo para abrir la guía en cualquier momento
-  const launcher = document.createElement('button');
-  launcher.id = 'guide-launcher';
-  launcher.innerHTML = `${icon('book')}<span>Parámetros</span>`;
-  launcher.addEventListener('click', () => open('overall'));
-  document.body.appendChild(launcher);
-
   const nav = overlay.querySelector('.guide-nav');
   const detail = overlay.querySelector('.guide-detail');
   let currentKey = null;
   let context = null; // datos del punto seleccionado (si hay)
-  let activeParams = PARAMS;
+  let activeRequirements = requirementsOf(model);
   let keys = [];
 
+  /** Navegación: índice global, subparámetros agrupados y requisitos del cuerpo seleccionado. */
   function refreshNavigation() {
-    activeParams = context?.analogBody
-      ? PARAMS.filter((p) => !p.bodies || p.bodies.includes(context.analogBody))
-      : PARAMS;
-    keys = ['overall', ...activeParams.map((p) => p.key)];
+    activeRequirements = requirementsOf(model, context?.analogBody);
+    keys = ['overall', ...parameters.map((p) => p.key), ...activeRequirements.map((r) => r.key)];
+    const button = (key, iconName, label) =>
+      `<button data-key="${key}">${icon(iconName)}<span>${label}</span></button>`;
     nav.innerHTML = [
-      `<button data-key="overall">${icon('target')}<span>Índice global</span></button>`,
-      ...activeParams.map((p) => `<button data-key="${p.key}">${icon(p.icon)}<span>${p.label}</span></button>`),
+      button('overall', 'target', 'Índice global'),
+      ...groups.map((g) => [
+        `<div class="guide-nav-group">${g.label}</div>`,
+        ...parameters.filter((p) => p.group === g.key).map((p) => button(p.key, p.icon, p.label)),
+      ].join('')),
+      '<div class="guide-nav-group">Requisitos del sitio</div>',
+      ...activeRequirements.map((r) => button(r.key, r.icon, r.label)),
     ].join('');
     if (currentKey && !keys.includes(currentKey)) currentKey = 'overall';
   }
@@ -67,14 +85,13 @@ export function createParamGuide({ onOpenLab } = {}) {
     if (btn) show(btn.dataset.key);
   });
 
-  // Teclado: Esc cierra y ↑/↓ navegan. Se registra en fase de captura para
-  // que Esc cierre solo la guía y no también la comparación de atrás.
-  window.addEventListener(
-    'keydown',
-    (e) => {
-      if (overlay.hidden) return;
+  // Teclado: Esc cierra y ↑/↓ navegan. Como capa de mayor prioridad que el globo,
+  // Esc cierra solo la guía y no también la comparación de atrás.
+  addKeyLayer({
+    priority: KEY_PRIORITY.guide,
+    isActive: () => !overlay.hidden,
+    onKeyDown(e) {
       if (e.key === 'Escape') {
-        e.stopImmediatePropagation();
         close();
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
@@ -82,62 +99,85 @@ export function createParamGuide({ onOpenLab } = {}) {
         show(keys[(i + keys.length) % keys.length]);
       }
     },
-    true
-  );
+  });
 
   // --- Render ---
+  /** Muestra la página de `key` (índice global, parámetro o requisito) y marca su botón. */
   function show(key) {
     if (!keys.includes(key)) key = 'overall';
+    const isRequirement = activeRequirements.some((r) => r.key === key);
+    detail.innerHTML = key === 'overall' ? renderOverall()
+      : isRequirement ? renderRequirement(key) : renderParam(key);
     currentKey = key;
     nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.key === key));
-    detail.innerHTML = key === 'overall' ? renderOverall() : renderParam(key);
     detail.scrollTop = 0;
-    if (key !== 'overall') bindSimulator(key);
+    if (key !== 'overall' && !isRequirement && !context?.isCandidate) bindSimulator(key);
   }
 
+  /** HTML de la página del índice global: fórmula y pesos de los grupos por cuerpo. */
   function renderOverall() {
-    const totalWeight = activeParams.reduce((sum, p) => sum + p.weight, 0);
-    const rows = activeParams.map((p) => {
-      const share = (p.weight / totalWeight) * 100;
+    // Pesos de los grupos para el cuerpo seleccionado, o para ambos si no hay selección
+    const shownBodies = context?.analogBody ? [context.analogBody] : Object.keys(bodies);
+    const rows = shownBodies.map((body) => {
+      const profile = bodies[body];
+      const total = Object.values(profile.weights).reduce((a, b) => a + b, 0);
       return `
-        <div class="weight-row">
-          <span class="weight-icon">${icon(p.icon)}</span>
-          <span class="weight-label">${p.label}</span>
-          <div class="weight-bar"><div style="width:${share}%"></div></div>
-          <span class="weight-value">×${p.weight} · ${share.toFixed(1)}%</span>
-        </div>`;
+        <h4 class="weight-body">${BODY_NAMES[body]} · ${profile.purpose}</h4>
+        <p class="guide-note">${profile.why}</p>
+        ${groups.map((g) => {
+          const w = profile.weights[g.key];
+          const share = (w / total) * 100;
+          return `
+            <div class="weight-row">
+              <span class="weight-icon">${icon(g.icon)}</span>
+              <span class="weight-label">${g.label}</span>
+              <div class="weight-bar"><div style="width:${share}%"></div></div>
+              <span class="weight-value">×${w} · ${share.toFixed(1)}%</span>
+            </div>`;
+        }).join('')}`;
     }).join('');
 
     const current = context
       ? `<div class="guide-block guide-current">
            <h3>En el punto seleccionado</h3>
-           <p>Comparación Tierra – ${context.analogName}:
+           <p>${context.isCandidate ? 'Puntaje del sitio' : `Comparación Tierra – ${context.analogName}`}:
              <strong class="lvl-${level(context.data.overall)}">${(context.data.overall * 100).toFixed(1)} %</strong></p>
+           ${context.isCandidate ? `<p class="guide-note">Cobertura de parámetros: ${context.candidate.parameterDataCoveragePercent ?? 0}%. El valor resume las capas disponibles; no es una similitud con la Tierra.</p>` : ''}
          </div>`
       : '';
+    const what = context?.isCandidate
+      ? 'Resume la evaluación de este punto en un número entre 0 % y 100 %. Se combinan los puntajes de los grupos con los pesos del objetivo del cuerpo y se usan solo las capas disponibles.'
+      : OVERALL_INFO.what;
+    const note = context?.isCandidate
+      ? 'Este puntaje de selección no representa similitud con la Tierra. Revisa la cobertura de parámetros y los filtros del punto; las capas sin datos no se consideran una medición.'
+      : OVERALL_INFO.note;
 
     return `
       <header class="guide-title">
         <span class="guide-title-icon">${icon('target')}</span>
-        <div><h2>Índice global de similitud</h2><span class="guide-tag">promedio ponderado</span></div>
+        <div><h2>${context?.isCandidate ? 'Puntaje del candidato' : 'Índice global de similitud'}</h2><span class="guide-tag">promedio ponderado</span></div>
         <button class="guide-lab-btn" data-lab="natural">${icon('cube')} Laboratorio 3D</button>
       </header>
-      <div class="guide-block"><h3>Qué es</h3><p>${OVERALL_INFO.what}</p></div>
+      <div class="guide-block"><h3>Qué es</h3><p>${what}</p></div>
       <div class="guide-block">
         <h3>Fórmula</h3>
-        <div class="formula">índice = Σ (peso<sub>i</sub> × similitud<sub>i</sub>) / Σ peso<sub>i</sub></div>
+        <div class="formula">grupo = promedio de sus subparámetros<br>índice = Σ (peso<sub>g</sub> × grupo<sub>g</sub>) / Σ peso<sub>g</sub></div>
       </div>
-      <div class="guide-block"><h3>Peso de cada parámetro</h3>${rows}<p class="guide-note">${OVERALL_INFO.note}</p></div>
+      <div class="guide-block"><h3>Peso de cada grupo según el objetivo</h3>${rows}<p class="guide-note">${note}</p></div>
       <div class="guide-block"><h3>Por qué sirve</h3><p>${OVERALL_INFO.why}</p></div>
       ${current}
-      <p class="guide-disclaimer">Los valores en pantalla son de demo. Las fuentes de cada parámetro son los datasets que se usarán para los datos reales.</p>`;
+      <p class="guide-disclaimer">${context?.isCandidate
+        ? 'Evaluación exploratoria con las capas disponibles; la cobertura incompleta se indica junto al punto.'
+        : `${context
+          ? `En este punto, ${context.data.dataSummary.real} de ${context.data.dataSummary.total} valores vienen de datos reales; el resto es de demostración.`
+          : 'Cada valor indica su procedencia: Medido, Calculado o Estimado vienen del pipeline de datos (con su fuente); Demo es ilustrativo.'} Abre un parámetro para ver la fuente de cada número.`}</p>`;
   }
 
+  /** HTML de la página de un subparámetro, con fuentes, fórmula y simulador. */
   function renderParam(key) {
-    const p = activeParams.find((x) => x.key === key);
+    const p = parameters.find((x) => x.key === key);
     const info = PARAM_INFO[key];
-    const totalWeight = activeParams.reduce((sum, item) => sum + item.weight, 0);
-    const share = (p.weight / totalWeight) * 100;
+    const group = groups.find((g) => g.key === p.group);
     const unit = p.unit || '—';
 
     const sources = Object.entries(info.sources)
@@ -145,16 +185,30 @@ export function createParamGuide({ onOpenLab } = {}) {
       .join('');
 
     const result = context?.data.results.find((r) => r.param.key === key);
+    const filter = context?.isCandidate ? context.data.candidate.hardFilters[key] : null;
+    const filterStatus = filter
+      ? { passed: 'Pasa el filtro', failed: 'No pasa el filtro', not_evaluated: 'Filtro no evaluado' }[filter.status] ?? filter.status
+      : null;
     const current = result
-      ? `<div class="guide-block guide-current">
-           <h3>En el punto seleccionado</h3>
-           <div class="current-grid">
-             <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}</div>
-             <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}</div>
-             <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
-           </div>
-           ${result.confidence ? `<p class="guide-note">Confianza de la estimación (demo): Tierra ${Math.round(result.confidence.earth)}% · ${context.analogName} ${Math.round(result.confidence.analog)}%. No forma parte del índice de similitud.</p>` : ''}
-         </div>`
+      ? context?.isCandidate
+        ? `<div class="guide-block guide-current">
+             <h3>En el punto candidato</h3>
+             <div class="current-grid">
+               <div><span>${context.analogName}</span>${result.analog == null ? 'Sin datos' : `${result.analog.toFixed(p.decimals)} ${p.unit}`}</div>
+               <div><span>Estado del factor</span>${filterStatus ?? 'Dato descriptivo'}</div>
+               <div><span>Confianza</span>${result.confidence?.analog == null ? 'Sin dato' : `${Math.round(result.confidence.analog)}%`}</div>
+             </div>
+             ${filter ? `<p class="guide-note">${filter.label}: ${filterStatus}. ${filter.value == null ? '' : `Valor ${filter.value} ${filter.unit}; umbral ${filter.threshold} ${filter.unit}.`}</p>` : ''}
+           </div>`
+        : `<div class="guide-block guide-current">
+             <h3>En el punto seleccionado</h3>
+             <div class="current-grid">
+               <div><span>Tierra</span>${result.earth.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.earth)}</div>
+               <div><span>${context.analogName}</span>${result.analog.toFixed(p.decimals)} ${p.unit}${provenanceTag(result.provenance.analog)}</div>
+               <div><span>Similitud</span><strong class="lvl-${level(result.similarity)}">${Math.round(result.similarity * 100)} %</strong></div>
+             </div>
+             ${result.confidence ? `<p class="guide-note">Confianza de la estimación: Tierra ${Math.round(result.confidence.earth)}% (${STATUS_LABELS[result.provenance.confidence.earth.status].toLowerCase()}) · ${context.analogName} ${Math.round(result.confidence.analog)}% (${STATUS_LABELS[result.provenance.confidence.analog.status].toLowerCase()}). No forma parte del índice de similitud.</p>` : ''}
+           </div>`
       : '';
 
     return `
@@ -163,9 +217,9 @@ export function createParamGuide({ onOpenLab } = {}) {
         <div>
           <h2>${p.label}</h2>
           <span class="guide-tag">unidad: ${unit}</span>
-          <span class="guide-tag">peso ×${p.weight} (${share.toFixed(1)}% del índice)</span>
+          <span class="guide-tag">grupo: ${group.label}</span>
         </div>
-        <button class="guide-lab-btn" data-lab="${key}">${icon('cube')} Ver en 3D</button>
+        ${p.lab ? `<button class="guide-lab-btn" data-lab="${p.lab}">${icon('cube')} Ver en 3D</button>` : ''}
       </header>
 
       <div class="guide-block"><h3>Qué mide</h3><p>${info.what}</p></div>
@@ -173,31 +227,82 @@ export function createParamGuide({ onOpenLab } = {}) {
       <div class="guide-block"><h3>Ejemplo en la Tierra</h3><p>${info.example}</p></div>
       <div class="guide-block"><h3>Fuentes de datos</h3><div class="sources">${sources}</div></div>
 
-      <div class="guide-block">
-        <h3>Cómo se compara</h3>
-        <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
-        <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
-        ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tendría la estimación. Los valores actuales son de demostración.</p>' : ''}
-        <div class="simulator">
-          <svg class="sim-plot" viewBox="0 0 300 130"></svg>
-          <div class="sim-controls">
-            <label>Tierra <output data-out="earth"></output>
-              <input type="range" data-sim="earth"></label>
-            <label>Análogo <output data-out="analog"></output>
-              <input type="range" data-sim="analog"></label>
-            <div class="sim-calc"></div>
-            <div class="hud-bar sim-bar"><div class="hud-fill"></div>
-              <span class="hud-label">Similitud</span><span class="hud-big sim-pct"></span></div>
-          </div>
+      ${context?.isCandidate
+        ? `<div class="guide-block"><h3>Cómo se usa este factor</h3>
+             <p>Se muestra el valor disponible en la capa del candidato. No se calcula similitud porque todavía no hay una ubicación terrestre asociada.</p>
+             ${p.key === 'ice' ? '<p class="guide-note">El potencial de hielo y su confianza son distintos. La confianza comunica cobertura y coherencia espacial; no es probabilidad de encontrar hielo.</p>' : ''}
+           </div>`
+        : `<div class="guide-block">
+             <h3>Cómo se compara</h3>
+             <div class="formula">similitud = max(0, 1 − |Tierra − análogo| / ${p.span} ${p.unit})</div>
+             <p class="guide-note">Si la diferencia llega a ${p.span} ${p.unit} (el <em>span</em> de este parámetro), la similitud es 0 %.</p>
+             ${p.key === 'ice' ? '<p class="guide-note">El índice de potencial y la confianza son conceptos distintos. El simulador compara el índice; la confianza solo comunica cuánta certeza tiene la estimación.</p>' : ''}
+             <div class="simulator">
+               <svg class="sim-plot" viewBox="0 0 300 130"></svg>
+               <div class="sim-controls">
+                 <label>Tierra <output data-out="earth"></output>
+                   <input type="range" data-sim="earth"></label>
+                 <label>Análogo <output data-out="analog"></output>
+                   <input type="range" data-sim="analog"></label>
+                 <div class="sim-calc"></div>
+                 <div class="hud-bar sim-bar"><div class="hud-fill"></div>
+                   <span class="hud-label">Similitud</span><span class="hud-big sim-pct"></span></div>
+               </div>
+             </div>
+           </div>`}
+      ${current}`;
+  }
+
+  /** Requisito de misión: se evalúa solo en el sitio de Marte o la Luna, sin simulador. */
+  function renderRequirement(key) {
+    const req = activeRequirements.find((r) => r.key === key);
+    const { body } = req;
+    const info = PARAM_INFO[key];
+    const sources = Object.entries(info.sources)
+      .map(([b, source]) => `<div class="source"><span>${BODY_NAMES[b]}</span>${source}</div>`)
+      .join('');
+    const result = context?.analogBody === body ? context.data.requirement : null;
+    // Los candidatos no traen procedencia del requisito y pueden no tener valor
+    const hasValue = result?.value != null;
+    const current = result
+      ? `<div class="guide-block guide-current">
+           <h3>${context.isCandidate ? 'En el punto candidato' : 'En el punto seleccionado'}</h3>
+           <div class="current-grid">
+             <div><span>${context.analogName}</span>${hasValue ? `${result.value.toFixed(req.decimals)} ${req.unit}` : 'Sin datos'}${result.provenance ? provenanceTag(result.provenance) : ''}</div>
+             <div><span>Mínimo</span>${req.min.toFixed(req.decimals)} ${req.unit}</div>
+             <div><span>Resultado</span><strong class="lvl-${result.pass ? 'high' : 'low'}">${!hasValue ? 'S/D' : result.pass ? 'APTO' : 'NO APTO'}</strong></div>
+           </div>
+         </div>`
+      : '';
+
+    return `
+      <header class="guide-title">
+        <span class="guide-title-icon">${icon(req.icon)}</span>
+        <div>
+          <h2>${req.label}</h2>
+          <span class="guide-tag">requisito · ${BODY_NAMES[body]}</span>
+          <span class="guide-tag">mínimo: ${req.min} ${req.unit}</span>
         </div>
+      </header>
+      <div class="guide-block"><h3>Qué mide</h3><p>${info.what}</p></div>
+      <div class="guide-block"><h3>Por qué importa</h3><p>${info.why}</p></div>
+      <div class="guide-block"><h3>¿Y en la Tierra?</h3><p>${info.example}</p></div>
+      <div class="guide-block"><h3>Fuentes de datos</h3><div class="sources">${sources}</div></div>
+      <div class="guide-block">
+        <h3>Cómo se evalúa</h3>
+        <div class="formula">apto = valor del sitio ≥ ${req.min} ${req.unit}</div>
+        <p class="guide-note">${req.note} ${context?.isCandidate
+          ? 'No entra al puntaje de selección: se muestra aparte como apto o no apto.'
+          : 'No entra al índice de similitud: un sitio que no cumple se marca como no apto aunque su análogo terrestre se parezca mucho.'}</p>
       </div>
       ${current}`;
   }
 
-  // --- Simulador: mueve los valores y recalcula con la misma función del HUD ---
+  // --- Simulador ---
+  /** Conecta los sliders del simulador y redibuja la similitud con la misma función del HUD. */
   function bindSimulator(key) {
-    const p = PARAMS.find((x) => x.key === key);
-    const ranges = [p.earth, p.mars, p.moon].filter(Boolean);
+    const p = parameters.find((x) => x.key === key);
+    const ranges = Object.values(p.ranges);
     const lo = Math.min(...ranges.map((range) => range[0]));
     const hi = Math.max(...ranges.map((range) => range[1]));
     const step = (hi - lo) / 200 || 0.01;
@@ -205,8 +310,8 @@ export function createParamGuide({ onOpenLab } = {}) {
 
     const result = context?.data.results.find((r) => r.param.key === key);
     const start = {
-      earth: result ? result.earth : mid(p.earth),
-      analog: result ? result.analog : mid(p[context?.analogBody] ?? p.mars ?? p.moon),
+      earth: result ? result.earth : mid(p.ranges.earth),
+      analog: result ? result.analog : mid(p.ranges[context?.analogBody] ?? p.ranges.mars),
     };
 
     const inputs = {};
@@ -258,20 +363,20 @@ export function createParamGuide({ onOpenLab } = {}) {
   }
 
   // --- API ---
+  /** Abre la guía en `key`, con el contexto del punto seleccionado si lo hay. */
   function open(key = 'overall', ctx = context) {
     context = ctx;
     refreshNavigation();
     overlay.hidden = false;
-    launcher.hidden = true;
     show(key);
   }
 
+  /** Cierra la guía; se vuelve a abrir con clic en una fila del HUD. */
   function close() {
     overlay.hidden = true;
-    launcher.hidden = false;
   }
 
-  // El contexto cambia cuando se selecciona o se limpia un punto
+  /** Actualiza el punto seleccionado (o null) y refresca la página abierta. */
   function setContext(ctx) {
     context = ctx;
     refreshNavigation();

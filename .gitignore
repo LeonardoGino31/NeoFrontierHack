@@ -38,3 +38,11 @@ CLAUDE.md
 
 # pnpm solo se usa en local; el lockfile oficial del repo es package-lock.json
 pnpm-lock.yaml
+
+# Descargas crudas del pipeline de datos (se regeneran con python -m pipeline fetch)
+.data-cache/
+__pycache__/
+.venv/
+
+# DEM crudos de los sitios terrestres (rasters locales, no se versionan; ver backend/README.md)
+data/raw/

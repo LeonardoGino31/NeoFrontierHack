@@ -1,0 +1,449 @@
+{
+ "methods": {
+  "previous": "Método anterior: parámetros físicos (terreno, luz, albedo, suelo, hielo), sin geología",
+  "current": "Método actual: parámetros físicos sin los que no distinguen sitios + litología",
+  "bestGroup": "La mejor de las dimensiones por separado (iluminación, topografía, hielo o geología)"
+ },
+ "bodies": {
+  "moon": {
+   "previous": {
+    "medianTopPct": 41.4,
+    "inTop10Pct": 0,
+    "n": 7
+   },
+   "current": {
+    "medianTopPct": 39.2,
+    "inTop10Pct": 1,
+    "n": 7
+   },
+   "bestGroup": {
+    "medianTopPct": 30.6,
+    "inTop10Pct": 2,
+    "n": 7
+   }
+  },
+  "mars": {
+   "previous": {
+    "medianTopPct": 39.1,
+    "inTop10Pct": 0,
+    "n": 6
+   },
+   "current": {
+    "medianTopPct": 26.9,
+    "inTop10Pct": 1,
+    "n": 6
+   },
+   "bestGroup": {
+    "medianTopPct": 16.0,
+    "inTop10Pct": 3,
+    "n": 6
+   }
+  },
+  "all": {
+   "previous": {
+    "medianTopPct": 40.6,
+    "inTop10Pct": 0,
+    "n": 13
+   },
+   "current": {
+    "medianTopPct": 28.5,
+    "inTop10Pct": 2,
+    "n": 13
+   },
+   "bestGroup": {
+    "medianTopPct": 26.9,
+    "inTop10Pct": 5,
+    "n": 13
+   }
+  }
+ },
+ "pairs": [
+  {
+   "target": "marius",
+   "targetName": "Colinas de Marius",
+   "body": "moon",
+   "targetLithology": "pyroclastic",
+   "targetMapUnit": "EIp",
+   "earth": "lanzarote",
+   "earthName": "Lanzarote · tubo de La Corona",
+   "earthLithology": null,
+   "previous": {
+    "topPct": 43.448,
+    "rank": 3773661,
+    "of": 8685409
+   },
+   "current": {
+    "topPct": 39.158,
+    "rank": 3401071,
+    "of": 8685409
+   },
+   "byGroup": {
+    "topography": 47.809,
+    "illumination": 44.696
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 44.696
+   }
+  },
+  {
+   "target": "aristarchus",
+   "targetName": "Meseta de Aristarco",
+   "body": "moon",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "Cc",
+   "earth": "spcrater",
+   "earthName": "SP Crater",
+   "earthLithology": "carbonate",
+   "previous": {
+    "topPct": 41.408,
+    "rank": 3596489,
+    "of": 8685409
+   },
+   "current": {
+    "topPct": 73.718,
+    "rank": 6402752,
+    "of": 8685409
+   },
+   "byGroup": {
+    "topography": 87.658,
+    "illumination": 30.621,
+    "geology": 100.0
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 30.621
+   }
+  },
+  {
+   "target": "tranquillitatis",
+   "targetName": "Pozo de Tranquilidad",
+   "body": "moon",
+   "targetLithology": "basalt",
+   "targetMapUnit": "Im2",
+   "earth": "cratersmoon",
+   "earthName": "Craters of the Moon",
+   "earthLithology": "basalt",
+   "previous": {
+    "topPct": 32.361,
+    "rank": 2810691,
+    "of": 8685409
+   },
+   "current": {
+    "topPct": 1.206,
+    "rank": 104714,
+    "of": 8685409
+   },
+   "byGroup": {
+    "topography": 83.858,
+    "illumination": 24.614,
+    "geology": 2.876
+   },
+   "bestGroup": {
+    "group": "geology",
+    "topPct": 2.876
+   }
+  },
+  {
+   "target": "shackleton",
+   "targetName": "Polo sur · Shackleton",
+   "body": "moon",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "Ec",
+   "earth": "mcmurdo",
+   "earthName": "Valles Secos de McMurdo",
+   "earthLithology": "clasticSedimentary",
+   "previous": {
+    "topPct": 20.51,
+    "rank": 1729559,
+    "of": 8432724
+   },
+   "current": {
+    "topPct": 21.801,
+    "rank": 1838385,
+    "of": 8432724
+   },
+   "byGroup": {
+    "topography": 92.254,
+    "illumination": 26.883,
+    "ice": 48.754,
+    "geology": 62.238
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 26.883
+   }
+  },
+  {
+   "target": "nobile_rim_1",
+   "targetName": "Nobile Rim 1",
+   "body": "moon",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "pNc",
+   "earth": "domec",
+   "earthName": "Domo C",
+   "earthLithology": "ice",
+   "previous": {
+    "topPct": 17.64,
+    "rank": 1487520,
+    "of": 8432724
+   },
+   "current": {
+    "topPct": 28.467,
+    "rank": 2400535,
+    "of": 8432724
+   },
+   "byGroup": {
+    "topography": 95.158,
+    "illumination": 43.095,
+    "ice": 48.754,
+    "geology": 100.0
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 43.095
+   }
+  },
+  {
+   "target": "malapert_massif",
+   "targetName": "Macizo de Malapert",
+   "body": "moon",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "pNbm",
+   "earth": "chajnantor",
+   "earthName": "Meseta de Chajnantor",
+   "earthLithology": "unconsolidated",
+   "previous": {
+    "topPct": 62.296,
+    "rank": 5253208,
+    "of": 8432724
+   },
+   "current": {
+    "topPct": 61.663,
+    "rank": 5199868,
+    "of": 8432724
+   },
+   "byGroup": {
+    "topography": 10.109,
+    "illumination": 5.171,
+    "ice": 100.0,
+    "geology": 35.739
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 5.171
+   }
+  },
+  {
+   "target": "mons_mouton",
+   "targetName": "Mons Mouton",
+   "body": "moon",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "pNb",
+   "earth": "maunakea",
+   "earthName": "Mauna Kea",
+   "earthLithology": "felsicVolcanic",
+   "previous": {
+    "topPct": 94.817,
+    "rank": 7995677,
+    "of": 8432724
+   },
+   "current": {
+    "topPct": 97.571,
+    "rank": 8227903,
+    "of": 8432724
+   },
+   "byGroup": {
+    "topography": 87.82,
+    "illumination": 74.479,
+    "ice": 100.0,
+    "geology": 100.0
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 74.479
+   }
+  },
+  {
+   "target": "jezero",
+   "targetName": "Cráter Jezero",
+   "body": "mars",
+   "targetLithology": "clasticSedimentary",
+   "targetMapUnit": "HNt",
+   "earth": "salda",
+   "earthName": "Lago Salda",
+   "earthLithology": "unconsolidated",
+   "previous": {
+    "topPct": 82.625,
+    "rank": 430038,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 48.202,
+    "rank": 249276,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 90.681,
+    "illumination": 38.824,
+    "ice": 33.609,
+    "geology": 43.177
+   },
+   "bestGroup": {
+    "group": "ice",
+    "topPct": 33.609
+   }
+  },
+  {
+   "target": "gale",
+   "targetName": "Cráter Gale",
+   "body": "mars",
+   "targetLithology": "clasticSedimentary",
+   "targetMapUnit": "Htu",
+   "earth": "hanksville",
+   "earthName": "Hanksville",
+   "earthLithology": "unconsolidated",
+   "previous": {
+    "topPct": 18.871,
+    "rank": 98215,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 26.633,
+    "rank": 137732,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 100.0,
+    "illumination": 30.766,
+    "ice": 33.609,
+    "geology": 43.177
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 30.766
+   }
+  },
+  {
+   "target": "gale",
+   "targetName": "Cráter Gale",
+   "body": "mars",
+   "targetLithology": "clasticSedimentary",
+   "targetMapUnit": "Htu",
+   "earth": "lajoya",
+   "earthName": "Pampas de La Joya",
+   "earthLithology": "unconsolidated",
+   "previous": {
+    "topPct": 10.553,
+    "rank": 54924,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 19.969,
+    "rank": 103271,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 100.0,
+    "illumination": 4.869,
+    "ice": 33.609,
+    "geology": 43.177
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 4.869
+   }
+  },
+  {
+   "target": "meridiani",
+   "targetName": "Meridiani Planum",
+   "body": "mars",
+   "targetLithology": "impactBreccia",
+   "targetMapUnit": "HNhu",
+   "earth": "riotinto",
+   "earthName": "Río Tinto",
+   "earthLithology": "maficPlutonic",
+   "previous": {
+    "topPct": 37.592,
+    "rank": 195655,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 27.168,
+    "rank": 140499,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 83.072,
+    "illumination": 5.612,
+    "ice": 33.609,
+    "geology": 10.856
+   },
+   "bestGroup": {
+    "group": "illumination",
+    "topPct": 5.612
+   }
+  },
+  {
+   "target": "arsia",
+   "targetName": "Arsia Mons",
+   "body": "mars",
+   "targetLithology": "basalt",
+   "targetMapUnit": "Ave",
+   "earth": "lavabeds",
+   "earthName": "Lava Beds",
+   "earthLithology": "basalt",
+   "previous": {
+    "topPct": 40.609,
+    "rank": 211359,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 1.421,
+    "rank": 7347,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 82.502,
+    "illumination": 38.398,
+    "ice": 38.323,
+    "geology": 2.836
+   },
+   "bestGroup": {
+    "group": "geology",
+    "topPct": 2.836
+   }
+  },
+  {
+   "target": "utopia",
+   "targetName": "Utopia Planitia",
+   "body": "mars",
+   "targetLithology": "clasticSedimentary",
+   "targetMapUnit": "eAb",
+   "earth": "devon",
+   "earthName": "Isla Devon · cráter Haughton",
+   "earthLithology": "clasticSedimentary",
+   "previous": {
+    "topPct": 81.276,
+    "rank": 423014,
+    "of": 520467
+   },
+   "current": {
+    "topPct": 35.186,
+    "rank": 181965,
+    "of": 517145
+   },
+   "byGroup": {
+    "topography": 71.9,
+    "illumination": 65.435,
+    "ice": 100.0,
+    "geology": 26.322
+   },
+   "bestGroup": {
+    "group": "geology",
+    "topPct": 26.322
+   }
+  }
+ ],
+ "generatedAt": "2026-11-15T18:54:45+00:00"
+}

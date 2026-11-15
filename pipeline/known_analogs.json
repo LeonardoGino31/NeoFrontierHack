@@ -1,0 +1,147 @@
+{
+ "pairs": [
+  {
+   "earthId": "salda",
+   "earthName": "Lago Salda",
+   "earthLat": 37.55,
+   "earthLon": 29.68,
+   "analogId": "jezero",
+   "body": "mars",
+   "analogName": "Cráter Jezero",
+   "analogLat": 18.38,
+   "analogLon": 77.58
+  },
+  {
+   "earthId": "hanksville",
+   "earthName": "Hanksville",
+   "earthLat": 38.41,
+   "earthLon": -110.79,
+   "analogId": "gale",
+   "body": "mars",
+   "analogName": "Cráter Gale",
+   "analogLat": -5.4,
+   "analogLon": 137.8
+  },
+  {
+   "earthId": "lajoya",
+   "earthName": "Pampas de La Joya",
+   "earthLat": -16.73,
+   "earthLon": -71.87,
+   "analogId": "gale",
+   "body": "mars",
+   "analogName": "Cráter Gale",
+   "analogLat": -5.4,
+   "analogLon": 137.8
+  },
+  {
+   "earthId": "riotinto",
+   "earthName": "Río Tinto",
+   "earthLat": 37.72,
+   "earthLon": -6.55,
+   "analogId": "meridiani",
+   "body": "mars",
+   "analogName": "Meridiani Planum",
+   "analogLat": -1.95,
+   "analogLon": -5.53
+  },
+  {
+   "earthId": "lavabeds",
+   "earthName": "Lava Beds",
+   "earthLat": 41.71,
+   "earthLon": -121.51,
+   "analogId": "arsia",
+   "body": "mars",
+   "analogName": "Arsia Mons",
+   "analogLat": -8.26,
+   "analogLon": -120.1
+  },
+  {
+   "earthId": "devon",
+   "earthName": "Isla Devon · cráter Haughton",
+   "earthLat": 75.38,
+   "earthLon": -89.68,
+   "analogId": "utopia",
+   "body": "mars",
+   "analogName": "Utopia Planitia",
+   "analogLat": 46.7,
+   "analogLon": 117.5
+  },
+  {
+   "earthId": "lanzarote",
+   "earthName": "Lanzarote · tubo de La Corona",
+   "earthLat": 29.16,
+   "earthLon": -13.44,
+   "analogId": "marius",
+   "body": "moon",
+   "analogName": "Colinas de Marius",
+   "analogLat": 14.09,
+   "analogLon": -56.8
+  },
+  {
+   "earthId": "spcrater",
+   "earthName": "SP Crater",
+   "earthLat": 35.58,
+   "earthLon": -111.63,
+   "analogId": "aristarchus",
+   "body": "moon",
+   "analogName": "Meseta de Aristarco",
+   "analogLat": 23.7,
+   "analogLon": -47.4
+  },
+  {
+   "earthId": "cratersmoon",
+   "earthName": "Craters of the Moon",
+   "earthLat": 43.42,
+   "earthLon": -113.52,
+   "analogId": "tranquillitatis",
+   "body": "moon",
+   "analogName": "Pozo de Tranquilidad",
+   "analogLat": 8.34,
+   "analogLon": 33.22
+  },
+  {
+   "earthId": "mcmurdo",
+   "earthName": "Valles Secos de McMurdo",
+   "earthLat": -77.5,
+   "earthLon": 162.0,
+   "analogId": "shackleton",
+   "body": "moon",
+   "analogName": "Polo sur · Shackleton",
+   "analogLat": -89.67,
+   "analogLon": 129.78
+  },
+  {
+   "earthId": "domec",
+   "earthName": "Domo C",
+   "earthLat": -75.1,
+   "earthLon": 123.39,
+   "analogId": "nobile_rim_1",
+   "body": "moon",
+   "analogName": "Nobile Rim 1",
+   "analogLat": -85.4381,
+   "analogLon": 37.36667
+  },
+  {
+   "earthId": "chajnantor",
+   "earthName": "Meseta de Chajnantor",
+   "earthLat": -23.0167,
+   "earthLon": -67.75,
+   "analogId": "malapert_massif",
+   "body": "moon",
+   "analogName": "Macizo de Malapert",
+   "analogLat": -85.9948,
+   "analogLon": -0.23578
+  },
+  {
+   "earthId": "maunakea",
+   "earthName": "Mauna Kea",
+   "earthLat": 19.8206,
+   "earthLon": -155.4681,
+   "analogId": "mons_mouton",
+   "body": "moon",
+   "analogName": "Mons Mouton",
+   "analogLat": -84.79059,
+   "analogLon": 29.19567
+  }
+ ]
+}

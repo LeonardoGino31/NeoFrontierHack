@@ -1,0 +1,265 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "moon-approx-0001",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -22.131148,
+          -82.295082
+        ]
+      },
+      "properties": {
+        "candidate_id": "moon-approx-0001",
+        "candidate_status": "selected",
+        "selection_detail": {},
+        "body": "moon",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Base lunar aproximada",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 1.333,
+        "grid_cell_height_km": 9.942,
+        "polar_scale_warning": true,
+        "overall_score": 45.91,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 100.0,
+        "parameter_data_coverage_percent": 57.1,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 71.4,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 370.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "passed",
+            "value": 33.4869,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Visibilidad solar promedio mínima de 30% en el período del producto LOLA",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 70.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥70%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "ice": {
+            "status": "passed",
+            "value": 28.44769,
+            "operator": "gte",
+            "threshold": 25.0,
+            "unit": "pts",
+            "label": "Potencial de hielo ≥25 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "passed",
+            "value": 87.94315,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Cobertura y coherencia espacial del indicador de hielo ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "earthView",
+          "label": "Comunicación con la Tierra",
+          "value": 63.63488,
+          "unit": "%",
+          "minimum": 50.0,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": 33.4869,
+          "albedo": null,
+          "relief": 370.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": 28.44769,
+          "iceConfidence": 87.94315,
+          "earthView": 63.63488
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "illumination": 33.4869,
+          "topography": 90.75,
+          "ice": 28.44769
+        },
+        "ice_confidence": 87.94315,
+        "ice_confidence_type": "local coverage and spatial coherence; not probability",
+        "data_status": "partial"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "moon-approx-0002",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -25.409836,
+          -81.311475
+        ]
+      },
+      "properties": {
+        "candidate_id": "moon-approx-0002",
+        "candidate_status": "selected",
+        "selection_detail": {},
+        "body": "moon",
+        "coordinate_system": "body geographic longitude/latitude in degrees; native DEM convention",
+        "mission": "Base lunar aproximada",
+        "footprint_km_at_equator": 30.0,
+        "grid_cell_width_km_at_latitude": 1.502,
+        "grid_cell_height_km": 9.942,
+        "polar_scale_warning": true,
+        "overall_score": 41.99,
+        "score_is_partial": true,
+        "scoring_coverage_percent": 100.0,
+        "parameter_data_coverage_percent": 57.1,
+        "eligible": true,
+        "filter_status": "partial",
+        "hard_filter_coverage_percent": 71.4,
+        "hard_filters": {
+          "safeSlope": {
+            "status": "passed",
+            "value": 100.0,
+            "operator": "gte",
+            "threshold": 80.0,
+            "unit": "%",
+            "label": "Al menos 80% del entorno analizado con pendiente ≤15°",
+            "required": true
+          },
+          "relief": {
+            "status": "passed",
+            "value": 877.0,
+            "operator": "lte",
+            "threshold": 1000.0,
+            "unit": "m",
+            "label": "Desnivel local máximo de 1.000 m",
+            "required": true
+          },
+          "sunlight": {
+            "status": "passed",
+            "value": 34.25674,
+            "operator": "gte",
+            "threshold": 30.0,
+            "unit": "%",
+            "label": "Visibilidad solar promedio mínima de 30% en el período del producto LOLA",
+            "required": false
+          },
+          "craterFree": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 70.0,
+            "unit": "%",
+            "label": "Superficie libre de peligros ≥70%",
+            "required": false
+          },
+          "soilStability": {
+            "status": "not_evaluated",
+            "value": null,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Estabilidad del suelo ≥50 puntos",
+            "required": false
+          },
+          "ice": {
+            "status": "passed",
+            "value": 25.67631,
+            "operator": "gte",
+            "threshold": 25.0,
+            "unit": "pts",
+            "label": "Potencial de hielo ≥25 puntos",
+            "required": false
+          },
+          "iceConfidence": {
+            "status": "passed",
+            "value": 87.54687,
+            "operator": "gte",
+            "threshold": 50.0,
+            "unit": "pts",
+            "label": "Cobertura y coherencia espacial del indicador de hielo ≥50 puntos",
+            "required": false
+          }
+        },
+        "requirement": {
+          "key": "earthView",
+          "label": "Comunicación con la Tierra",
+          "value": 64.63317,
+          "unit": "%",
+          "minimum": 50.0,
+          "passed": true
+        },
+        "metrics": {
+          "sunlight": 34.25674,
+          "albedo": null,
+          "relief": 877.0,
+          "safeSlope": 100.0,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": 25.67631,
+          "iceConfidence": 87.54687,
+          "earthView": 64.63317
+        },
+        "parameter_scores": {
+          "sunlight": null,
+          "relief": null,
+          "safeSlope": null,
+          "craterFree": null,
+          "soilStability": null,
+          "ice": null
+        },
+        "group_scores": {
+          "illumination": 34.25674,
+          "topography": 78.075,
+          "ice": 25.67631
+        },
+        "ice_confidence": 87.54687,
+        "ice_confidence_type": "local coverage and spatial coherence; not probability",
+        "data_status": "partial"
+      }
+    }
+  ]
+}

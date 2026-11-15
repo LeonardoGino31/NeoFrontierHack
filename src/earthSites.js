@@ -3,7 +3,7 @@
 const SITES_DIR = '/trek/sites';
 
 export const EARTH_LAYERS = {
-  visible: 'Blue Marble NG (NASA GIBS)',
+  visible: 'Landsat 31 m (NASA GIBS; Blue Marble en la Antártida)',
   relief: 'ASTER GDEM (NASA GIBS)',
 };
 

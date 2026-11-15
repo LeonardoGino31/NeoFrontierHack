@@ -1,0 +1,87 @@
+{
+  "dataset": "/data/planetary_candidates.csv",
+  "groups": [
+    { "key": "illumination", "label": "Iluminación", "icon": "sun" },
+    { "key": "topography", "label": "Topografía", "icon": "mountain" },
+    { "key": "ice", "label": "Potencial de hielo", "icon": "ice" }
+  ],
+  "parameters": [
+    {
+      "key": "sunlight", "group": "illumination", "label": "Tiempo con luz solar",
+      "unit": "%", "decimals": 0, "span": 50, "icon": "sun", "lab": "sunlight",
+      "columns": { "earth": "sunlight_earth", "analog": "sunlight_analog" },
+      "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
+    },
+    {
+      "key": "albedo", "group": "illumination", "label": "Albedo",
+      "unit": "", "decimals": 2, "span": 0.3, "icon": "eye", "lab": "albedo",
+      "columns": { "earth": "albedo_earth", "analog": "albedo_analog" },
+      "ranges": { "earth": [0.05, 0.6], "mars": [0.1, 0.35], "moon": [0.07, 0.2] }
+    },
+    {
+      "key": "relief", "group": "topography", "label": "Desnivel",
+      "unit": "m", "decimals": 0, "span": 2000, "icon": "mountain", "lab": "elevation",
+      "columns": { "earth": "relief_earth", "analog": "relief_analog" },
+      "ranges": { "earth": [0, 3000], "mars": [0, 3000], "moon": [0, 3000] }
+    },
+    {
+      "key": "safeSlope", "group": "topography", "label": "Pendiente segura",
+      "unit": "%", "decimals": 0, "span": 50, "icon": "slope", "lab": "slope",
+      "columns": { "earth": "safe_slope_earth", "analog": "safe_slope_analog" },
+      "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
+    },
+    {
+      "key": "craterFree", "group": "topography", "label": "Libre de cráteres y rocas",
+      "unit": "%", "decimals": 0, "span": 50, "icon": "target", "lab": "hazards",
+      "columns": { "earth": "crater_free_earth", "analog": "crater_free_analog" },
+      "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
+    },
+    {
+      "key": "soilStability", "group": "topography", "label": "Estabilidad del suelo",
+      "unit": "pts", "decimals": 0, "span": 50, "icon": "grid", "lab": "soilStability",
+      "columns": { "earth": "soil_stability_earth", "analog": "soil_stability_analog" },
+      "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
+    },
+    {
+      "key": "ice", "group": "ice", "label": "Potencial de hielo",
+      "unit": "pts", "decimals": 0, "span": 100, "icon": "ice", "lab": "ice",
+      "columns": { "earth": "ice_earth", "analog": "ice_analog" },
+      "confidenceColumns": { "earth": "ice_confidence_earth", "analog": "ice_confidence_analog" },
+      "ranges": { "earth": [0, 100], "mars": [0, 100], "moon": [0, 100] }
+    }
+  ],
+  "geology": {
+    "key": "lithology", "label": "Litología", "icon": "layers",
+    "weights": { "moon": 1.5, "mars": 2 },
+    "columns": { "earth": "geology_earth", "analog": "geology_analog" },
+    "unitColumn": "geology_unit_analog", "similarityColumn": "geology_similarity",
+    "classes": "pipeline/geology.json",
+    "note": "Parámetro categórico de la búsqueda (pipeline/search.py): la clase litológica del sitio (Unified Geologic Map de la Luna, SIM 3292 de Marte) frente a la de cada celda de la Tierra (GLiM), con la matriz de afinidad de pipeline/geology.json. Se guarda aparte de `parameters` porque no es una diferencia numérica."
+  },
+  "bodies": {
+    "moon": {
+      "purpose": "Estación base",
+      "why": "Una base permanente necesita energía solar casi continua y agua (hielo) cerca; el terreno debe permitir construir.",
+      "weights": { "illumination": 1.5, "topography": 1, "ice": 1.5 },
+      "requirement": {
+        "key": "earthView", "column": "earth_view_analog",
+        "label": "Comunicación con la Tierra", "short": "Tierra visible",
+        "unit": "%", "decimals": 0, "min": 50, "icon": "signal",
+        "note": "Tierra sobre el horizonte; por debajo del mínimo hace falta un satélite relé."
+      }
+    },
+    "mars": {
+      "purpose": "Aterrizaje y recorridos",
+      "why": "Aterrizar y moverse con un rover dependen sobre todo del terreno; el hielo es un objetivo científico y un recurso.",
+      "weights": { "illumination": 0.5, "topography": 2, "ice": 1 },
+      "searchExclude": ["sunlight"],
+      "searchExcludeWhy": "En Marte la luz solar es un cálculo geométrico (~50 % casi en todo el planeta) y en la Tierra es día × cielo despejado de MODIS: no distingue sitios y empuja la búsqueda hacia desiertos sin nubes.",
+      "requirement": {
+        "key": "descent", "column": "descent_density_analog",
+        "label": "Densidad del aire para el descenso", "short": "Descenso",
+        "unit": "kg/m³", "decimals": 4, "min": 0.010, "icon": "parachute",
+        "note": "Con menos aire, el paracaídas frena menos; mínimo del año a las 15 h según la Mars Climate Database; Jezero, Gale y Meridiani lo cumplen."
+      }
+    }
+  }
+}
